@@ -20,6 +20,7 @@ namespace CustomUtils.Runtime.Localization
             LocalizationRegistry.Instance.Clear();
 
             _processedGuids.Clear();
+            _usedLanguages.Clear();
 
             foreach (var sheet in sheets)
             {
@@ -33,12 +34,12 @@ namespace CustomUtils.Runtime.Localization
                 var csvTable = CsvParser.Parse(sheet.TextAsset.text);
                 ProcessSheet(csvTable, sheet.Name);
             }
+
+            LocalizationRegistry.Instance.SupportedLanguages = _usedLanguages;
         }
 
         private static void ProcessSheet(CsvTable csvTable, string sheetName)
         {
-            _usedLanguages.Clear();
-
             foreach (var row in csvTable.Rows)
             {
                 if (TryCreateEntryFromRow(row, sheetName, out var entry) is false)
@@ -46,8 +47,6 @@ namespace CustomUtils.Runtime.Localization
 
                 LocalizationRegistry.Instance.AddOrUpdateEntry(entry);
             }
-
-            LocalizationRegistry.Instance.SupportedLanguages = _usedLanguages;
         }
 
         private static bool TryCreateEntryFromRow(CsvRow row, string sheetName, out LocalizationEntry localizationEntry)

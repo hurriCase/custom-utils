@@ -13,7 +13,7 @@ namespace CustomUtils.Editor.Scripts.Localization
         [MainToolbarElement(LocalizationConstants.ToolbarPath, defaultDockPosition = MainToolbarDockPosition.Right)]
         public static MainToolbarDropdown LanguageSwitchButton()
         {
-            var icon = EditorGUIUtility.IconContent(LocalizationConstants.LanguageIconPath).image as Texture2D;
+            var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(LocalizationConstants.LanguageIconPath);
             var content = new MainToolbarContent(icon);
 
             return new MainToolbarDropdown(content, static rect =>
