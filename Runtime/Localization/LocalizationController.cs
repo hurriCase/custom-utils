@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using R3;
+using UnityEditor;
 using UnityEngine;
 using ZLinq;
 
@@ -18,6 +19,14 @@ namespace CustomUtils.Runtime.Localization
         [UsedImplicitly]
         public static ReactiveProperty<SystemLanguage> Language { get; } =
             new(LocalizationDatabase.Instance.DefaultLanguage);
+
+#if UNITY_EDITOR
+        [InitializeOnLoadMethod]
+        private static void InitializeInEditor()
+        {
+            ReadLocalizationData();
+        }
+#endif
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void InitializeInRuntime()

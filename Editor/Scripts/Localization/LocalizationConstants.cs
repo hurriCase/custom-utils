@@ -19,5 +19,8 @@
         internal const string ExportSuccessMessageFormat =
             "Exported sheet '{0}' to CSV and copied to clipboard.\n\nYou can now paste this into your Google Sheet.";
         internal const string CopySuccessMessageFormat = "Copied {0} text entries for {1} to clipboard.";
+
+        internal const string LanguageIconPath = "Packages/com.firsttry.customutils/Editor/Icons/language_icon.png";
+        internal const string ToolbarPath = "Localization/Change Language";
     }
 }
