@@ -11,7 +11,7 @@ using UnityEngine.UIElements;
 
 namespace CustomUtils.Editor.Scripts.SheetsDownloader
 {
-    [UsedImplicitly]
+    [PublicAPI]
     public abstract class SheetsDownloaderWindowBase<TDatabase, TSheet> : EditorWindow, ISheetsDownloaderWindow
         where TDatabase : SheetsDatabase<TDatabase, TSheet>
         where TSheet : Sheet, new()
@@ -23,7 +23,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
         private CancellationTokenSource _downloadTokenSource;
 
-        protected abstract void CreateCustomContent();
+        protected abstract void CreateCustomContent(VisualElement parent);
         protected virtual void OnSheetsDownloaded() { }
 
         public void DownloadSheet(long sheetId)
@@ -38,35 +38,42 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
             _serializedObject = new SerializedObject(Database);
             _sheetsDownloader = new SheetsDownloader<TDatabase, TSheet>(Database);
 
-            CreateButtons();
+            var scrollView = new ScrollView();
+            rootVisualElement.Add(scrollView);
 
-            _serializedObject.CreateProperty(nameof(Database.TableId), rootVisualElement);
-            _serializedObject.CreateProperty(nameof(Database.Sheets), rootVisualElement);
+            var scrollContent = scrollView.contentContainer;
 
-            CreateCustomContent();
+            CreateButtons(scrollContent);
+
+            _serializedObject.CreateProperty(nameof(Database.TableId), scrollContent);
+            _serializedObject.CreateProperty(nameof(Database.Sheets), scrollContent);
+
+            CreateCustomContent(scrollContent);
         }
 
-        private void CreateButtons()
+        private void CreateButtons(VisualElement parent)
         {
             var buttonContainer = new VisualElement();
             buttonContainer.AddToClassList("unity-base-field");
 
-            var downloadAllButton = new Button(() => ProcessDownloadSheetsAsync().Forget())
+            var downloadAllButton = new Button
             {
                 text = "Download All Sheets",
-                style = { flexGrow = 1 }
+                style = { flexGrow = 1 },
+                clickable = new Clickable(() => ProcessDownloadSheetsAsync().Forget())
             };
 
-            var openGoogleButton = new Button(OpenGoogleSheet)
+            var openGoogleButton = new Button
             {
                 text = "Open Google Sheet",
-                style = { flexGrow = 1 }
+                style = { flexGrow = 1 },
+                clickable = new Clickable(OpenGoogleSheet)
             };
 
             buttonContainer.Add(downloadAllButton);
             buttonContainer.Add(openGoogleButton);
 
-            rootVisualElement.Add(buttonContainer);
+            parent.Add(buttonContainer);
         }
 
         private async UniTaskVoid ProcessDownloadSingleSheetAsync(TSheet sheet)
@@ -99,7 +106,8 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
         private void OpenGoogleSheet()
         {
-            Application.OpenURL(ZString.Format(SheetDownloaderConstants.TableUrlPattern, Database.TableId));
+            var url = ZString.Format(SheetDownloaderConstants.TableUrlPattern, Database.TableId);
+            Application.OpenURL(url);
         }
     }
 }

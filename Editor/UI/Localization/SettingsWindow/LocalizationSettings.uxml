@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <Style src="project://database/Assets/CustomUtils/Editor/UI/Localization/SettingsWindow/Styles/LocalizationSettings.uss?fileID=7433441132597879392&amp;guid=b19d11df87c944d7b7b6ab5daae9c196&amp;type=3#LocalizationSettings"/>
+    <Style src="project://database/Assets/custom-utils/Editor/UI/Localization/SettingsWindow/Styles/LocalizationSettings.uss?fileID=7433441132597879392&amp;guid=b19d11df87c944d7b7b6ab5daae9c196&amp;type=3#LocalizationSettings"/>
     <ui:VisualElement name="CustomContent" class="custom-container">
         <ui:VisualElement name="DefaultLanguage" class="section">
             <ui:Label text="Default Language" name="DefaultLanguageLabel" class="subsection-header"/>

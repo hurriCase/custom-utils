@@ -36,10 +36,10 @@ namespace CustomUtils.Editor.Scripts.Localization.LocalizationSettings
             UpdateLanguagesDisplay();
         }
 
-        protected override void CreateCustomContent()
+        protected override void CreateCustomContent(VisualElement parent)
         {
-            _customLayout.CloneTree(rootVisualElement);
-            _elements = new LocalizationSettingsElements(rootVisualElement);
+            _customLayout.CloneTree(parent);
+            _elements = new LocalizationSettingsElements(parent);
 
             SetupDefaultLanguageField();
             SetupSheetExportSection();
@@ -51,9 +51,9 @@ namespace CustomUtils.Editor.Scripts.Localization.LocalizationSettings
             _elements.DefaultLanguageField.Init(Database.DefaultLanguage);
             _elements.DefaultLanguageField.value = Database.DefaultLanguage;
 
-            _elements.DefaultLanguageField.RegisterValueChangedCallback(evt =>
+            _elements.DefaultLanguageField.RegisterValueChangedCallback(changeEvent =>
             {
-                Database.DefaultLanguage = (SystemLanguage)evt.newValue;
+                Database.DefaultLanguage = (SystemLanguage)changeEvent.newValue;
                 EditorUtility.SetDirty(Database);
             });
         }
