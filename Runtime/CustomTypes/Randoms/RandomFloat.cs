@@ -19,7 +19,7 @@ namespace CustomUtils.Runtime.CustomTypes.Randoms
         /// </summary>
         /// <value>A random float value in the range [_randomStart, _randomEnd].</value>
         [UsedImplicitly]
-        public float RandomValue => Random.Range(_randomStart, _randomEnd);
+        public float Value => Random.Range(_randomStart, _randomEnd);
 
         /// <summary>
         /// Initializes a new instance of the RandomFloat struct with the specified range.

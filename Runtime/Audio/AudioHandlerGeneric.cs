@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using CustomUtils.Runtime.Audio.Containers;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Storage;
 using CustomUtils.Unsafe;
@@ -15,16 +14,18 @@ namespace CustomUtils.Runtime.Audio
         where TMusicType : unmanaged, Enum
         where TSoundType : unmanaged, Enum
     {
-        [SerializeField] protected AudioDatabaseGeneric<TMusicType, TSoundType> audioDatabaseGeneric;
-        [SerializeField] protected AudioSource soundSourcePrefab;
-        [SerializeField] protected AudioSource clipSource;
-        [SerializeField] protected AudioSource musicSource;
-        [SerializeField] protected AudioSource oneShotSource;
-        [SerializeField] protected int soundPoolSize;
-        [SerializeField] protected int maxPoolSize;
+        [SerializeField] private AudioDatabaseGeneric<TMusicType, TSoundType> _audioDatabaseGeneric;
 
-        public virtual PersistentReactiveProperty<float> MusicVolume { get; } = new();
-        public virtual PersistentReactiveProperty<float> SoundVolume { get; } = new();
+        [SerializeField] private AudioSource _soundSourcePrefab;
+        [SerializeField] private AudioSource _clipSource;
+        [SerializeField] private AudioSource _musicSource;
+        [SerializeField] private AudioSource _oneShotSource;
+
+        [SerializeField] private int _soundPoolSize;
+        [SerializeField] private int _maxPoolSize;
+
+        public PersistentReactiveProperty<float> MusicVolume { get; } = new();
+        public PersistentReactiveProperty<float> SoundVolume { get; } = new();
 
         private readonly Dictionary<int, float> _lastPlayedTimes = new();
         private readonly List<AliveAudioData<TSoundType>> _aliveAudios = new();
@@ -45,9 +46,7 @@ namespace CustomUtils.Runtime.Audio
             await SoundVolume.InitAsync(SoundVolumeKey, destroyCancellationToken, defaultSoundVolume);
 
             _soundPool = new PoolHandler<AudioSource>();
-            _soundPool.Init(soundSourcePrefab, soundPoolSize, maxPoolSize, parent: transform);
-
-            audioDatabaseGeneric.Init();
+            _soundPool.Init(_soundSourcePrefab, _soundPoolSize, _maxPoolSize, parent: transform);
 
             SoundVolume.SubscribeUntilDestroy(this, static (volume, self) => self.OnSoundVolumeChanged(volume));
             MusicVolume.SubscribeUntilDestroy(this, static (volume, self) => self.OnMusicVolumeChanged(volume));
@@ -55,7 +54,7 @@ namespace CustomUtils.Runtime.Audio
 
         public virtual AudioSource PlaySound(TSoundType soundType, float volumeModifier = 1, float pitchModifier = 1)
         {
-            var soundData = audioDatabaseGeneric.GetSoundContainer(soundType);
+            var soundData = _audioDatabaseGeneric.SoundContainers[soundType];
             if (ShouldPlaySound(soundType, soundData) is false)
                 return null;
 
@@ -64,8 +63,8 @@ namespace CustomUtils.Runtime.Audio
 
             var soundSource = _soundPool.Get();
             soundSource.clip = soundData.AudioData.AudioClip;
-            soundSource.pitch = pitchModifier * soundData.AudioData.RandomPitch;
-            soundSource.volume = SoundVolume.Value * volumeModifier * soundData.AudioData.RandomVolume;
+            soundSource.pitch = pitchModifier * soundData.AudioData.RandomPitch.Value;
+            soundSource.volume = SoundVolume.Value * volumeModifier * soundData.AudioData.RandomVolume.Value;
 
             soundSource.Play();
 
@@ -79,36 +78,36 @@ namespace CustomUtils.Runtime.Audio
 
         public virtual AudioSource PlayClip(AudioClip soundType, float volumeModifier = 1, float pitchModifier = 1)
         {
-            clipSource.clip = soundType;
-            clipSource.pitch = pitchModifier;
-            clipSource.volume = SoundVolume.Value * volumeModifier;
+            _clipSource.clip = soundType;
+            _clipSource.pitch = pitchModifier;
+            _clipSource.volume = SoundVolume.Value * volumeModifier;
 
-            clipSource.Play();
+            _clipSource.Play();
 
-            return clipSource;
+            return _clipSource;
         }
 
         public virtual void StopClip()
         {
-            clipSource.Stop();
+            _clipSource.Stop();
         }
 
         public virtual void PlayOneShotSound(TSoundType soundType, float volumeModifier = 1, float pitchModifier = 1)
         {
-            var soundData = audioDatabaseGeneric.GetSoundContainer(soundType);
+            var soundData = _audioDatabaseGeneric.SoundContainers[soundType];
 
             if (soundData?.AudioData == null || !soundData.AudioData?.AudioClip)
                 return;
 
-            oneShotSource.pitch = pitchModifier * soundData.AudioData.RandomPitch;
-            oneShotSource.volume = SoundVolume.Value * volumeModifier * soundData.AudioData.RandomVolume;
-            oneShotSource.PlayOneShot(soundData.AudioData.AudioClip);
+            _oneShotSource.pitch = pitchModifier * soundData.AudioData.RandomPitch.Value;
+            _oneShotSource.volume = SoundVolume.Value * volumeModifier * soundData.AudioData.RandomVolume.Value;
+            _oneShotSource.PlayOneShot(soundData.AudioData.AudioClip);
         }
 
         public virtual AudioSource PlayMusic(TMusicType musicType)
         {
-            var musicData = audioDatabaseGeneric.GetMusicContainer(musicType);
-            return musicData?.AudioData == null ? null : PlayMusic(musicData.AudioData);
+            var musicData = _audioDatabaseGeneric.MusicContainers[musicType];
+            return musicData == null ? null : PlayMusic(musicData);
         }
 
         public virtual AudioSource PlayMusic(AudioData data)
@@ -116,19 +115,19 @@ namespace CustomUtils.Runtime.Audio
             if (data == null || !data.AudioClip)
                 return null;
 
-            musicSource.clip = data.AudioClip;
-            musicSource.pitch = data.RandomPitch;
-            musicSource.volume = data.RandomVolume * MusicVolume.Value;
-            musicSource.Play();
+            _musicSource.clip = data.AudioClip;
+            _musicSource.pitch = data.RandomPitch.Value;
+            _musicSource.volume = MusicVolume.Value * data.RandomVolume.Value;
+            _musicSource.Play();
 
             _currentMusicData = data;
 
-            return musicSource;
+            return _musicSource;
         }
 
         public virtual void StopMusic()
         {
-            musicSource.Stop();
+            _musicSource.Stop();
         }
 
         public virtual void StopSound(TSoundType soundType)
@@ -168,10 +167,10 @@ namespace CustomUtils.Runtime.Audio
         /// <param name="musicVolume">New music volume level</param>
         protected virtual void OnMusicVolumeChanged(float musicVolume)
         {
-            musicSource.volume = (_currentMusicData?.RandomVolume ?? 0) * musicVolume;
+            _musicSource.volume = (_currentMusicData?.RandomVolume.Value ?? 0) * musicVolume;
         }
 
-        private bool ShouldPlaySound(TSoundType soundType, SoundContainer<TSoundType> soundData)
+        private bool ShouldPlaySound(TSoundType soundType, SoundContainer soundData)
         {
             if (soundData?.AudioData == null || !soundData.AudioData?.AudioClip)
                 return false;
