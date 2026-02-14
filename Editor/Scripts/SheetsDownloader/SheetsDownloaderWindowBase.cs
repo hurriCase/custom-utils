@@ -1,5 +1,7 @@
-﻿using CustomUtils.Editor.Scripts.Extensions;
+﻿using System.Threading;
+using CustomUtils.Editor.Scripts.Extensions;
 using CustomUtils.Runtime.Downloader;
+using CustomUtils.Runtime.Extensions;
 using Cysharp.Text;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
@@ -18,6 +20,8 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
         private SheetsDownloader<TDatabase, TSheet> _sheetsDownloader;
         private SerializedObject _serializedObject;
+
+        private CancellationTokenSource _downloadTokenSource;
 
         protected abstract void CreateCustomContent();
         protected virtual void OnSheetsDownloaded() { }
@@ -67,7 +71,8 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
         private async UniTaskVoid ProcessDownloadSingleSheetAsync(TSheet sheet)
         {
-            var result = await _sheetsDownloader.DownloadSingleSheetAsync(sheet);
+            var token = CancellationExtensions.GetFreshToken(ref _downloadTokenSource);
+            var result = await _sheetsDownloader.DownloadSingleSheetAsync(sheet, token);
             result.DisplayMessage();
 
             if (result.IsValid)
@@ -82,13 +87,14 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
                 resolveResult.DisplayMessage();
             }
 
-            var downloadResult = await _sheetsDownloader.DownloadSheetsAsync();
+            var token = CancellationExtensions.GetFreshToken(ref _downloadTokenSource);
+            var downloadResult = await _sheetsDownloader.DownloadSheetsAsync(token);
 
-            if (downloadResult.IsValid is false)
+            downloadResult.DisplayMessage();
+            if (!downloadResult.IsValid)
                 return;
 
             OnSheetsDownloaded();
-            downloadResult.DisplayMessage();
         }
 
         private void OpenGoogleSheet()

@@ -34,11 +34,12 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="tokenSource">The <see cref="CancellationTokenSource"/> to renew.
         /// It will be replaced with a new instance.</param>
         [UsedImplicitly]
-        public static void RenewTokenSource(ref CancellationTokenSource tokenSource)
+        public static CancellationToken GetFreshToken(ref CancellationTokenSource tokenSource)
         {
             tokenSource?.Cancel();
             tokenSource?.Dispose();
             tokenSource = new CancellationTokenSource();
+            return tokenSource.Token;
         }
 
         /// <summary>

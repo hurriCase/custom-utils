@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 using CustomUtils.Runtime.Downloader;
 using CustomUtils.Runtime.ResponseTypes;
 using Cysharp.Text;
@@ -76,13 +77,13 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
         /// <exception cref="Exception">Thrown when network errors occur
         /// or when access to the Google Sheets document is denied.</exception>
         [UsedImplicitly]
-        public async UniTask<Result> DownloadSheetsAsync()
+        public async UniTask<Result> DownloadSheetsAsync(CancellationToken token)
         {
             Debug.Log("[SheetsDownloader::DownloadSheetsAsync] Start downloading sheets ...");
 
             PrepareDownloadFolderIfNeeded();
 
-            await FillSheetsToDownloadAsync();
+            await FillSheetsToDownloadAsync(token);
 
             if (_sheetsToDownload.Count == 0)
                 return Result.Invalid(SheetDownloaderConstants.AllSheetsUpToDateMessage);
@@ -90,7 +91,8 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
             var changedCount = 0;
             foreach (var sheet in _sheetsToDownload)
             {
-                var downloadResult = await DownloadSingleSheetAsync(sheet);
+                Debug.Log($"[SheetsDownloader::DownloadSheetsAsync] Downloading sheet {sheet.Name}...");
+                var downloadResult = await DownloadSingleSheetAsync(sheet, token);
 
                 if (downloadResult.IsValid)
                     changedCount++;
@@ -108,6 +110,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
         /// Forces download of the specified sheet and updates its content length.
         /// </summary>
         /// <param name="sheet">The sheet to download.</param>
+        /// <param name="token"></param>
         /// <returns>A <see cref="UniTask{DownloadResult}"/> representing the asynchronous download operation.
         /// The result contains information about the download and a status message.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="sheet"/> is null.</exception>
@@ -115,7 +118,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
         /// <exception cref="Exception">Thrown when network errors occur
         /// or when access to the Google Sheets document is denied.</exception>
         [UsedImplicitly]
-        public async UniTask<Result> DownloadSingleSheetAsync(TSheet sheet)
+        public async UniTask<Result> DownloadSingleSheetAsync(TSheet sheet, CancellationToken token)
         {
             if (sheet == null)
                 return Result.Valid(SheetDownloaderConstants.SheetIsNullMessage);
@@ -124,37 +127,48 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
             try
             {
-                var url = ZString.Format(SheetDownloaderConstants.UrlPattern, _database.TableId, sheet.Id);
+                var result = await GetSheetContent(sheet.Id);
 
-                using var request = UnityWebRequest.Get(url);
-                await request.SendWebRequest().ToUniTask();
+                if (!result.IsValid)
+                    return Result.Invalid(result.Message);
 
-                var error = GetRequestError(request);
-                if (string.IsNullOrEmpty(error) is false)
-                {
-                    var errorMessage = error.Contains(SheetDownloaderConstants.Error404Indicator)
-                        ? SheetDownloaderConstants.TableIdWrongMessage
-                        : error;
+                sheet.TextAsset = await SaveSheetDataAsync(sheet, result.Data, token);
+                sheet.ContentLength = result.Data.Length;
 
-                    return Result.Invalid(errorMessage);
-                }
-
-                var data = request.downloadHandler.data;
-                await SaveSheetDataAsync(sheet, data);
-
-                sheet.ContentLength = data.Length;
-
-                return Result.Valid(ZString.Format(SheetDownloaderConstants.SheetDownloadedSuccessFormat, sheet.Name));
+                var successMessage = ZString.Format(SheetDownloaderConstants.SheetDownloadedSuccessFormat, sheet.Name);
+                return Result.Valid(successMessage);
             }
             catch (Exception ex)
             {
                 Debug.LogException(ex);
-                var message = ZString.Format(SheetDownloaderConstants.SheetDownloadFailedFormat, sheet.Name, ex.Message);
-                return Result.Invalid(message);
+                var errorMessage = ZString.Format(
+                    SheetDownloaderConstants.SheetDownloadFailedFormat,
+                    sheet.Name,
+                    ex.Message);
+
+                return Result.Invalid(errorMessage);
             }
         }
 
-        private async UniTask FillSheetsToDownloadAsync()
+        private async UniTask<Result<byte[]>> GetSheetContent(long id)
+        {
+            var url = ZString.Format(SheetDownloaderConstants.UrlPattern, _database.TableId, id);
+
+            using var request = UnityWebRequest.Get(url);
+            await request.SendWebRequest().ToUniTask();
+
+            var error = GetRequestError(request);
+            if (string.IsNullOrEmpty(error) is true)
+            {return new Result<byte[]>(request.downloadHandler.data);}
+
+            var errorMessage = error.Contains(SheetDownloaderConstants.Error404Indicator)
+                ? SheetDownloaderConstants.TableIdWrongMessage
+                : error;
+
+            return Result<byte[]>.Invalid(errorMessage);
+        }
+
+        private async UniTask FillSheetsToDownloadAsync(CancellationToken token)
         {
             _sheetsToDownload.Clear();
 
@@ -166,7 +180,9 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
                     continue;
                 }
 
-                var contentLength = await GetSheetContentLengthAsync(sheet.Id);
+                var contentLength = await GetSheetContentLengthAsync(sheet.Id, token);
+
+                Debug.Log($"[SheetsDownloader::FillSheetsToDownloadAsync] Checking sheet {sheet.Name} length...");
 
                 if (contentLength > 0 && sheet.HasChanged(contentLength))
                     _sheetsToDownload.Add(sheet);
@@ -184,31 +200,17 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
             if (sheets == null)
                 return Result.Invalid(SheetDownloaderConstants.FailedToParseResponseMessage);
 
-            var existingSheets =
-                _database.Sheets.ToDictionary(static sheet => sheet.Id, static sheet => sheet.ContentLength);
-
-            _database.Sheets.Clear();
-            foreach (var (sheetName, id) in sheets)
-            {
-                var contentLength = existingSheets.GetValueOrDefault(id, 0);
-
-                _database.Sheets.Add(new TSheet
-                {
-                    Id = id,
-                    Name = sheetName,
-                    ContentLength = contentLength
-                });
-            }
+            _database.ReplaceSheets(sheets);
 
             return Result.Valid();
         }
 
-        private async UniTask<long> GetSheetContentLengthAsync(long sheetId)
+        private async UniTask<long> GetSheetContentLengthAsync(long sheetId, CancellationToken token)
         {
             var url = ZString.Format(SheetDownloaderConstants.UrlPattern, _database.TableId, sheetId);
 
             using var request = UnityWebRequest.Head(url);
-            await request.SendWebRequest().ToUniTask();
+            await request.SendWebRequest().ToUniTask(cancellationToken: token);
 
             if (string.IsNullOrEmpty(request.error) is false)
                 return 0;
@@ -219,16 +221,16 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
                 : 0;
         }
 
-        private async UniTask SaveSheetDataAsync(TSheet sheet, byte[] data)
+        private async UniTask<TextAsset> SaveSheetDataAsync(TSheet sheet, byte[] data, CancellationToken token)
         {
             var fileName = ZString.Concat(sheet.Name, SheetDownloaderConstants.CsvExtension);
             var path = Path.Combine(_database.GetDownloadPath(), fileName);
-            await File.WriteAllBytesAsync(path, data);
+            await File.WriteAllBytesAsync(path, data, token);
 
-            await UniTask.SwitchToMainThread();
+            await UniTask.SwitchToMainThread(token);
 
             AssetDatabase.Refresh();
-            sheet.TextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+            return AssetDatabase.LoadAssetAtPath<TextAsset>(path);
         }
 
         private static string GetRequestError(UnityWebRequest request)

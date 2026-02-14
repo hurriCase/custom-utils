@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CustomUtils.Runtime.CustomTypes.Singletons;
+using CustomUtils.Runtime.Extensions;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -32,7 +33,7 @@ namespace CustomUtils.Runtime.Downloader
         /// </summary>
         /// <value>A list of <see cref="Sheet"/> objects representing the available sheets. Defaults to an empty list.</value>
         [UsedImplicitly]
-        [field: SerializeField] public List<TSheet> Sheets { get; set; } = new();
+        [field: SerializeField] public List<TSheet> Sheets { get; private set; } = new();
 
         /// <summary>
         /// Gets the file system path where downloaded sheet CSV files should be stored.
@@ -41,5 +42,21 @@ namespace CustomUtils.Runtime.Downloader
         /// <returns>The directory path where CSV files will be saved. Defaults to "Assets/Resources/Sheets/".</returns>
         [UsedImplicitly]
         public virtual string GetDownloadPath() => "Assets/Resources/Sheets/";
+
+        internal void ReplaceSheets(Dictionary<string, long> sheets)
+        {
+            Sheets.Clear();
+            foreach (var (sheetName, id) in sheets)
+            {
+                Sheets.Add(new TSheet
+                {
+                    Id = id,
+                    Name = sheetName,
+                    ContentLength = 0
+                });
+            }
+
+            this.MarkAsDirty();
+        }
     }
 }
