@@ -19,7 +19,7 @@ namespace CustomUtils.Runtime.Localization
     {
         [field: SerializeField]
         internal SerializedDictionary<string, LocalizationEntry> Entries { get; private set; } = new();
-        [field: SerializeField] public List<SystemLanguage> SupportedLanguages { get; set; } = new();
+        [field: SerializeField] public List<SystemLanguage> SupportedLanguages { get; private set; } = new();
 
         internal IReadOnlyDictionary<string, List<string>> TableToGuids => _tableToGuids;
 
@@ -35,6 +35,12 @@ namespace CustomUtils.Runtime.Localization
 
             _tableToGuids[entry.TableName].Add(entry.GUID);
 
+            this.MarkAsDirty();
+        }
+
+        internal void ReplaceSupportedLanguages(List<SystemLanguage> supportedLanguages)
+        {
+            SupportedLanguages = supportedLanguages;
             this.MarkAsDirty();
         }
 

@@ -35,7 +35,7 @@ namespace CustomUtils.Runtime.Localization
                 ProcessSheet(csvTable, sheet.Name);
             }
 
-            LocalizationRegistry.Instance.SupportedLanguages = _usedLanguages;
+            LocalizationRegistry.Instance.ReplaceSupportedLanguages(_usedLanguages);
         }
 
         private static void ProcessSheet(CsvTable csvTable, string sheetName)
