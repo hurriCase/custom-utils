@@ -71,8 +71,8 @@ namespace CustomUtils.Runtime.UI.Windows
 
                 _createdPopUps[popUpType] = popUpBase;
 
-                popUpBase.BaseInit();
-                popUpBase.Init();
+                popUpBase.BaseInitialize();
+                popUpBase.Initialize();
                 popUpBase.HideImmediately();
                 popUpBase.OnPopUpHidden.SubscribeUntilDestroy(this, static self => self.HandlePopUpHide());
             }
@@ -158,8 +158,8 @@ namespace CustomUtils.Runtime.UI.Windows
 
                 _createdScreens[screenType] = screenBase;
 
-                screenBase.BaseInit();
-                screenBase.Init();
+                screenBase.BaseInitialize();
+                screenBase.Initialize();
 
                 if (screenBase.InitialWindow)
                 {

@@ -14,9 +14,9 @@ namespace CustomUtils.Runtime.UI.Windows
     {
         [SerializeField, Self] protected CanvasGroup canvasGroup;
 
-        internal virtual void BaseInit() { }
+        internal virtual void BaseInitialize() { }
 
-        public virtual void Init() { }
+        public virtual void Initialize() { }
 
         public abstract UniTask ShowAsync();
         public abstract UniTask HideAsync();

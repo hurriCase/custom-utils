@@ -23,7 +23,7 @@ namespace CustomUtils.Runtime.UI.Windows
         public Observable<Unit> OnPopUpHidden => _popUpHidden;
         private readonly Subject<Unit> _popUpHidden = new();
 
-        internal override void BaseInit()
+        internal override void BaseInitialize()
         {
             _closeButton.AsNullable()?.OnClickAsObservable()
                 .SubscribeUntilDestroy(this, static self => self.HideAsync().Forget());
