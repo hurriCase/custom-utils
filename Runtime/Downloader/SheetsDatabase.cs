@@ -48,12 +48,9 @@ namespace CustomUtils.Runtime.Downloader
             Sheets.Clear();
             foreach (var (sheetName, id) in sheets)
             {
-                Sheets.Add(new TSheet
-                {
-                    Id = id,
-                    Name = sheetName,
-                    ContentLength = 0
-                });
+                var sheet = new TSheet();
+                sheet.Initialize(sheetName, id);
+                Sheets.Add(sheet);
             }
 
             this.MarkAsDirty();

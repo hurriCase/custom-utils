@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using CustomUtils.Runtime.Downloader;
+using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.ResponseTypes;
 using Cysharp.Text;
 using Cysharp.Threading.Tasks;
@@ -98,6 +99,8 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
                     changedCount++;
             }
 
+            _database.MarkAsDirty();
+
             var changeResult = changedCount > 0
                 ? Result.Valid(ZString.Format(SheetDownloaderConstants.ChangedSheetsDownloadedFormat, changedCount))
                 : Result.Invalid(SheetDownloaderConstants.AllSheetsUpToDateMessage);
@@ -132,8 +135,8 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
                 if (!result.IsValid)
                     return Result.Invalid(result.Message);
 
-                sheet.TextAsset = await SaveSheetDataAsync(sheet, result.Data, token);
-                sheet.ContentLength = result.Data.Length;
+                var sheetFile = await SaveSheetDataAsync(sheet, result.Data, token);
+                sheet.UpdateSheetData(sheetFile, result.Data.Length);
 
                 var successMessage = ZString.Format(SheetDownloaderConstants.SheetDownloadedSuccessFormat, sheet.Name);
                 return Result.Valid(successMessage);

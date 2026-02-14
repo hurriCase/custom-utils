@@ -80,6 +80,8 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
         {
             var token = CancellationExtensions.GetFreshToken(ref _downloadTokenSource);
             var result = await _sheetsDownloader.DownloadSingleSheetAsync(sheet, token);
+            Database.MarkAsDirty();
+
             result.DisplayMessage();
 
             if (result.IsValid)
