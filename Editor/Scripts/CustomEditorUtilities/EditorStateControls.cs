@@ -14,7 +14,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
     /// Enhanced GUI system for editor inspectors with automatic undo support.
     /// Uses Unity's standard editor styling for consistency with native Unity editors.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public sealed class EditorStateControls
     {
         private readonly Object _target;
@@ -26,7 +26,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="target">The Unity object to track for undo operations. Must not be null.</param>
         /// <param name="serializedObject">The serialized object which is used for operation where it is required (Like FindField() (Optional)</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="target"/> is null.</exception>
-        [UsedImplicitly]
         public EditorStateControls([NotNull] Object target, SerializedObject serializedObject = null)
         {
             _target = target;
@@ -40,7 +39,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="value">The current color value.</param>
         /// <param name="useConsistentHeight">Whether to use Unity's single line height. Default is true.</param>
         /// <returns>The modified color value.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public Color ColorField(string label, Color value, bool useConsistentHeight = true) =>
             HandleValueChange(label, value, () =>
                 useConsistentHeight
@@ -54,7 +53,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="value">The current gradient value.</param>
         /// <param name="useConsistentHeight">Whether to use Unity's single line height. Default is true.</param>
         /// <returns>The modified gradient value.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public Gradient GradientField(string label, Gradient value, bool useConsistentHeight = true) =>
             HandleValueChange(label, value, () =>
                 useConsistentHeight
@@ -68,7 +67,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="value">The current sprite reference.</param>
         /// <param name="allowSceneObjects">Whether to allow scene objects to be assigned. Default is false.</param>
         /// <returns>The modified sprite reference.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public Sprite SpriteField(string label, Sprite value, bool allowSceneObjects = false) =>
             HandleValueChange(label, value, () =>
                 (Sprite)EditorGUILayout.ObjectField(label, value, typeof(Sprite), allowSceneObjects,
@@ -83,7 +82,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="allowSceneObjects">Whether to allow scene objects to be assigned. Default is false.</param>
         /// <param name="expandWidth">Whether the field should expand to fill available width. Default is true.</param>
         /// <returns>The modified object reference.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public Object ObjectField(string label, Object value, Type type, bool allowSceneObjects = false,
             bool expandWidth = true) =>
             HandleValueChange(label, value, () =>
@@ -98,7 +97,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="allowSceneObjects">Whether to allow scene objects to be assigned. Default is false.</param>
         /// <param name="expandWidth">Whether the field should expand to fill available width. Default is true.</param>
         /// <returns>The modified object reference.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public Object ObjectField(Object value, Type type, bool allowSceneObjects = false,
             bool expandWidth = true) =>
             HandleValueChange(value.name, value, () =>
@@ -111,7 +110,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="label">The label to display next to the field.</param>
         /// <param name="value">The current float value.</param>
         /// <returns>The modified float value.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public float FloatField(string label, float value) =>
             HandleValueChange(label, value, () => EditorGUILayout.FloatField(label, value));
 
@@ -122,7 +121,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="label">The label used for the undo operation.</param>
         /// <param name="value">The current float value.</param>
         /// <returns>The modified float value.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public float FloatField(Rect rect, string label, float value) =>
             HandleValueChangeWithRect(rect, label, value, EditorGUI.FloatField);
 
@@ -134,7 +133,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="content">The GUIContent to display with the field.</param>
         /// <param name="value">The current float value.</param>
         /// <returns>The modified float value.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public float FloatField(Rect rect, string label, GUIContent content, float value) =>
             HandleValueChangeWithRect(rect, label, value, (position, currentValue)
                 => EditorGUI.FloatField(position, content, currentValue));
@@ -148,7 +147,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="currentValue">The current value before any changes.</param>
         /// <param name="guiMethod">The function that creates the GUI control with custom rect and returns its new value.</param>
         /// <returns>The current value if unchanged, or the new value if modified.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public T HandleValueChangeWithRect<T>(Rect rect, string label, T currentValue,
             Func<Rect, T, T> guiMethod)
         {
@@ -167,7 +166,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="label">The label to display next to the field.</param>
         /// <param name="value">The current int value.</param>
         /// <returns>The modified int value.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public int IntField(string label, int value) =>
             HandleValueChange(label, value, () => EditorGUILayout.IntField(label, value));
 
@@ -178,7 +177,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="label">The label to display next to the field.</param>
         /// <param name="value">The current enum value.</param>
         /// <returns>The modified enum value.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public T EnumField<T>(string label, T value) where T : Enum =>
             HandleValueChange(label, value, () => (T)EditorGUILayout.EnumPopup(label, value));
 
@@ -188,7 +187,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <typeparam name="T">The enum type.</typeparam>
         /// <param name="value">The current enum value.</param>
         /// <returns>The modified enum value.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public T EnumField<T>(T value) where T : Enum =>
             HandleValueChange(nameof(T), value, () => (T)EditorGUILayout.EnumPopup(value));
 
@@ -199,7 +198,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="property">The serialized property to modify.</param>
         /// <param name="includeChildren">Whether to include children of the property. Default is false.</param>
         /// <returns>True if the property was modified, false otherwise.</returns>
-        [UsedImplicitly]
         public bool PropertyField(SerializedProperty property, string label, bool includeChildren = false)
         {
             EditorGUI.BeginChangeCheck();
@@ -219,7 +217,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="property">The serialized property to modify.</param>
         /// <param name="includeChildren">Whether to include children of the property. Default is false.</param>
         /// <returns>True if the property was modified, false otherwise.</returns>
-        [UsedImplicitly]
         public bool PropertyField(SerializedProperty property, bool includeChildren = false)
             => PropertyField(property, property.displayName, includeChildren);
 
@@ -229,7 +226,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="propertyName">Name of the serialized property to modify</param>
         /// <param name="includeChildren">Whether to include children of the property</param>
         /// <returns>Tuple containing whether the property was modified and the property reference</returns>
-        [UsedImplicitly]
         public (bool wasModified, SerializedProperty serializedProperty) PropertyField(
             string propertyName,
             bool includeChildren = false)
@@ -252,7 +248,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="propertyName">Name of the serialized property to modify</param>
         /// <param name="includeChildren">Whether to include children of the property</param>
         /// <returns>True if the property was modified, false otherwise</returns>
-        [UsedImplicitly]
         public bool PropertyFieldIf(bool isDisabled, string propertyName, bool includeChildren = false)
         {
             if (_serializedObject is null)
@@ -271,7 +266,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Draws the script property in the Inspector.
         /// This displays the "Script" field which shows the script file associated with the component.
         /// </summary>
-        [UsedImplicitly]
         public void DrawScriptProperty()
         {
             if (_serializedObject is null)
@@ -293,7 +287,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="options">List of option strings to display.</param>
         /// <param name="rect">The rect where the dropdown should be drawn.</param>
         /// <returns>The selected string value.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public string Dropdown(string label, string selectedValue, List<string> options, Rect rect = default)
         {
             var selectedIndex = options.IndexOf(selectedValue);
@@ -312,7 +306,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="options">List of option strings to display.</param>
         /// <param name="rect">The rect where the dropdown should be drawn.</param>
         /// <returns>The selected string value.</returns>
-        [UsedImplicitly]
         public string Dropdown(SerializedProperty property, List<string> options, Rect rect = default)
         {
             var selectedIndex = options.IndexOf(property.stringValue);
@@ -333,6 +326,30 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         }
 
         /// <summary>
+        /// Creates a dropdown with undo support using int value selection from an array of options.
+        /// </summary>
+        /// <param name="property">The serialized property to modify (must be int type).</param>
+        /// <param name="options">Array of int options to display and select from.</param>
+        /// <param name="optionNames">Display names for the options.</param>
+        /// <param name="rect">The rect where the dropdown should be drawn.</param>
+        /// <returns>The selected int value.</returns>
+        public int Dropdown(SerializedProperty property, int[] options, string[] optionNames, Rect rect = default)
+        {
+            var currentIndex = Array.IndexOf(options, property.intValue);
+            if (currentIndex == -1)
+                currentIndex = 0;
+
+            var newIndex = DrawDropdown(property.displayName, currentIndex, optionNames, rect);
+
+            if (newIndex < 0 || newIndex >= options.Length)
+                return property.intValue;
+
+            property.intValue = options[newIndex];
+            property.serializedObject.ApplyModifiedProperties();
+            return options[newIndex];
+        }
+
+        /// <summary>
         /// Creates a dropdown with undo support using string value selection.
         /// </summary>
         /// <param name="label">The label to display next to the dropdown.</param>
@@ -340,7 +357,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="options">Array of option strings to display.</param>
         /// <param name="rect">The rect where the dropdown should be drawn.</param>
         /// <returns>The selected string value.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public string Dropdown(string label, string selectedValue, string[] options, Rect rect = default)
         {
             var selectedIndex = Array.IndexOf(options, selectedValue);
@@ -359,7 +376,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="options">List of option strings to display.</param>
         /// <param name="rect">The rect where the dropdown should be drawn.</param>
         /// <returns>The index of the selected option.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public int Dropdown(string label, int selectedIndex, List<string> options, Rect rect = default)
             => Dropdown(label, selectedIndex, options.ToArray(), rect);
 
@@ -371,7 +388,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="options">Array of option strings to display.</param>
         /// <param name="rect">The rect where the dropdown should be drawn.</param>
         /// <returns>The index of the selected option.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public int Dropdown(string label, int selectedIndex, string[] options, Rect rect = default)
         {
             var originalIndent = EditorGUI.indentLevel;
@@ -409,7 +426,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="isSelected">Whether the button is currently selected.</param>
         /// <param name="highlightColor">Optional color to use when the button is selected. If null, use a default highlight color.</param>
         /// <returns>The newly selected state of the button.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public bool ToggleButton(string label, bool isSelected, Color? highlightColor = null)
         {
             var originalBackgroundColor = GUI.backgroundColor;
@@ -435,7 +452,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="labels">Array of button labels to display.</param>
         /// <param name="selectedIndex">The currently selected button index.</param>
         /// <returns>The index of the newly selected button.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public int ToggleButtonGroup(string[] labels, int selectedIndex)
         {
             EditorGUILayout.BeginHorizontal();
@@ -463,7 +480,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="label">The label to display next to the toggle.</param>
         /// <param name="value">The current toggle state.</param>
         /// <returns>The new toggle state.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public bool Toggle(string label, bool value) =>
             HandleValueChange(label, value, () => EditorGUILayout.Toggle(label, value));
 
@@ -478,7 +495,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="toggle2">Reference to the second toggle's state.</param>
         /// <param name="label1">The label for the first toggle.</param>
         /// <param name="label2">The label for the second toggle.</param>
-        [UsedImplicitly]
         public void ExclusiveToggles(ref bool toggle1, ref bool toggle2, string label1, string label2)
         {
             EditorGUI.BeginChangeCheck();
@@ -527,7 +543,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="label">The label to display above the text area.</param>
         /// <param name="value">The current text content.</param>
         /// <returns>The modified text content.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public string TextArea(string label, string value)
         {
             EditorGUILayout.LabelField(label);
@@ -540,7 +556,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="label">The label to display next to the field.</param>
         /// <param name="value">The current text content.</param>
         /// <returns>The modified text content.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public string TextField(string label, string value) =>
             HandleValueChange(label, value, () => EditorGUILayout.TextField(label, value));
 
@@ -549,7 +565,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// </summary>
         /// <param name="label">The label to display next to the field.</param>
         /// <param name="value">Reference to the text content that will be modified directly.</param>
-        [UsedImplicitly]
         public void TextField(string label, ref string value)
         {
             var cashedValue = value;
@@ -567,7 +582,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="leftValue">The minimum value (left end of slider).</param>
         /// <param name="rightValue">The maximum value (right end of slider).</param>
         /// <returns>The modified float value.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public float Slider(string label, float value, float leftValue, float rightValue) =>
             HandleValueChange(label, value, () => EditorGUILayout.Slider(label, value, leftValue, rightValue));
 
@@ -579,7 +594,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="leftValue">The minimum value (left end of slider).</param>
         /// <param name="rightValue">The maximum value (right end of slider).</param>
         /// <returns>The modified int value.</returns>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public int IntSlider(string label, int value, int leftValue, int rightValue) =>
             HandleValueChange(label, value, () => EditorGUILayout.IntSlider(label, value, leftValue, rightValue));
 
