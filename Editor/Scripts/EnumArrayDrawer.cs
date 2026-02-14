@@ -34,6 +34,7 @@ namespace CustomUtils.Editor.Scripts
             _container = new Foldout { text = preferredLabel, viewDataKey = preferredLabel };
 
             _container.AddManipulator(new ContextualMenuManipulator(AddActions));
+            _container.RegisterCallback<PointerDownEvent>(HandleAltKey);
 
             CreateEntries(_container);
 
@@ -108,6 +109,28 @@ namespace CustomUtils.Editor.Scripts
         {
             _rootProperty.Paste();
             _rootProperty.serializedObject.ApplyModifiedProperties();
+        }
+
+        private void HandleAltKey(PointerDownEvent pointerEvent)
+        {
+            if (!pointerEvent.altKey)
+                return;
+
+            if (!_container.TryQ<Foldout>(out var toggle))
+                return;
+
+            var shouldExpand = !toggle.value;
+            toggle.value = shouldExpand;
+
+            foreach (var entry in _entries)
+                SetFoldoutState(entry, shouldExpand);
+        }
+
+        private void SetFoldoutState(VisualElement element, bool expanded)
+        {
+            var foldouts = element.Query<Foldout>().ToList();
+            foreach (var foldout in foldouts)
+                foldout.value = expanded;
         }
     }
 }
