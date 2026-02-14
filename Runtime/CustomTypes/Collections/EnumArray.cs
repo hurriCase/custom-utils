@@ -7,7 +7,6 @@ using CustomUtils.Unsafe;
 using JetBrains.Annotations;
 using MemoryPack;
 using UnityEngine;
-using ZLinq;
 
 namespace CustomUtils.Runtime.CustomTypes.Collections
 {
@@ -16,37 +15,54 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
     /// </summary>
     /// <typeparam name="TEnum">The enum type to be used as keys for this structure.</typeparam>
     /// <typeparam name="TValue">The type of values to be stored in the array.</typeparam>
-    [Serializable, UsedImplicitly, MemoryPackable]
+    [PublicAPI]
+    [Serializable]
+    [MemoryPackable]
     public partial class EnumArray<TEnum, TValue> : IEnumerable<TValue>, IEquatable<EnumArray<TEnum, TValue>>
         where TEnum : unmanaged, Enum
     {
         /// <summary>
         /// Gets the array of entries associated with the underlying enum type as keys.
         /// </summary>
-        [UsedImplicitly]
         [field: SerializeField] public Entry<TValue>[] Entries { get; private set; }
 
         /// <summary>
         /// Gets the total number of elements in the array associated with the underlying enum type.
         /// </summary>
-        [UsedImplicitly, MemoryPackIgnore]
         public int Length => Entries.Length;
+
+        /// <summary>
+        /// Gets all enum keys used in this array.
+        /// </summary>
+        public IReadOnlyList<TEnum> Keys => _cachedKeys;
+
+        /// <summary>
+        /// Gets all key-value pairs from this array.
+        /// </summary>
+        /// <returns>A new array containing all key-value pairs with current values.</returns>
+        public KeyValuePair<TEnum, TValue>[] KeyValuePairs
+        {
+            get
+            {
+                var keys = _cachedKeys;
+                var result = new KeyValuePair<TEnum, TValue>[keys.Length];
+                for (var i = 0; i < keys.Length; i++)
+                    result[i] = new KeyValuePair<TEnum, TValue>(keys[i], Entries[i].Value);
+                return result;
+            }
+        }
 
         internal static string EntriesPropertyName => nameof(Entries);
 
         [MemoryPackIgnore]
-        private static int GetValuesCount =>
-            Enum.GetValues(typeof(TEnum)).Cast<TEnum>()
-                .Distinct()
-                .Count();
+        private static readonly TEnum[] _cachedKeys = (TEnum[])Enum.GetValues(typeof(TEnum));
 
         /// <summary>
         /// Initializes a new instance of the EnumArray with default values for all elements.
         /// </summary>
-        [UsedImplicitly]
         public EnumArray()
         {
-            Entries = new Entry<TValue>[GetValuesCount];
+            Entries = new Entry<TValue>[_cachedKeys.Length];
 
             for (var i = 0; i < Entries.Length; i++)
                 Entries[i] = new Entry<TValue>();
@@ -56,10 +72,9 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         /// Initializes a new instance of the EnumArray with all elements set to the specified default value.
         /// </summary>
         /// <param name="defaultValue">The default value to assign to all elements in the array.</param>
-        [UsedImplicitly]
         public EnumArray(TValue defaultValue)
         {
-            Entries = new Entry<TValue>[GetValuesCount];
+            Entries = new Entry<TValue>[_cachedKeys.Length];
 
             for (var i = 0; i < Entries.Length; i++)
                 Entries[i] = new Entry<TValue> { Value = defaultValue };
@@ -70,10 +85,9 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         /// with all elements set to values created by the specified factory method.
         /// </summary>
         /// <param name="factory">A factory method that creates default values for each array element.</param>
-        [UsedImplicitly]
         public EnumArray(Func<TValue> factory)
         {
-            Entries = new Entry<TValue>[GetValuesCount];
+            Entries = new Entry<TValue>[_cachedKeys.Length];
 
             for (var i = 0; i < Entries.Length; i++)
                 Entries[i] = new Entry<TValue> { Value = factory() };
@@ -91,7 +105,6 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         /// </summary>
         /// <param name="key">The enum key corresponding to the value in the array.</param>
         /// <returns>The value stored in the array at the position corresponding to the enum key.</returns>
-        [UsedImplicitly]
         public TValue this[TEnum key]
         {
             get => Entries[UnsafeEnumConverter<TEnum>.ToInt32(key)].Value;
@@ -104,7 +117,6 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         /// </summary>
         /// <param name="index">The index corresponding to the value in the array.</param>
         /// <returns>The value stored in the array at the position corresponding to the index.</returns>
-        [UsedImplicitly]
         public TValue this[int index]
         {
             get => Entries[index].Value;
@@ -114,7 +126,6 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         /// <summary>
         /// Clears all entries in the array, setting them to their default values.
         /// </summary>
-        [UsedImplicitly]
         public void Clear()
         {
             Array.Clear(Entries, 0, Entries.Length);
@@ -124,14 +135,12 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         /// Enumerates over (key, value) tuples like a dictionary without allocations.
         /// </summary>
         /// <returns>A struct enumerator that iterates through key-value pairs.</returns>
-        [UsedImplicitly]
         public TupleEnumerator<TEnum, TValue> AsTuples() => new(this);
 
         /// <summary>
         /// Returns a struct enumerator for iterating through the array of values.
         /// </summary>
         /// <returns>A struct enumerator for the array of values.</returns>
-        [UsedImplicitly]
         public Enumerator<TValue> GetEnumerator() => new(Entries);
 
         [EditorBrowsable(EditorBrowsableState.Never)]
