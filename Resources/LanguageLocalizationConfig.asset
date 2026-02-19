@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e946a8f0d4b4323a5a136f64ecc5c8c, type: 3}
+  m_Name: LanguageLocalizationConfig
+  m_EditorClassIdentifier: Source.Scripts.Main::Source.Scripts.Main.UI.PopUps.Selection.LocalizationData.LanguageLocalizationConfig
+  _localizations:
+    <Entries>k__BackingField:
+    - <Value>k__BackingField: Afrikaans
+    - <Value>k__BackingField: "\u0627\u0644\u0639\u0631\u0628\u064A\u0629"
+    - <Value>k__BackingField: Euskara
+    - <Value>k__BackingField: "\u0411\u0435\u043B\u0430\u0440\u0443\u0441\u043A\u0430\u044F"
+    - <Value>k__BackingField: "\u0411\u044A\u043B\u0433\u0430\u0440\u0441\u043A\u0438"
+    - <Value>k__BackingField: "Catal\xE0"
+    - <Value>k__BackingField: "\u4E2D\u6587"
+    - <Value>k__BackingField: "\u010Ce\u0161tina"
+    - <Value>k__BackingField: Dansk
+    - <Value>k__BackingField: Nederlands
+    - <Value>k__BackingField: English
+    - <Value>k__BackingField: Eesti
+    - <Value>k__BackingField: "F\xF8royskt"
+    - <Value>k__BackingField: Suomi
+    - <Value>k__BackingField: "Fran\xE7ais"
+    - <Value>k__BackingField: Deutsch
+    - <Value>k__BackingField: "\u0395\u03BB\u03BB\u03B7\u03BD\u03B9\u03BA\u03AC"
+    - <Value>k__BackingField: "\u05E2\u05D1\u05E8\u05D9\u05EA"
+    - <Value>k__BackingField: Magyar
+    - <Value>k__BackingField: "\xCDslenska"
+    - <Value>k__BackingField: Bahasa Indonesia
+    - <Value>k__BackingField: Italiano
+    - <Value>k__BackingField: "\u65E5\u672C\u8A9E"
+    - <Value>k__BackingField: "\uD55C\uAD6D\uC5B4"
+    - <Value>k__BackingField: "Latvie\u0161u"
+    - <Value>k__BackingField: "Lietuvi\u0173"
+    - <Value>k__BackingField: Norsk
+    - <Value>k__BackingField: Polski
+    - <Value>k__BackingField: "Portugu\xEAs"
+    - <Value>k__BackingField: "Rom\xE2n\u0103"
+    - <Value>k__BackingField: "\u0420\u0443\u0441\u0441\u043A\u0438\u0439"
+    - <Value>k__BackingField: "\u0421\u0440\u043F\u0441\u043A\u043E\u0445\u0440\u0432\u0430\u0442\u0441\u043A\u0438"
+    - <Value>k__BackingField: "Sloven\u010Dina"
+    - <Value>k__BackingField: "Sloven\u0161\u010Dina"
+    - <Value>k__BackingField: "Espa\xF1ol"
+    - <Value>k__BackingField: Svenska
+    - <Value>k__BackingField: "\u0E44\u0E17\u0E22"
+    - <Value>k__BackingField: "T\xFCrk\xE7e"
+    - <Value>k__BackingField: "\u0423\u043A\u0440\u0430\u0457\u043D\u0441\u044C\u043A\u0430"
+    - <Value>k__BackingField: "Ti\u1EBFng Vi\u1EC7t"
+    - <Value>k__BackingField: "\u7B80\u4F53\u4E2D\u6587"
+    - <Value>k__BackingField: "\u7E41\u9AD4\u4E2D\u6587"
+    - <Value>k__BackingField: "\u0939\u093F\u0928\u094D\u0926\u0940"
+    - <Value>k__BackingField: Unknown
