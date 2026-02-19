@@ -1,4 +1,5 @@
-﻿using CustomUtils.Runtime.CustomTypes.Collections;
+﻿using CustomUtils.Runtime.AssetLoader;
+using CustomUtils.Runtime.CustomTypes.Collections;
 using CustomUtils.Runtime.CustomTypes.Singletons;
 using CustomUtils.Unsafe;
 using JetBrains.Annotations;
@@ -7,6 +8,7 @@ using UnityEngine;
 namespace CustomUtils.Runtime.Localization
 {
     [PublicAPI]
+    [Resource(name: nameof(LanguageLocalizationConfig))]
     public sealed class LanguageLocalizationConfig : SingletonScriptableObject<LanguageLocalizationConfig>
     {
         [SerializeField] private EnumArray<SystemLanguage, string> _localizations;
