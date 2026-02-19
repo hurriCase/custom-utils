@@ -52,7 +52,8 @@ namespace CustomUtils.Runtime.UI.Windows
 
         private void OnDestroy()
         {
-            _hidden?.Dispose();
+            _shown.Dispose();
+            _hidden.Dispose();
         }
     }
 }
