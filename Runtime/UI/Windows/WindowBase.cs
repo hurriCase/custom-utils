@@ -21,6 +21,9 @@ namespace CustomUtils.Runtime.UI.Windows
         public abstract UniTask ShowAsync();
         public abstract UniTask HideAsync();
 
-        public virtual void HideImmediately() => canvasGroup.Hide();
+        public virtual void HideImmediately()
+        {
+            canvasGroup.Hide();
+        }
     }
 }

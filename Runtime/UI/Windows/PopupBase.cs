@@ -9,19 +9,19 @@ using UnityEngine;
 namespace CustomUtils.Runtime.UI.Windows
 {
     [PublicAPI]
-    public abstract class PopUpBase : WindowBase
+    public abstract class PopupBase : WindowBase
     {
         [field: SerializeField] internal bool IsSingle { get; private set; } = true;
 
-        [SerializeField] private PopUpVisibilityHandler _popUpVisibilityHandler;
+        [SerializeField] private VisibilityHandler _visibilityHandler;
 
         [SerializeField] private ThemeButton _closeButton;
 
-        public Observable<Unit> OnPopUpShown => _popUpShown;
-        private readonly Subject<Unit> _popUpShown = new();
+        public Observable<Unit> OnShown => _shown;
+        private readonly Subject<Unit> _shown = new();
 
-        public Observable<Unit> OnPopUpHidden => _popUpHidden;
-        private readonly Subject<Unit> _popUpHidden = new();
+        public Observable<Unit> OnHidden => _hidden;
+        private readonly Subject<Unit> _hidden = new();
 
         internal override void BaseInitialize()
         {
@@ -31,28 +31,28 @@ namespace CustomUtils.Runtime.UI.Windows
 
         public override async UniTask ShowAsync()
         {
-            await _popUpVisibilityHandler.ShowAsync();
+            await _visibilityHandler.ShowAsync();
 
-            _popUpShown.OnNext(Unit.Default);
+            _shown.OnNext(Unit.Default);
         }
 
         public override async UniTask HideAsync()
         {
-            await _popUpVisibilityHandler.HideAsync();
+            await _visibilityHandler.HideAsync();
 
-            _popUpHidden.OnNext(Unit.Default);
+            _hidden.OnNext(Unit.Default);
         }
 
         public override void HideImmediately()
         {
-            _popUpVisibilityHandler.HideImmediately();
+            _visibilityHandler.HideImmediately();
 
-            _popUpHidden.OnNext(Unit.Default);
+            _hidden.OnNext(Unit.Default);
         }
 
         private void OnDestroy()
         {
-            _popUpHidden?.Dispose();
+            _hidden?.Dispose();
         }
     }
 }

@@ -7,7 +7,7 @@ using UnityEngine;
 namespace CustomUtils.Runtime.UI.Windows
 {
     [PublicAPI]
-    public class PopUpVisibilityHandler : MonoBehaviour
+    public class VisibilityHandler : MonoBehaviour
     {
         [SerializeField] private CanvasGroup _canvasGroup;
 

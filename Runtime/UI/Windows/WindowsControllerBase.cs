@@ -19,26 +19,26 @@ using VContainer.Unity;
 namespace CustomUtils.Runtime.UI.Windows
 {
     [PublicAPI]
-    public abstract class WindowsControllerBase<TScreenEnum, TPopUpEnum> : MonoBehaviour
+    public abstract class WindowsControllerBase<TScreenEnum, TPopupEnum> : MonoBehaviour
         where TScreenEnum : unmanaged, Enum
-        where TPopUpEnum : unmanaged, Enum
+        where TPopupEnum : unmanaged, Enum
     {
         [SerializeField] private EnumArray<TScreenEnum, AssetReferenceT<GameObject>> _screenReferences;
-        [SerializeField] private EnumArray<TPopUpEnum, AssetReferenceT<GameObject>> _popUpReferences;
+        [SerializeField] private EnumArray<TPopupEnum, AssetReferenceT<GameObject>> _popupReferences;
 
         [SerializeField] private Transform _screensContainer;
-        [SerializeField] private Transform _popUpsContainer;
+        [SerializeField] private Transform _popupsContainer;
 
         public ReadOnlyReactiveProperty<TScreenEnum> CurrentScreenType => _currentScreenType;
         private readonly ReactiveProperty<TScreenEnum> _currentScreenType = new();
 
-        public TPopUpEnum CurrentPopUpType { get; private set; }
+        public TPopupEnum CurrentPopupType { get; private set; }
 
         private readonly EnumArray<TScreenEnum, ScreenBase> _createdScreens = new();
-        private readonly EnumArray<TPopUpEnum, PopUpBase> _createdPopUps = new();
-        private readonly Stack<PopUpBase> _previousOpenedPopUps = new();
+        private readonly EnumArray<TPopupEnum, PopupBase> _createdPopups = new();
+        private readonly Stack<PopupBase> _previousOpenedPopups = new();
 
-        private PopUpBase _currentOpenedPopUp;
+        private PopupBase _currentOpenedPopup;
         private ScreenBase _currentScreen;
 
         private IObjectResolver _objectResolver;
@@ -56,94 +56,7 @@ namespace CustomUtils.Runtime.UI.Windows
             var sourceWithDestroy = cancellationToken.CreateLinkedTokenSourceWithDestroy(this);
 
             await InitScreensAsync(sourceWithDestroy.Token);
-            await InitPopUpAsync(sourceWithDestroy.Token);
-        }
-
-        private async UniTask InitPopUpAsync(CancellationToken cancellationToken)
-        {
-            foreach (var (popUpType, popUpReference) in _popUpReferences.AsTuples())
-            {
-                var loadedPopUp = await _addressablesLoader.LoadAsync<GameObject>(popUpReference, cancellationToken);
-                var createdWindow = _objectResolver.Instantiate(loadedPopUp, _popUpsContainer);
-
-                if (createdWindow.TryGetComponent<PopUpBase>(out var popUpBase) is false)
-                    continue;
-
-                _createdPopUps[popUpType] = popUpBase;
-
-                popUpBase.BaseInitialize();
-                popUpBase.Initialize();
-                popUpBase.HideImmediately();
-                popUpBase.OnPopUpHidden.SubscribeUntilDestroy(this, static self => self.HandlePopUpHide());
-            }
-        }
-
-        public void OpenScreenByType(TScreenEnum screenType)
-        {
-            HideAllPopUps();
-
-            var screenBase = _createdScreens[screenType];
-
-            if (!screenBase)
-            {
-                var message = ZString.Format("[WindowsControllerBase::OpenScreenByType] " +
-                                             "There is no screen with type: {0}", screenType);
-                Debug.LogError(message);
-                return;
-            }
-
-            if (_currentScreen)
-                _currentScreen.HideAsync();
-
-            _currentScreen = screenBase;
-            _currentScreenType.Value = screenType;
-            screenBase.ShowAsync();
-        }
-
-        public void OpenPopUpByType(TPopUpEnum popUpType)
-        {
-            var popUpBase = _createdPopUps[popUpType];
-
-            if (!popUpBase)
-            {
-                var message = ZString.Format("[WindowsControllerBase::OpenPopUpByType] There is no pop up with type: {0}",
-                    popUpType);
-                Debug.LogError(message);
-                return;
-            }
-
-            OpenPopUpAsync(popUpBase, popUpType).Forget();
-        }
-
-        public TPopUpType OpenPopUp<TPopUpType>() where TPopUpType : PopUpBase
-        {
-            foreach (var (popUpEnum, popUpBase) in _createdPopUps.AsTuples())
-            {
-                if (popUpBase.GetType() != typeof(TPopUpType))
-                    continue;
-
-                OpenPopUpAsync(popUpBase, popUpEnum).Forget();
-                return popUpBase as TPopUpType;
-            }
-
-            Debug.LogError(ZString.Format("[WindowsControllerBase::OpenPopUp] There is no pop up with type: {0}",
-                typeof(TPopUpType)));
-
-            return null;
-        }
-
-        public void BindPopUpOpen(UIBehaviour component, TPopUpEnum popUpType)
-        {
-            component.OnPointerClickAsObservable()
-                .Subscribe((self: this, popUpType), static (_, tuple) => tuple.self.OpenPopUpByType(tuple.popUpType))
-                .RegisterTo(component.destroyCancellationToken);
-        }
-
-        public void BindScreenOpen(UIBehaviour component, TScreenEnum screenType)
-        {
-            component.OnPointerClickAsObservable()
-                .Subscribe((self: this, screenType), static (_, tuple) => tuple.self.OpenScreenByType(tuple.screenType))
-                .RegisterTo(component.destroyCancellationToken);
+            await InitPopupsAsync(sourceWithDestroy.Token);
         }
 
         private async UniTask InitScreensAsync(CancellationToken cancellationToken)
@@ -171,51 +84,139 @@ namespace CustomUtils.Runtime.UI.Windows
             }
         }
 
-        private async UniTask OpenPopUpAsync(PopUpBase popUpBase, TPopUpEnum popUpEnum)
+        private async UniTask InitPopupsAsync(CancellationToken cancellationToken)
         {
-            if (_currentOpenedPopUp && popUpBase.IsInFrontOf(_currentOpenedPopUp) is false)
-                popUpBase.transform.SetAsLastSibling();
-
-            await popUpBase.ShowAsync();
-
-            if (_currentOpenedPopUp)
+            foreach (var (popupType, popupReference) in _popupReferences.AsTuples())
             {
-                _previousOpenedPopUps.Push(_currentOpenedPopUp);
+                var loadedPopup = await _addressablesLoader.LoadAsync<GameObject>(popupReference, cancellationToken);
+                var createdWindow = _objectResolver.Instantiate(loadedPopup, _popupsContainer);
 
-                if (popUpBase.IsSingle)
-                    _currentOpenedPopUp.HideImmediately();
+                if (createdWindow.TryGetComponent<PopupBase>(out var popupBase) is false)
+                    continue;
+
+                _createdPopups[popupType] = popupBase;
+
+                popupBase.BaseInitialize();
+                popupBase.Initialize();
+                popupBase.HideImmediately();
+                popupBase.OnHidden.SubscribeUntilDestroy(this, static self => self.HandlePopupHide());
             }
-
-            _currentOpenedPopUp = popUpBase;
-            CurrentPopUpType = popUpEnum;
         }
 
-        private void HideAllPopUps()
+        public void OpenScreenByType(TScreenEnum screenType)
         {
-            CurrentPopUpType = default;
+            HideAllPopups();
 
-            if (_currentOpenedPopUp)
+            var screenBase = _createdScreens[screenType];
+
+            if (!screenBase)
             {
-                _currentOpenedPopUp.HideImmediately();
-                _currentOpenedPopUp = null;
+                var message = ZString.Format("[WindowsControllerBase::OpenScreenByType] " +
+                                             "There is no screen with type: {0}", screenType);
+                Debug.LogError(message);
+                return;
             }
 
-            _previousOpenedPopUps.Clear();
+            if (_currentScreen)
+                _currentScreen.HideAsync();
+
+            _currentScreen = screenBase;
+            _currentScreenType.Value = screenType;
+            screenBase.ShowAsync();
         }
 
-        private void HandlePopUpHide()
+        public void OpenPopupByType(TPopupEnum popupType)
         {
-            CurrentPopUpType = default;
+            var popupBase = _createdPopups[popupType];
 
-            var needShow = _currentOpenedPopUp && _currentOpenedPopUp.IsSingle;
-            _currentOpenedPopUp = null;
+            if (!popupBase)
+            {
+                var message = ZString.Format("[WindowsControllerBase::OpenPopupByType] " +
+                                             "There is no popup with type: {0}", popupType);
+                Debug.LogError(message);
+                return;
+            }
 
-            if (_previousOpenedPopUps.TryPop(out var previousPopUp) is false)
+            OpenPopupAsync(popupBase, popupType).Forget();
+        }
+
+        public TPopupType OpenPopup<TPopupType>() where TPopupType : PopupBase
+        {
+            foreach (var (popupEnum, popupBase) in _createdPopups.AsTuples())
+            {
+                if (popupBase.GetType() != typeof(TPopupType))
+                    continue;
+
+                OpenPopupAsync(popupBase, popupEnum).Forget();
+                return popupBase as TPopupType;
+            }
+
+            var errorMessage = ZString.Format("[WindowsControllerBase::OpenPopup] " +
+                                              "There is no popup with type: {0}", typeof(TPopupType));
+            Debug.LogError(errorMessage);
+
+            return null;
+        }
+
+        public void BindPopupOpen(UIBehaviour component, TPopupEnum popupType)
+        {
+            component.OnPointerClickAsObservable()
+                .Subscribe((self: this, popupType), static (_, tuple) => tuple.self.OpenPopupByType(tuple.popupType))
+                .RegisterTo(component.destroyCancellationToken);
+        }
+
+        public void BindScreenOpen(UIBehaviour component, TScreenEnum screenType)
+        {
+            component.OnPointerClickAsObservable()
+                .Subscribe((self: this, screenType), static (_, tuple) => tuple.self.OpenScreenByType(tuple.screenType))
+                .RegisterTo(component.destroyCancellationToken);
+        }
+
+        private async UniTask OpenPopupAsync(PopupBase popupBase, TPopupEnum popupEnum)
+        {
+            if (_currentOpenedPopup && popupBase.IsInFrontOf(_currentOpenedPopup) is false)
+                popupBase.transform.SetAsLastSibling();
+
+            await popupBase.ShowAsync();
+
+            if (_currentOpenedPopup)
+            {
+                _previousOpenedPopups.Push(_currentOpenedPopup);
+
+                if (popupBase.IsSingle)
+                    _currentOpenedPopup.HideImmediately();
+            }
+
+            _currentOpenedPopup = popupBase;
+            CurrentPopupType = popupEnum;
+        }
+
+        private void HideAllPopups()
+        {
+            CurrentPopupType = default;
+
+            if (_currentOpenedPopup)
+            {
+                _currentOpenedPopup.HideImmediately();
+                _currentOpenedPopup = null;
+            }
+
+            _previousOpenedPopups.Clear();
+        }
+
+        private void HandlePopupHide()
+        {
+            CurrentPopupType = default;
+
+            var needShow = _currentOpenedPopup && _currentOpenedPopup.IsSingle;
+            _currentOpenedPopup = null;
+
+            if (_previousOpenedPopups.TryPop(out var previousPopup) is false)
                 return;
 
-            _currentOpenedPopUp = previousPopUp;
+            _currentOpenedPopup = previousPopup;
             if (needShow)
-                previousPopUp.ShowAsync().Forget();
+                previousPopup.ShowAsync().Forget();
         }
     }
 }
