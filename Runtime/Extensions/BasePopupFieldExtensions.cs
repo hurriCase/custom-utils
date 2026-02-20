@@ -7,7 +7,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="VisualElement"/> and related types.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class BasePopupFieldExtensions
     {
         private const string UnityInspectorFieldUssClassName = "inspector-field";
@@ -20,7 +20,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="field">The popup field to register the click action on.</param>
         /// <param name="source">The source object to pass to the click action.</param>
         /// <param name="clickAction">The action to invoke when the input is clicked.</param>
-        [UsedImplicitly]
         public static void RegisterInputClick<TValueType, TSource>(
             this PopupField<TValueType> field,
             TSource source,
@@ -38,7 +37,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <typeparam name="TValueType">The type of the value of the field.</typeparam>
         /// <param name="field">The field to add styling classes to.</param>
-        [UsedImplicitly]
         public static void AddUnityFileStyles<TValueType>(this BaseField<TValueType> field)
         {
             field.AddToClassList(BaseField<TValueType>.alignedFieldUssClassName);

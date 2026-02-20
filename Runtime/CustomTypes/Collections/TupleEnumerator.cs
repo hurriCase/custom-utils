@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime.CustomTypes.Collections
 {
@@ -10,6 +11,7 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
     /// </summary>
     /// <typeparam name="TEnum">The enumeration type that represents the keys.</typeparam>
     /// <typeparam name="TValue">The type of the associated values.</typeparam>
+    [PublicAPI]
     public struct TupleEnumerator<TEnum, TValue> : IEnumerator<(TEnum Key, TValue Value)>
         where TEnum : unmanaged, Enum
     {

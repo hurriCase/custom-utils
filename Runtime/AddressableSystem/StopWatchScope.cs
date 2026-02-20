@@ -8,7 +8,7 @@ namespace CustomUtils.Runtime.AddressableSystem
     /// <summary>
     /// Disposable struct for measuring and logging operation execution time.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public readonly struct StopWatchScope : IDisposable
     {
         private readonly Stopwatch _stopwatch;
@@ -18,7 +18,6 @@ namespace CustomUtils.Runtime.AddressableSystem
         /// Initializes a new StopWatchScope and starts timing.
         /// </summary>
         /// <param name="message">Message to log with the elapsed time.</param>
-        [UsedImplicitly]
         public StopWatchScope(string message)
         {
             _stopwatch = Stopwatch.StartNew();
@@ -28,7 +27,6 @@ namespace CustomUtils.Runtime.AddressableSystem
         /// <summary>
         /// Stops timing and logs the elapsed time with the message.
         /// </summary>
-        [UsedImplicitly]
         public void Dispose()
         {
             _stopwatch.Stop();

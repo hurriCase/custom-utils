@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles.Mappings
 {
-    [UsedImplicitly]
+    [PublicAPI]
     [CreateAssetMenu(
         fileName = nameof(ToggleSpriteMapping),
         menuName = ResourcePaths.MappingsPath + nameof(ToggleSpriteMapping)
@@ -13,7 +13,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles.Mappings
     {
         [field: SerializeField] public EnumArray<ToggleStateType, Sprite> StateMappings { get; private set; }
 
-        [UsedImplicitly]
         public Sprite GetSpriteForState(ToggleStateType state) => StateMappings[state];
     }
 }

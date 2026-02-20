@@ -15,6 +15,7 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
     /// Base class for singleton ScriptableObjects that are automatically loaded or created when accessed.
     /// </summary>
     /// <typeparam name="T">The type of ScriptableObject to create as a singleton.</typeparam>
+    [PublicAPI]
     public abstract class SingletonScriptableObject<T> : ScriptableObject
         where T : SingletonScriptableObject<T>
     {
@@ -25,7 +26,6 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
         /// If the instance doesn't exist, it will be loaded from resources or created if necessary.
         /// The location is determined by the ResourceAttribute applied to the class.
         /// </summary>
-        [UsedImplicitly]
         public static T Instance
         {
             get
@@ -40,10 +40,7 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
 #if UNITY_EDITOR
         static SingletonScriptableObject()
         {
-            SingletonResetter.RegisterResetAction(static () =>
-            {
-                _instance = null;
-            });
+            SingletonResetter.RegisterResetAction(static () => _instance = null);
         }
 #endif
 

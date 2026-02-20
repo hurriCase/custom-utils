@@ -3,7 +3,6 @@ using CustomUtils.Runtime.AssetLoader;
 using JetBrains.Annotations;
 using UnityEngine;
 
-// ReSharper disable StaticMemberInGenericType
 namespace CustomUtils.Runtime.CustomTypes.Singletons
 {
     /// <inheritdoc />
@@ -12,11 +11,12 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
     /// Can be instantiated from a prefab in Resources folder or created dynamically.
     /// </summary>
     /// <typeparam name="T">The type of MonoBehaviour to make a persistent singleton.</typeparam>
+    [PublicAPI]
     public abstract class PersistentSingletonBehavior<T> : MonoBehaviour where T : MonoBehaviour
     {
         private static T _instance;
 
-        [UsedImplicitly] public static T Instance
+        public static T Instance
         {
             get
             {
@@ -32,6 +32,7 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
 
         public static event Action OnDestroyed;
 
+        // ReSharper disable once StaticMemberInGenericType | intentional, each T has its own creation state
         private static bool _created;
 
 #if UNITY_EDITOR

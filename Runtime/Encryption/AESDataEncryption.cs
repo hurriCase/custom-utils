@@ -8,7 +8,7 @@ namespace CustomUtils.Runtime.Encryption
     /// <summary>
     /// Provides AES encryption and decryption functionality with password-based key derivation.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class AESDataEncryption
     {
         private const int SaltSize = 16;
@@ -22,7 +22,6 @@ namespace CustomUtils.Runtime.Encryption
         /// <param name="data">The plaintext data to encrypt.</param>
         /// <param name="password">The password used for key derivation.</param>
         /// <returns>A Base64-encoded string containing the encrypted data with salt and IV.</returns>
-        [UsedImplicitly]
         public static string Encrypt(string data, string password)
         {
             var salt = new byte[SaltSize];
@@ -61,7 +60,6 @@ namespace CustomUtils.Runtime.Encryption
         /// <param name="encryptedData">The Base64-encoded encrypted data containing salt, IV, and ciphertext.</param>
         /// <param name="password">The password used for key derivation.</param>
         /// <returns>The decrypted plaintext string.</returns>
-        [UsedImplicitly]
         public static string Decrypt(string encryptedData, string password)
         {
             var data = Convert.FromBase64String(encryptedData);

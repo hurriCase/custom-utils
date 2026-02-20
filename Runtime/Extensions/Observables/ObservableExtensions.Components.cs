@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using R3;
+﻿using R3;
 using TMPro;
 
 namespace CustomUtils.Runtime.Extensions.Observables
@@ -7,7 +6,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
     /// <summary>
     /// Provides extension methods for <see cref="Observable{T}"/> to work with UI components.
     /// </summary>
-    [UsedImplicitly]
     public partial class ObservableExtensions
     {
         /// <summary>
@@ -20,7 +18,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <returns>
         /// An observable sequence that emits the current and updated string values of the input field as they change.
         /// </returns>
-        [UsedImplicitly]
         public static Observable<string> OnValueChangedAsObservable(this TMP_InputField inputField)
         {
             return Observable.Create<string, TMP_InputField>(inputField, static (observer, inputField) =>

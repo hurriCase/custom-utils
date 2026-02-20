@@ -15,6 +15,7 @@ namespace CustomUtils.Runtime.UI.GradientHelpers.GraphicGradient
     /// It works by manipulating the color of individual vertices in quad formations.
     /// </remarks>
     [ExecuteAlways]
+    [PublicAPI]
     public sealed class VertexGradientEffect : BaseMeshEffect
     {
         [SerializeField, InspectorReadOnly] private Color _startColor;
@@ -39,7 +40,6 @@ namespace CustomUtils.Runtime.UI.GradientHelpers.GraphicGradient
         /// This method configures the gradient but does not immediately apply it.
         /// The effect will be applied during the next mesh update cycle.
         /// </remarks>
-        [UsedImplicitly]
         public void SetGradient(Color startColor, Color endColor, GradientDirection direction)
         {
             _startColor = startColor;
@@ -56,7 +56,6 @@ namespace CustomUtils.Runtime.UI.GradientHelpers.GraphicGradient
         /// This method is called automatically by Unity's UI system when the mesh needs to be updated.
         /// It processes vertices in groups of four (quads) and applies gradient colors based on the configured direction.
         /// </remarks>
-        [UsedImplicitly]
         public override void ModifyMesh(VertexHelper vertexHelper)
         {
             if (_direction == GradientDirection.None)

@@ -10,6 +10,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.FilledImage
 {
     [RequireComponent(typeof(CanvasRenderer))]
     [ExecuteAlways]
+    [PublicAPI]
     public sealed class RoundedFilledImage : Image
     {
         [field: SerializeField, Range(0, 359)] public float CustomFillOrigin { get; set; }
@@ -38,7 +39,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.FilledImage
             SetAllDirty();
         }
 
-        [UsedImplicitly]
         public void ChangeCapGeometry(CapGeometryType geometryType)
         {
             CapGeometry.AsNullable()?.Destroy();

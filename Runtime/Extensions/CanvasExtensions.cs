@@ -6,7 +6,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="CanvasGroup"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class CanvasExtensions
     {
         /// <summary>
@@ -16,10 +16,9 @@ namespace CustomUtils.Runtime.Extensions
         /// <remarks>
         /// Sets alpha to 0 and disables both interactable and blocksRaycasts properties.
         /// </remarks>
-        [UsedImplicitly]
         public static void Hide(this CanvasGroup canvasGroup)
         {
-            SetVisible(canvasGroup, false);
+            canvasGroup.SetVisible(false);
         }
 
         /// <summary>
@@ -29,10 +28,9 @@ namespace CustomUtils.Runtime.Extensions
         /// <remarks>
         /// Sets alpha to 1 and enables both interactable and blocksRaycasts properties.
         /// </remarks>
-        [UsedImplicitly]
         public static void Show(this CanvasGroup canvasGroup)
         {
-            SetVisible(canvasGroup, true);
+            canvasGroup.SetVisible(true);
         }
 
         /// <summary>
@@ -43,7 +41,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <remarks>
         /// When true, sets alpha to 1 and enables interaction. When false, sets alpha to 0 and disables interaction.
         /// </remarks>
-        [UsedImplicitly]
         public static void SetVisible(this CanvasGroup canvasGroup, bool isVisible)
         {
             canvasGroup.alpha = isVisible ? 1f : 0f;

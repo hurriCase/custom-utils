@@ -9,15 +9,13 @@ using UnityEngine.UI;
 
 namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 {
-    [UsedImplicitly]
+    [PublicAPI]
     [ExecuteAlways]
     [AddComponentMenu("UI/Procedural Image")]
     public class ProceduralImage : Image
     {
-        [UsedImplicitly]
         [field: SerializeField] public SerializableReactiveProperty<float> BorderWidth { get; set; } = new();
 
-        [UsedImplicitly]
         [field: SerializeField] public SerializableReactiveProperty<float> FalloffDistance { get; set; } = new();
 
         private ResourceReferences ResourceReferences => ResourceReferences.Instance;
@@ -37,7 +35,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             }
         }
 
-        [UsedImplicitly]
         public bool SetModifierType(System.Type modifierType)
         {
             if (TryGetComponent<ModifierBase>(out var currentModifier)
@@ -142,7 +139,8 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
                 info.NormalizedRadius.z.PackAs16BitWith(info.NormalizedRadius.w)
             );
 
-            var uv3 = new Vector2(info.NormalizedBorderWidth == 0 ? 1 : Mathf.Clamp01(info.NormalizedBorderWidth), info.PixelSize);
+            var uv3 = new Vector2(info.NormalizedBorderWidth == 0 ? 1 : Mathf.Clamp01(info.NormalizedBorderWidth),
+                info.PixelSize);
 
             var vert = new UIVertex();
             for (var i = 0; i < vertexHelper.currentVertCount; i++)

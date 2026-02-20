@@ -7,7 +7,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="SystemLanguage"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class SystemLanguageExtensions
     {
         private static readonly Dictionary<SystemLanguage, (string iso1, string iso2)> _languageCodes = new()
@@ -56,7 +56,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="language">The SystemLanguage to convert.</param>
         /// <returns>The ISO 639-1 language code (e.g., "en", "ja"), or "en" if not found.</returns>
-        [UsedImplicitly]
         public static string SystemLanguageToISO1(this SystemLanguage language)
             => _languageCodes.TryGetValue(language, out var codes) ? codes.iso1 : "en";
 
@@ -65,7 +64,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="language">The SystemLanguage to convert.</param>
         /// <returns>The ISO 639-2 language code (e.g., "eng", "spa"), or "eng" if not found.</returns>
-        [UsedImplicitly]
         public static string SystemLanguageToISO2(this SystemLanguage language)
             => _languageCodes.TryGetValue(language, out var codes) ? codes.iso2 : "eng";
 
@@ -74,7 +72,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="isoCode">The ISO language code to convert.</param>
         /// <returns>The corresponding SystemLanguage, or SystemLanguage.English if not found.</returns>
-        [UsedImplicitly]
         public static SystemLanguage ISOToSystemLanguage(this string isoCode)
             => GetReverseMap().GetValueOrDefault(isoCode, SystemLanguage.English);
 
@@ -84,7 +81,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="language">The SystemLanguage to convert.</param>
         /// <returns>The locale code string, or "en-US" if not found.</returns>
-        [UsedImplicitly]
         public static string ToLocaleCode(this SystemLanguage language)
         {
             return language switch

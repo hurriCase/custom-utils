@@ -7,7 +7,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for working with JSON-related tasks.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class JsonExtension
     {
         /// <summary>
@@ -15,7 +15,6 @@ namespace CustomUtils.Runtime.Extensions
         /// value or the enum value's string representation.
         /// </summary>
         /// <param name="enumValue">The enum value to get the JSON property name for.</param>
-        [UsedImplicitly]
         public static string GetJsonPropertyName(this Type enumValue)
         {
             var attribute = enumValue

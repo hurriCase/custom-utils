@@ -10,6 +10,7 @@ namespace CustomUtils.Runtime.Extensions.Observables
     /// <summary>
     /// Provides extension methods for <see cref="Observable{T}"/> with automatic disposal on destruction.
     /// </summary>
+    [PublicAPI]
     public static partial class ObservableExtensions
     {
         /// <summary>
@@ -20,7 +21,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="observable">Observable to subscribe to.</param>
         /// <param name="behaviour">MonoBehaviour instance for disposal registration.</param>
         /// <param name="onNext">Action called with MonoBehaviour instance.</param>
-        [UsedImplicitly]
         public static void SubscribeUntilDestroy<TBehaviour, T>(
             this Observable<T> observable,
             TBehaviour behaviour,
@@ -39,7 +39,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="observable">Observable to subscribe to.</param>
         /// <param name="behaviour">MonoBehaviour instance for disposal registration.</param>
         /// <param name="onNext">Action called with observable value and MonoBehaviour instance.</param>
-        [UsedImplicitly]
         public static void SubscribeUntilDestroy<TBehaviour, T>(
             this Observable<T> observable,
             TBehaviour behaviour,
@@ -60,7 +59,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="behaviour">MonoBehaviour instance for disposal registration.</param>
         /// <param name="tuple">Additional data passed to the action.</param>
         /// <param name="onNext">Action called with additional data and MonoBehaviour instance.</param>
-        [UsedImplicitly]
         public static void SubscribeUntilDestroy<TBehaviour, T, TTuple>(
             this Observable<T> observable,
             TBehaviour behaviour,
@@ -83,7 +81,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="behaviour">MonoBehaviour instance for disposal registration.</param>
         /// <param name="tuple">Additional data passed to the action.</param>
         /// <param name="onNext">Action called with observable value, MonoBehaviour instance, and additional data.</param>
-        [UsedImplicitly]
         public static void SubscribeUntilDestroy<TBehaviour, T, TTuple>(
             this Observable<T> observable,
             TBehaviour behaviour,
@@ -101,7 +98,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// </summary>
         /// <param name="source">The boolean observable source.</param>
         /// <param name="selectable">The selectable UI element to update.</param>
-        [UsedImplicitly]
         public static void SubscribeToInteractableUntilDestroy(this Observable<bool> source, Selectable selectable)
         {
             source.SubscribeToInteractable(selectable).RegisterTo(selectable.destroyCancellationToken);
@@ -113,7 +109,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <typeparam name="T">The type of value being observed.</typeparam>
         /// <param name="source">The observable source.</param>
         /// <param name="text">The TextMeshProUGUI component to update.</param>
-        [UsedImplicitly]
         public static void SubscribeToTextUntilDestroy<T>(this Observable<T> source, TextMeshProUGUI text)
         {
             // ReSharper disable once HeapView.PossibleBoxingAllocation | We don't care about boxing here

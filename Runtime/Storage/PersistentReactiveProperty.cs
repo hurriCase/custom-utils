@@ -14,13 +14,13 @@ namespace CustomUtils.Runtime.Storage
     /// Must call <see cref="InitAsync"/> before use to load saved values.
     /// </summary>
     /// <typeparam name="TProperty">The type of value to store and persist</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     public sealed class PersistentReactiveProperty<TProperty> : IDisposable
     {
         /// <summary>
         /// Gets the underlying reactive property.
         /// </summary>
-        [UsedImplicitly]
+
         public ReactiveProperty<TProperty> Property { get; private set; }
 
         private string _key;
@@ -33,7 +33,7 @@ namespace CustomUtils.Runtime.Storage
         /// Setting this value will automatically save it to storage.
         /// </summary>
         /// <value>The current value stored in the property</value>
-        [UsedImplicitly]
+
         public TProperty Value
         {
             get => Property.Value;
@@ -47,7 +47,6 @@ namespace CustomUtils.Runtime.Storage
         /// <param name="target">Target object to pass to the callback</param>
         /// <param name="onNext">Action to execute when value changes. Receives the new value and target object.</param>
         /// <returns>A disposable subscription that can be used to unsubscribe</returns>
-        [UsedImplicitly]
         public IDisposable Subscribe<TTarget>(TTarget target, Action<TProperty, TTarget> onNext)
             => Property.Subscribe((target, onNext),
                 static (property, tuple) => tuple.onNext(property, tuple.target));
@@ -57,7 +56,6 @@ namespace CustomUtils.Runtime.Storage
         /// </summary>
         /// <param name="onNext">Action to execute when value changes. Receives the new value.</param>
         /// <returns>A disposable subscription that can be used to unsubscribe</returns>
-        [UsedImplicitly]
         public IDisposable Subscribe(Action<TProperty> onNext)
             => Property.Subscribe(onNext, static (property, action) => action(property));
 
@@ -66,7 +64,6 @@ namespace CustomUtils.Runtime.Storage
         /// Use this for advanced reactive operations like filtering, mapping, or combining with other observables.
         /// </summary>
         /// <returns>An observable stream of value changes</returns>
-        [UsedImplicitly]
         public Observable<TProperty> AsObservable() => Property.AsObservable();
 
         /// <summary>
@@ -74,36 +71,30 @@ namespace CustomUtils.Runtime.Storage
         /// This method must be called before using the property.
         /// </summary>
         /// <param name="key">Unique storage key for this property</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <param name="token">Cancellation token.</param>
         /// <param name="defaultValue">Default value to use if no saved value exists or loading fails</param>
         /// <returns>A task that completes when initialization is finished</returns>
         /// <exception cref="InvalidOperationException">Thrown if called multiple times</exception>
-        [UsedImplicitly]
-        public async UniTask InitAsync(
-            string key,
-            CancellationToken cancellationToken = default,
-            TProperty defaultValue = default)
+        public async UniTask InitAsync(string key, CancellationToken token = default, TProperty defaultValue = default)
         {
             _provider = ServiceProvider.Provider;
 
             _key = key;
             Property = new ReactiveProperty<TProperty>(defaultValue);
 
-            _subscription = Property.Subscribe(this, static (_, self) =>
-            {
-                if (self._savingEnabled)
-                    self.SaveAsync().Forget();
-            });
+            _subscription = Property
+                .Where(this, static (_, self) => self._savingEnabled)
+                .Subscribe(this, static (_, self) => self.SaveAsync().Forget());
 
             try
             {
-                var loaded = await _provider.LoadAsync<TProperty>(_key, cancellationToken);
+                var loaded = await _provider.LoadAsync<TProperty>(_key, token);
                 if (loaded != null && EqualityComparer<TProperty>.Default.Equals(loaded, default) is false)
                     Property.Value = loaded;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[PersistentReactiveProperty::InitializeAsync] " +
+                Debug.LogError("[PersistentReactiveProperty::InitializeAsync] " +
                                $"Failed to load key '{_key}': {ex.Message}");
             }
             finally
@@ -117,7 +108,6 @@ namespace CustomUtils.Runtime.Storage
         /// Note: Values are automatically saved when changed, so this is typically not needed.
         /// </summary>
         /// <returns>A task that completes when the save operation is finished</returns>
-        [UsedImplicitly]
         public async UniTask SaveAsync() => await _provider.TrySaveAsync(_key, Property.Value);
 
         /// <summary>

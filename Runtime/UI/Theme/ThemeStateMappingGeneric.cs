@@ -10,7 +10,7 @@ namespace CustomUtils.Runtime.UI.Theme
     /// Base class for creating theme state mappings that associate enum states with color data.
     /// </summary>
     /// <typeparam name="TEnum">The enum type representing different states.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     public abstract class ThemeStateMappingGeneric<TEnum> : ScriptableObject where TEnum : unmanaged, Enum
     {
         /// <summary>
@@ -23,7 +23,6 @@ namespace CustomUtils.Runtime.UI.Theme
         /// </summary>
         /// <param name="state">The state to apply.</param>
         /// <param name="themeComponent">The theme component to update.</param>
-        [UsedImplicitly]
         public void SetComponentForState(TEnum state, ThemeComponent themeComponent)
         {
             themeComponent.UpdateColorData(StateMappings[state]);

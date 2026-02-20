@@ -12,7 +12,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="Object"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class ObjectExtensions
     {
         /// <summary>
@@ -27,7 +27,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <typeparam name="T">The type of the object.</typeparam>
         /// <param name="target">The object being checked.</param>
         /// <returns>The object itself if it exists and not destroyed, null otherwise.</returns>
-        [UsedImplicitly]
         public static T AsNullable<T>(this T target) where T : Object => target ? target : null;
 
         /// <summary>
@@ -40,7 +39,6 @@ namespace CustomUtils.Runtime.Extensions
         /// and does nothing during play mode or when the object is part of a prefab asset.
         /// It ensures that modifications made to the object are registered by Unity's serialization system.
         /// </remarks>
-        [UsedImplicitly]
         [Conditional("UNITY_EDITOR")]
         public static void MarkAsDirty<T>(this T target) where T : Object
         {

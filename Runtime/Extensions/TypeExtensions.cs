@@ -7,7 +7,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="Type"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class TypeExtensions
     {
         /// <summary>
@@ -16,7 +16,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="type">The type to extract the enum type from.</param>
         /// <param name="enumType">The extracted enum type if found; otherwise, null.</param>
         /// <returns>True if the enum type was successfully extracted; otherwise, false.</returns>
-        [UsedImplicitly]
         public static bool TryGetEnumType(this Type type, out Type enumType)
         {
             enumType = null;
@@ -39,7 +38,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="enumType">The enum type to get distinct names from.</param>
         /// <returns>An array of distinct enum member names, or an empty array if the type is not an enum.</returns>
-        [UsedImplicitly]
         public static string[] GetDistinctEnumNames(this Type enumType)
         {
             if (typeof(Enum).IsAssignableFrom(enumType) is false)

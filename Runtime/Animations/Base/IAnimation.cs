@@ -8,7 +8,7 @@ namespace CustomUtils.Runtime.Animations.Base
     /// Defines a component that can play and cancel state-based animations.
     /// </summary>
     /// <typeparam name="TState">The enum type representing animation states.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     public interface IAnimation<in TState>
         where TState : unmanaged, Enum
     {
@@ -18,13 +18,11 @@ namespace CustomUtils.Runtime.Animations.Base
         /// <param name="state">The animation state to play.</param>
         /// <param name="isInstant">If true, applies the animation immediately without tweening.</param>
         /// <returns>The tween controlling the animation, or default if instant.</returns>
-        [UsedImplicitly]
         Tween PlayAnimation(TState state, bool isInstant = false);
 
         /// <summary>
         /// Cancels the currently playing animation.
         /// </summary>
-        [UsedImplicitly]
         void CancelAnimation();
     }
 }

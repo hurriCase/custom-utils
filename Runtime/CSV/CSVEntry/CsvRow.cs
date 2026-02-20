@@ -8,7 +8,7 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
     /// <summary>
     /// Represents a single row in a CSV document with column-based value access.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public readonly struct CsvRow
     {
         private readonly Dictionary<string, int> _columnMap;
@@ -31,7 +31,6 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
         /// contains the value associated with the specified column if the operation succeeds,
         /// or an empty string if it fails.</param>
         /// <returns>true if the value is successfully retrieved; otherwise, false.</returns>
-        [UsedImplicitly]
         public bool TryGetValue(string columnName, out string value)
         {
             value = string.Empty;
@@ -47,7 +46,6 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
         /// </summary>
         /// <param name="columnName">The name of the column to retrieve the value from.</param>
         /// <returns>The value in the specified column, or empty string if column is not found or index is out of range.</returns>
-        [UsedImplicitly]
         public string GetValue(string columnName)
         {
             if (_columnMap.TryGetValue(columnName, out var index) && index < _values.Length)
@@ -61,7 +59,6 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
         /// </summary>
         /// <param name="pattern">The regex pattern to match against column names (case-insensitive).</param>
         /// <returns>The first matching value, or empty string if no column matches the pattern.</returns>
-        [UsedImplicitly]
         public string GetValueByPattern(string pattern)
         {
             foreach (var (headerName, index) in _columnMap)
@@ -81,7 +78,6 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
         /// </summary>
         /// <param name="pattern">The regex pattern to match against column names (case-insensitive).</param>
         /// <returns>A list of all values from columns that match the pattern. Only includes valid (non-null, non-empty) values.</returns>
-        [UsedImplicitly]
         public List<string> GetValuesByPattern(string pattern)
         {
             var result = new List<string>();

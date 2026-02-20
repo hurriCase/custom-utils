@@ -10,7 +10,7 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
     /// Provides a struct-based enumerator for iterating over an array of elements.
     /// </summary>
     /// <typeparam name="TValue">The type of the elements in the array.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     public struct Enumerator<TValue> : IEnumerator<TValue>
     {
         private readonly Entry<TValue>[] _array;

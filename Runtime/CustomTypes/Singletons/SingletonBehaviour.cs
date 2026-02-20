@@ -10,9 +10,10 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
     /// Ensures only one instance exists and automatically handles cleanup.
     /// </summary>
     /// <typeparam name="T">The type of MonoBehaviour to make a singleton.</typeparam>
+    [PublicAPI]
     public abstract class SingletonBehaviour<T> : MonoBehaviour where T : MonoBehaviour
     {
-        [UsedImplicitly] public static T Instance { get; private set; }
+        public static T Instance { get; private set; }
 
         public static event Action OnDestroyed;
 

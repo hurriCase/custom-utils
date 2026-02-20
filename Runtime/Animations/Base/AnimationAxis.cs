@@ -5,7 +5,7 @@ namespace CustomUtils.Runtime.Animations.Base
     /// <summary>
     /// Defines which axis or axes to animate.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public enum AnimationAxis
     {
         None = 0,

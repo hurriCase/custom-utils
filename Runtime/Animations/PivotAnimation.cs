@@ -11,7 +11,7 @@ namespace CustomUtils.Runtime.Animations
     /// Animates the pivot of a RectTransform based on state.
     /// </summary>
     /// <typeparam name="TState">The enum type representing animation states.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     [Serializable]
     public sealed class PivotAnimation<TState> : AnimationBase<TState, Vector2, Vector2AnimationSettings>
         where TState : unmanaged, Enum

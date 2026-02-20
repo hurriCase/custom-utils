@@ -6,13 +6,12 @@ using UnityEngine;
 namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Buttons
 {
     [Serializable]
-    [UsedImplicitly]
+    [PublicAPI]
     public struct ThemeGraphicMapping
     {
         [SerializeField] private ThemeComponent _themeComponent;
         [SerializeField] private SelectableColorMapping _colorMapping;
 
-        [UsedImplicitly]
         public void ApplyColor(SelectableStateType state)
         {
             if (!_colorMapping || !_themeComponent)

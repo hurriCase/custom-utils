@@ -23,7 +23,7 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogError($"[SingletonResetter::ResetAllSingletons] " +
+                        Debug.LogError("[SingletonResetter::ResetAllSingletons] " +
                                        $"Failed to reset singleton: {ex.Message}");
                     }
                 }

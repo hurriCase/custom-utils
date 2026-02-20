@@ -14,7 +14,7 @@ namespace CustomUtils.Runtime.AssetLoader
     /// and falls back to AssetDatabase searches when needed.
     /// </summary>
     /// <typeparam name="TResource">The type of resource to load, must inherit from UnityEngine.Object.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class EditorLoader<TResource> where TResource : Object
     {
         /// <summary>
@@ -34,7 +34,6 @@ namespace CustomUtils.Runtime.AssetLoader
         /// Examples: "Assets/UI/Icons/settings.png", "Assets/Prefabs/Player.prefab".
         /// </param>
         /// <returns>The loaded resource or null if the resource could not be found.</returns>
-        [UsedImplicitly]
         public static TResource Load(string resourcePath = null, string fullPath = null)
         {
             if (PathUtility.TryGetResourcePath<TResource>(ref resourcePath) is false)
@@ -42,7 +41,8 @@ namespace CustomUtils.Runtime.AssetLoader
 
             var resource = EditorGUIUtility.Load(resourcePath) as TResource;
 
-            if (resource || ResourceLoader<TResource>.TryLoad(out resource, Path.GetFileNameWithoutExtension(resourcePath)))
+            if (resource ||
+                ResourceLoader<TResource>.TryLoad(out resource, Path.GetFileNameWithoutExtension(resourcePath)))
                 return resource;
 
             if (string.IsNullOrEmpty(fullPath) is false)
@@ -75,7 +75,6 @@ namespace CustomUtils.Runtime.AssetLoader
         /// Examples: "Assets/UI/Icons/settings.png", "Assets/Prefabs/Player.prefab".
         /// </param>
         /// <returns>True if the resource was successfully loaded; otherwise, false.</returns>
-        [UsedImplicitly]
         public static bool TryLoad(out TResource resource, string resourcePath = null, string fullPath = null)
         {
             resource = Load(resourcePath, fullPath);

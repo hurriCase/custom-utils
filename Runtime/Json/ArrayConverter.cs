@@ -12,7 +12,7 @@ namespace CustomUtils.Runtime.Json
     /// <typeparam name="TWrapper">The wrapper type that implements
     /// <see cref="T:CustomUtils.Runtime.Json.IWrapper`1">IWrapper{TData}</see>.</typeparam>
     /// <typeparam name="TData">The type of data stored in the array.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     public sealed class ArrayConverter<TWrapper, TData> : JsonConverter<TWrapper>
         where TWrapper : IWrapper<TData>, new()
     {

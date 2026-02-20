@@ -9,6 +9,7 @@ namespace CustomUtils.Runtime.CustomTypes.Randoms
     /// Represents a random float value generator with configurable minimum and maximum bounds.
     /// </summary>
     [Serializable]
+    [PublicAPI]
     public struct RandomFloat
     {
         [SerializeField] private float _randomStart;
@@ -18,7 +19,6 @@ namespace CustomUtils.Runtime.CustomTypes.Randoms
         /// Gets a random float value between the specified minimum and maximum bounds.
         /// </summary>
         /// <value>A random float value in the range [_randomStart, _randomEnd].</value>
-        [UsedImplicitly]
         public float Value => Random.Range(_randomStart, _randomEnd);
 
         /// <summary>

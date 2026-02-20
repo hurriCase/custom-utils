@@ -11,7 +11,7 @@ namespace CustomUtils.Runtime.Animations
     /// Animates the alpha value of a CanvasGroup based on state.
     /// </summary>
     /// <typeparam name="TState">The enum type representing animation states.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     [Serializable]
     public sealed class AlphaAnimation<TState> : AnimationBase<TState, float, FloatAnimationSettings>
         where TState : unmanaged, Enum

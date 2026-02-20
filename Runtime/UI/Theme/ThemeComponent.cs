@@ -17,7 +17,7 @@ namespace CustomUtils.Runtime.UI.Theme
     [ExecuteAlways]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Graphic))]
-    [UsedImplicitly]
+    [PublicAPI]
     public sealed class ThemeComponent : MonoBehaviour
     {
         [SerializeField] private ColorData _colorData;
@@ -32,7 +32,6 @@ namespace CustomUtils.Runtime.UI.Theme
         /// Updates the color data for this theme component and applies the corresponding color modifier.
         /// </summary>
         /// <param name="colorData">The new color data to apply.</param>
-        [UsedImplicitly]
         public void UpdateColorData(ColorData colorData)
         {
             if (_colorData == colorData)

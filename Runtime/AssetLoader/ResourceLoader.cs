@@ -12,7 +12,7 @@ namespace CustomUtils.Runtime.AssetLoader
     /// Simple, clean implementation without caching (Unity handles caching internally).
     /// </summary>
     /// <typeparam name="TResource">The type of resource to load, must inherit from UnityEngine.Object.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class ResourceLoader<TResource> where TResource : Object
     {
         /// <summary>
@@ -24,7 +24,6 @@ namespace CustomUtils.Runtime.AssetLoader
         /// Examples: "UI/Icons/settings", "Audio/music_track", "Prefabs/Player", "Materials/stone".
         /// </param>
         /// <returns>The loaded resource or null if the resource could not be found.</returns>
-        [UsedImplicitly]
         public static TResource Load(string resourcePath = null) =>
             PathUtility.TryGetResourcePath<TResource>(ref resourcePath)
                 ? Resources.Load<TResource>(resourcePath)
@@ -40,7 +39,6 @@ namespace CustomUtils.Runtime.AssetLoader
         /// If null, path is determined from ResourceAttribute on TResource type.
         /// </param>
         /// <returns>True if the resource was successfully loaded; otherwise, false.</returns>
-        [UsedImplicitly]
         public static bool TryLoad(out TResource resource, string path = null)
         {
             resource = Load(path);
@@ -57,7 +55,6 @@ namespace CustomUtils.Runtime.AssetLoader
         /// </param>
         /// <param name="cancellationToken">Optional cancellation token to stop the loading operation.</param>
         /// <returns>A UniTask that represents the asynchronous load operation. The result is the loaded resource or null if not found.</returns>
-        [UsedImplicitly]
         public static async UniTask<TResource> LoadAsync(string resourcePath = null,
             CancellationToken cancellationToken = default)
         {
@@ -83,7 +80,6 @@ namespace CustomUtils.Runtime.AssetLoader
         /// Examples: "UI/Icons", "Audio/Effects", "Prefabs/Enemies", "Materials".
         /// </param>
         /// <returns>An array of loaded resources or null if no resources were found.</returns>
-        [UsedImplicitly]
         public static TResource[] LoadAll(string path)
         {
             var resources = Resources.LoadAll<TResource>(path);
@@ -104,7 +100,6 @@ namespace CustomUtils.Runtime.AssetLoader
         /// </param>
         /// <param name="resources">When this method returns, contains the loaded resources if found; otherwise, null.</param>
         /// <returns>True if resources were successfully loaded; otherwise, false.</returns>
-        [UsedImplicitly]
         public static bool TryLoadAll(string path, out TResource[] resources)
             => (resources = LoadAll(path)) != null;
     }

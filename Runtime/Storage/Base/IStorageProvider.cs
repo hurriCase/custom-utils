@@ -7,18 +7,18 @@ namespace CustomUtils.Runtime.Storage.Base
     /// <summary>
     /// Provides storage operations with automatic caching and serialization.
     /// </summary>
+    [PublicAPI]
     public interface IStorageProvider
     {
         /// <summary>
         /// Saves data to storage with the specified key.
-        /// Data is automatically cached and serialized using MemoryPack.
+        /// Data is automatically cached.
         /// </summary>
         /// <typeparam name="T">The type of data to save.</typeparam>
         /// <param name="key">Unique key for the data.</param>
         /// <param name="data">Data to save.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>True if successful, false on error.</returns>
-        [UsedImplicitly]
         UniTask<bool> TrySaveAsync<T>(string key, T data, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -29,7 +29,6 @@ namespace CustomUtils.Runtime.Storage.Base
         /// <param name="key">Unique key for the data.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The loaded data, or default value if not found.</returns>
-        [UsedImplicitly]
         UniTask<T> LoadAsync<T>(string key, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -39,7 +38,6 @@ namespace CustomUtils.Runtime.Storage.Base
         /// <param name="key">Key to check.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>True if key exists, false otherwise.</returns>
-        [UsedImplicitly]
         UniTask<bool> HasKeyAsync(string key, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -49,7 +47,6 @@ namespace CustomUtils.Runtime.Storage.Base
         /// <param name="key">Key of data to delete.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>True if successful, false on error.</returns>
-        [UsedImplicitly]
         UniTask<bool> TryDeleteKeyAsync(string key, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -58,7 +55,6 @@ namespace CustomUtils.Runtime.Storage.Base
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>True if successful, false if not supported or failed.</returns>
-        [UsedImplicitly]
         UniTask<bool> TryDeleteAllAsync(CancellationToken cancellationToken = default);
     }
 }

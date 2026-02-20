@@ -11,7 +11,7 @@ namespace CustomUtils.Runtime.Animations
     /// Animates the Z-axis rotation of a RectTransform based on state, accounting for angle wrapping.
     /// </summary>
     /// <typeparam name="TState">The enum type representing animation states.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     [Serializable]
     public sealed class RotationZAnimation<TState> : AnimationBase<TState, float, FloatAnimationSettings>
         where TState : unmanaged, Enum

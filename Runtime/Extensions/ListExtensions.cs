@@ -6,7 +6,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="List{T}"/> collections.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class ListExtensions
     {
         /// <summary>
@@ -19,7 +19,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="defaultValue">The default value to use when creating new elements.
         /// If not specified, uses the default value for type T.</param>
         /// <returns>The element at the specified index.</returns>
-        [UsedImplicitly]
         public static T GetOrCreate<T>([NotNull] this IList<T> list, int index, T defaultValue = default)
         {
             while (list.Count <= index)
@@ -36,7 +35,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <typeparam name="T">The type of elements in the list.</typeparam>
         /// <param name="list">The list to get a random element from.</param>
         /// <returns>A randomly selected element from the list.</returns>
-        [UsedImplicitly]
         public static T Random<T>([NotNull] this IList<T> list) => list[UnityEngine.Random.Range(0, list.Count)];
     }
 }

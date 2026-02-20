@@ -4,11 +4,10 @@ using JetBrains.Annotations;
 namespace CustomUtils.Runtime.CSV.Base
 {
     /// <inheritdoc />
-    [UsedImplicitly]
+    [PublicAPI]
     public abstract class CsvConverterBase<T> : ICsvConverter<T>
     {
         /// <inheritdoc />
-        [UsedImplicitly]
         public T[] ConvertToObjects(CsvTable csvTable)
         {
             var objects = new T[csvTable.Rows.Length];

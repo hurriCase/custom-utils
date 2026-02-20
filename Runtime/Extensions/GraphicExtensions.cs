@@ -6,7 +6,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="Graphic"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class GraphicExtensions
     {
         /// <summary>
@@ -14,7 +14,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="graphic">The graphic to modify.</param>
         /// <param name="alpha">The alpha value to set, where 0 is fully transparent and 1 is fully opaque.</param>
-        [UsedImplicitly]
         public static void SetAlpha(this Graphic graphic, float alpha)
         {
             var color = graphic.color;

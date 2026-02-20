@@ -6,10 +6,9 @@ using UnityEngine;
 
 namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.MenuItems.MethodExecution
 {
-    [UsedImplicitly]
+    [PublicAPI]
     public sealed class StorageHelper
     {
-        [UsedImplicitly]
         public static async UniTask<bool> TryDeleteAllAsync()
         {
             try

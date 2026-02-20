@@ -51,15 +51,15 @@ namespace CustomUtils.Runtime.UI.Windows
             _addressablesLoader = addressablesLoader;
         }
 
-        public async UniTask InitAsync(CancellationToken cancellationToken)
+        public async UniTask InitializeAsync(CancellationToken cancellationToken)
         {
             var sourceWithDestroy = cancellationToken.CreateLinkedTokenSourceWithDestroy(this);
 
-            await InitScreensAsync(sourceWithDestroy.Token);
-            await InitPopupsAsync(sourceWithDestroy.Token);
+            await InitializeScreensAsync(sourceWithDestroy.Token);
+            await InitializePopupsAsync(sourceWithDestroy.Token);
         }
 
-        private async UniTask InitScreensAsync(CancellationToken cancellationToken)
+        private async UniTask InitializeScreensAsync(CancellationToken cancellationToken)
         {
             foreach (var (screenType, screenReference) in _screenReferences.AsTuples())
             {
@@ -84,7 +84,7 @@ namespace CustomUtils.Runtime.UI.Windows
             }
         }
 
-        private async UniTask InitPopupsAsync(CancellationToken cancellationToken)
+        private async UniTask InitializePopupsAsync(CancellationToken cancellationToken)
         {
             foreach (var (popupType, popupReference) in _popupReferences.AsTuples())
             {

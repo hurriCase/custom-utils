@@ -6,7 +6,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="LocalizationKey"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class LocalizationKeyExtensions
     {
         /// <summary>
@@ -14,7 +14,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="key">The localization key to get the localized string for.</param>
         /// <returns>The localized string corresponding to the key.</returns>
-        [UsedImplicitly]
         public static string GetLocalization(this LocalizationKey key) => LocalizationController.Localize(key);
     }
 }

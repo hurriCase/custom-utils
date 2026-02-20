@@ -96,7 +96,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="name">The name of the element to query for.</param>
         /// <param name="className">The USS class name of the element to query for.</param>
         /// <returns>True if the element was found; otherwise, false.</returns>
-        [UsedImplicitly]
         public static bool TryQ<TElement>(
             this VisualElement element,
             out TElement queriedElement,

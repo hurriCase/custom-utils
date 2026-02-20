@@ -9,7 +9,7 @@ namespace CustomUtils.Runtime.Animations.Base
     /// Contains the target value and tween settings for an animation.
     /// </summary>
     /// <typeparam name="TValue">The type of value being animated.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     public abstract class AnimationSettings<TValue> : ScriptableObject
     {
         [field: SerializeField] public TValue Value { get; private set; }

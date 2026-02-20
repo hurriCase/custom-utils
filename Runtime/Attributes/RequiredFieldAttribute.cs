@@ -12,7 +12,7 @@ namespace CustomUtils.Runtime.Attributes
     /// During runtime initialization, fields with this attribute will be validated, and error messages
     /// will be logged if they are null or empty.
     /// </remarks>
-    [UsedImplicitly]
+    [PublicAPI]
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class RequiredFieldAttribute : PropertyAttribute { }
 }

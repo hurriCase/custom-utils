@@ -14,7 +14,7 @@ namespace CustomUtils.Runtime.Downloader
     /// <typeparam name="TDatabase">The concrete database type that inherits from this class, used for singleton
     /// pattern implementation.</typeparam>
     /// <typeparam name="TSheet">The type of sheets to use it for a database</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     public abstract class SheetsDatabase<TDatabase, TSheet> : SingletonScriptableObject<TDatabase>
         where TDatabase : SheetsDatabase<TDatabase, TSheet>
         where TSheet : Sheet, new()
@@ -24,7 +24,7 @@ namespace CustomUtils.Runtime.Downloader
         /// This should be the spreadsheet ID extracted from the Google Sheets URL.
         /// </summary>
         /// <value>The table ID string, or null/empty if not configured.</value>
-        [UsedImplicitly]
+
         [field: SerializeField] public string TableId { get; set; }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace CustomUtils.Runtime.Downloader
         /// Each sheet contains information such as ID, name, content length, and associated TextAsset reference.
         /// </summary>
         /// <value>A list of <see cref="Sheet"/> objects representing the available sheets. Defaults to an empty list.</value>
-        [UsedImplicitly]
+
         [field: SerializeField] public List<TSheet> Sheets { get; private set; } = new();
 
         /// <summary>
@@ -40,7 +40,6 @@ namespace CustomUtils.Runtime.Downloader
         /// Derived classes can override this method to specify custom download locations.
         /// </summary>
         /// <returns>The directory path where CSV files will be saved. Defaults to "Assets/Resources/Sheets/".</returns>
-        [UsedImplicitly]
         public virtual string GetDownloadPath() => "Assets/Resources/Sheets/";
 
         internal void ReplaceSheets(Dictionary<string, long> sheets)

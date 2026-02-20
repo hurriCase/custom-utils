@@ -10,7 +10,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="RectTransform"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class RectTransformExtensions
     {
         /// <summary>
@@ -18,7 +18,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="target">The RectTransform to observe.</param>
         /// <returns>Observable that emits the new height value.</returns>
-        [UsedImplicitly]
         public static Observable<float> OnReactTransformHeightChangeAsObservable(this RectTransform target) =>
             target.OnRectTransformDimensionsChangeAsObservable()
                 .Select(target, static (_, target) => GetDimensionValue(target, DimensionType.Height))
@@ -29,7 +28,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="target">The RectTransform to observe.</param>
         /// <returns>Observable that emits the new width value.</returns>
-        [UsedImplicitly]
         public static Observable<float> OnReactTransformWidthChangeAsObservable(this RectTransform target) =>
             target.OnRectTransformDimensionsChangeAsObservable()
                 .Select(target, static (_, target) => GetDimensionValue(target, DimensionType.Width))
@@ -41,7 +39,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="target">The RectTransform to observe.</param>
         /// <param name="dimension">The dimension type to observe.</param>
         /// <returns>Observable that emits the new dimension value.</returns>
-        [UsedImplicitly]
         public static Observable<float> OnReactTransformDimensionChangeAsObservable(
             this RectTransform target,
             DimensionType dimension) =>
@@ -54,7 +51,6 @@ namespace CustomUtils.Runtime.Extensions
         /// Marks the specified RectTransform for rebuild by the LayoutRebuilder.
         /// </summary>
         /// <param name="rectTransform">The RectTransform to mark for rebuild.</param>
-        [UsedImplicitly]
         public static void MarkLayoutForRebuild(this RectTransform rectTransform) =>
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
 

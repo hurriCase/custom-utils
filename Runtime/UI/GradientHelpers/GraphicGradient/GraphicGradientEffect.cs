@@ -10,6 +10,7 @@ namespace CustomUtils.Runtime.UI.GradientHelpers.GraphicGradient
     /// <summary>
     /// Provides gradient effects for Unity UI Graphic components using vertex manipulation.
     /// </summary>
+    [PublicAPI]
     public sealed class GraphicGradientEffect : GradientEffectBase<Graphic>
     {
         protected override void ApplyGradient(
@@ -32,7 +33,6 @@ namespace CustomUtils.Runtime.UI.GradientHelpers.GraphicGradient
         /// This method destroys the VertexGradientEffect component if present
         /// and marks the graphic's vertices as dirty for re-rendering.
         /// </remarks>
-        [UsedImplicitly]
         public override void ClearGradient(Graphic graphic)
         {
             if (graphic.TryGetComponent<VertexGradientEffect>(out var gradientEffect) is false)

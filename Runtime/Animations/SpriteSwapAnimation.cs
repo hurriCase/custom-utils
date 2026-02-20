@@ -13,7 +13,7 @@ namespace CustomUtils.Runtime.Animations
     /// Swaps the sprite of an Image component based on state, with optional delay.
     /// </summary>
     /// <typeparam name="TState">The enum type representing animation states.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     [Serializable]
     public sealed class SpriteSwapAnimation<TState> : IAnimation<TState>
         where TState : unmanaged, Enum

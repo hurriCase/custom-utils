@@ -7,7 +7,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="string"/> conversions.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class StringConversionExtensions
     {
         private const char CollectionDelimiter = ';';
@@ -17,7 +17,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="value">The string to convert.</param>
         /// <returns>The converted integer value, or 0 if conversion fails.</returns>
-        [UsedImplicitly]
         public static int ToInt(this string value) => int.TryParse(value, out var result) ? result : 0;
 
         /// <summary>
@@ -25,7 +24,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="value">The string to convert.</param>
         /// <returns>The converted float value, or 0f if conversion fails.</returns>
-        [UsedImplicitly]
         public static float ToFloat(this string value) => float.TryParse(value, out var result) ? result : 0f;
 
         /// <summary>
@@ -34,7 +32,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="value">The string to convert.</param>
         /// <returns>True if the string equals "true" (case-insensitive) or "1"; otherwise, false.</returns>
-        [UsedImplicitly]
         public static bool ToBool(this string value) =>
             string.IsNullOrWhiteSpace(value) is false &&
             (value.Equals("true", StringComparison.OrdinalIgnoreCase) || value == "1");
@@ -45,7 +42,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="value">The delimited string to convert.</param>
         /// <returns>A list of trimmed string elements, or an empty list if the input is null or whitespace.</returns>
-        [UsedImplicitly]
         public static List<string> ToStringList(this string value) => value.SplitToListTrimmed(CollectionDelimiter);
 
         /// <summary>
@@ -55,7 +51,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="value">The delimited string to convert.</param>
         /// <returns>A list of integers, or an empty list if the input is null or whitespace.</returns>
         /// <exception cref="FormatException">Thrown if any non-empty element cannot be parsed as an integer.</exception>
-        [UsedImplicitly]
         public static List<int> ToIntList(this string value) =>
             string.IsNullOrWhiteSpace(value)
                 ? new List<int>()
@@ -71,7 +66,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="converter">A function that converts a trimmed string element to type T.</param>
         /// <returns>A list of converted elements of type T, or an empty list if the input is null or whitespace.</returns>
         /// <exception cref="Exception">May throw exceptions based on the converter function's implementation.</exception>
-        [UsedImplicitly]
         public static List<T> ToList<T>(this string value, Func<string, T> converter) =>
             string.IsNullOrWhiteSpace(value)
                 ? new List<T>()

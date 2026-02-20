@@ -6,7 +6,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="Component"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class ComponentExtensions
     {
         /// <summary>
@@ -18,7 +18,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <returns>
         /// <c>true</c> if a component of type T was found in the parent hierarchy; otherwise, <c>false</c>.
         /// </returns>
-        [UsedImplicitly]
         public static bool TryGetComponentInParent<T>(this Component component, out T result) where T : Component
         {
             result = component.GetComponentInParent<T>();
@@ -30,7 +29,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="component">The component whose associated GameObject's active state will be set.</param>
         /// <param name="isActive">A boolean value indicating whether to activate (<c>true</c>) or deactivate (<c>false</c>) the GameObject.</param>
-        [UsedImplicitly]
         public static void SetActive(this Component component, bool isActive)
             => component.gameObject.SetActive(isActive);
 
@@ -49,7 +47,6 @@ namespace CustomUtils.Runtime.Extensions
         /// In Unity's UI system, components with higher sibling indexes are rendered on top of those with lower indexes.
         /// This method compares the sibling indexes of the transforms associated with the components.
         /// </remarks>
-        [UsedImplicitly]
         public static bool IsInFrontOf<TSource, TTarget>(this TSource component, TTarget target)
             where TSource : Component
             where TTarget : Component
@@ -62,7 +59,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <typeparam name="T">The type of component to retrieve or add, must inherit from Component.</typeparam>
         /// <param name="component">The component whose GameObject is searched for the specified type.</param>
         /// <returns>The existing component of type T, or the newly added component if it did not exist.</returns>
-        [UsedImplicitly]
         public static T GetOrAddComponent<T>(this Component component) where T : Component =>
             component.GetComponent<T>() ? component.GetComponent<T>() : component.gameObject.AddComponent<T>();
 
@@ -72,7 +68,6 @@ namespace CustomUtils.Runtime.Extensions
         /// otherwise, schedules the destruction at the end of the frame.
         /// </summary>
         /// <param name="component">The component instance to destroy.</param>
-        [UsedImplicitly]
         public static void Destroy(this Component component)
         {
             if (Application.isPlaying)

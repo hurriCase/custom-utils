@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Buttons
 {
-    [UsedImplicitly]
     [CreateAssetMenu(
         fileName = nameof(SelectableColorMapping),
         menuName = ResourcePaths.MappingsPath + nameof(SelectableColorMapping)

@@ -10,7 +10,7 @@ namespace CustomUtils.Runtime.Storage.Migration
     /// <summary>
     /// Simple storage migration between providers
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class StorageMigrator
     {
         /// <summary>
@@ -21,7 +21,6 @@ namespace CustomUtils.Runtime.Storage.Migration
         /// <param name="keys">Keys to migrate</param>
         /// <param name="deleteFromSource">Delete from source after migration</param>
         /// <returns>Number of successfully migrated keys</returns>
-        [UsedImplicitly]
         public static async UniTask<int> MigrateAsync(
             IStorageProvider fromProvider,
             IStorageProvider toProvider,

@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using R3;
 using UnityEngine;
 
@@ -19,7 +18,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="self">MonoBehaviour instance for predicate.</param>
         /// <param name="predicate">Predicate function that takes only MonoBehaviour instance.</param>
         /// <returns>Filtered observable.</returns>
-        [UsedImplicitly]
         public static Observable<T> Where<TSelf, T>(
             this Observable<T> observable,
             TSelf self,
@@ -40,7 +38,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="tuple">Additional data passed to the predicate.</param>
         /// <param name="predicate">Predicate function that takes additional data and MonoBehaviour instance.</param>
         /// <returns>Filtered observable.</returns>
-        [UsedImplicitly]
         public static Observable<T> Where<TSelf, T, TTuple>(
             this Observable<T> observable,
             TSelf self,
@@ -63,7 +60,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="tuple">Additional data passed to the predicate.</param>
         /// <param name="predicate">Predicate function that takes observable value, MonoBehaviour instance, and additional data.</param>
         /// <returns>Filtered observable.</returns>
-        [UsedImplicitly]
         public static Observable<T> Where<TSelf, T, TTuple>(
             this Observable<T> observable,
             TSelf self,

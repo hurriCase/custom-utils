@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace CustomUtils.Runtime.UI.GradientHelpers.Base
 {
+    [PublicAPI]
     public abstract class GradientEffectBase<TComponent> where TComponent : Component
     {
         /// <summary>
@@ -15,7 +16,6 @@ namespace CustomUtils.Runtime.UI.GradientHelpers.Base
         /// The gradient must contain at least one color key. If the gradient has multiple color keys,
         /// only the first and last colors will be used for the gradient effect.
         /// </remarks>
-        [UsedImplicitly]
         public void ApplyGradient(
             [NotNull] TComponent component,
             [NotNull] Gradient gradient,
@@ -40,7 +40,6 @@ namespace CustomUtils.Runtime.UI.GradientHelpers.Base
             Color endColor,
             GradientDirection direction);
 
-        [UsedImplicitly]
         public abstract void ClearGradient(TComponent component);
     }
 }

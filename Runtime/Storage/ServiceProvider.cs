@@ -9,7 +9,7 @@ namespace CustomUtils.Runtime.Storage
     /// Provides platform-specific storage provider instances with lazy initialization.
     /// Automatically selects the appropriate provider based on the current platform.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class ServiceProvider
     {
         private static readonly Lazy<IStorageProvider> _lazyProvider = new(CreateProvider);
@@ -20,13 +20,12 @@ namespace CustomUtils.Runtime.Storage
         /// Returns a platform-specific provider or a custom provider if one was set using SetProvider.
         /// </summary>
         /// <returns>The active storage provider instance.</returns>
-        [UsedImplicitly]
+
         public static IStorageProvider Provider => _customProvider ?? _lazyProvider.Value;
 
         /// <summary>
         /// Sets a custom storage provider. Must be called before any storage operations.
         /// </summary>
-        [UsedImplicitly]
         public static void SetProvider<TProvider>() where TProvider : class, IStorageProvider, new()
         {
             _customProvider = new TProvider();
@@ -35,7 +34,6 @@ namespace CustomUtils.Runtime.Storage
         /// <summary>
         /// Sets a custom storage provider instance. Must be called before any storage operations.
         /// </summary>
-        [UsedImplicitly]
         public static void SetProvider(IStorageProvider provider)
         {
             _customProvider = provider;

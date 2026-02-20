@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace CustomUtils.Runtime.Extensions.Observables
 {
+    [PublicAPI]
     [DisallowMultipleComponent]
     public sealed class ObservableDisableTrigger : ObservableTriggerBase
     {
@@ -19,7 +20,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <summary>
         /// Returns a CancellationToken that will be cancelled when OnDisable is called.
         /// </summary>
-        [UsedImplicitly]
         public CancellationToken GetCancellationToken()
         {
             if (_cancellationTokenSource == null || _cancellationTokenSource.IsCancellationRequested)

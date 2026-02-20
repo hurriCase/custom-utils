@@ -2,7 +2,7 @@
 
 namespace CustomUtils.Runtime.UI.HorizontalVerticalLayout
 {
-    [UsedImplicitly]
+    [PublicAPI]
     public enum LayoutDirection
     {
         Horizontal = 0,

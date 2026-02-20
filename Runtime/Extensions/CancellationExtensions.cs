@@ -9,7 +9,7 @@ namespace CustomUtils.Runtime.Extensions
     /// Provides extension methods for operations involving <see cref="CancellationToken"/>
     /// and <see cref="CancellationTokenSource"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class CancellationExtensions
     {
         /// <summary>
@@ -19,7 +19,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="token">The base <see cref="CancellationToken"/> to link with.</param>
         /// <param name="target">The <see cref="MonoBehaviour"/> whose destruction token will be linked.</param>
         /// <returns>A <see cref="CancellationTokenSource"/> linked to both the provided token and the destruction token of the specified <see cref="MonoBehaviour"/>.</returns>
-        [UsedImplicitly]
         public static CancellationTokenSource CreateLinkedTokenSourceWithDestroy(this CancellationToken token,
             MonoBehaviour target) =>
             CancellationTokenSource.CreateLinkedTokenSource(
@@ -33,7 +32,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="tokenSource">The <see cref="CancellationTokenSource"/> to renew.
         /// It will be replaced with a new instance.</param>
-        [UsedImplicitly]
         public static CancellationToken GetFreshToken(ref CancellationTokenSource tokenSource)
         {
             tokenSource?.Cancel();
@@ -45,7 +43,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <summary>
         /// Returns a CancellationToken that will be cancelled when OnDisable is called on the component's GameObject.
         /// </summary>
-        [UsedImplicitly]
         public static CancellationToken GetDisableCancellationToken(this Component component)
         {
             if (!component || !component.gameObject)

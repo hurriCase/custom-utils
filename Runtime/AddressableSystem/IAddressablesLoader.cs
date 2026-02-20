@@ -10,7 +10,7 @@ namespace CustomUtils.Runtime.AddressableSystem
     /// <summary>
     /// Interface for loading Addressable assets asynchronously.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public interface IAddressablesLoader
     {
         /// <summary>
@@ -20,7 +20,6 @@ namespace CustomUtils.Runtime.AddressableSystem
         /// <param name="assetReference">Asset reference to load.</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>Loaded asset instance.</returns>
-        [UsedImplicitly]
         UniTask<T> LoadAsync<T>(AssetReference assetReference, CancellationToken token)
             where T : Object;
 
@@ -31,7 +30,6 @@ namespace CustomUtils.Runtime.AddressableSystem
         /// <param name="assetGuid">Asset GUID to load.</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>Loaded asset instance.</returns>
-        [UsedImplicitly]
         UniTask<T> LoadAsync<T>(string assetGuid, CancellationToken token)
             where T : Object;
 
@@ -42,7 +40,6 @@ namespace CustomUtils.Runtime.AddressableSystem
         /// <param name="assetReference">GameObject asset reference.</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>Component from loaded GameObject.</returns>
-        [UsedImplicitly]
         UniTask<TComponent> LoadComponentAsync<TComponent>(
             AssetReference assetReference,
             CancellationToken token)
@@ -54,7 +51,6 @@ namespace CustomUtils.Runtime.AddressableSystem
         /// <param name="image">Target Image component.</param>
         /// <param name="assetReference">Sprite asset reference.</param>
         /// <param name="token">Cancellation token.</param>
-        [UsedImplicitly]
         UniTask AssignImageAsync(Image image, AssetReference assetReference, CancellationToken token);
 
         /// <summary>
@@ -63,7 +59,6 @@ namespace CustomUtils.Runtime.AddressableSystem
         /// <param name="image">Target Image component.</param>
         /// <param name="cachedSprite">Cached sprite data.</param>
         /// <param name="token">Cancellation token.</param>
-        [UsedImplicitly]
         UniTask AssignImageAsync(Image image, CachedSprite cachedSprite, CancellationToken token);
     }
 }

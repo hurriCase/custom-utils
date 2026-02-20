@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using R3;
 using UnityEngine;
 
@@ -18,7 +17,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="observable">Observable to subscribe to.</param>
         /// <param name="self">MonoBehaviour instance for disposal registration.</param>
         /// <param name="onNext">Action called with MonoBehaviour instance.</param>
-        [UsedImplicitly]
         public static void SubscribeUntilDisable<TSelf, T>(
             this Observable<T> observable,
             TSelf self,
@@ -37,7 +35,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="observable">Observable to subscribe to.</param>
         /// <param name="self">MonoBehaviour instance for disposal registration.</param>
         /// <param name="onNext">Action called with observable value and MonoBehaviour instance.</param>
-        [UsedImplicitly]
         public static void SubscribeUntilDisable<TSelf, T>(
             this Observable<T> observable,
             TSelf self,
@@ -58,7 +55,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="self">MonoBehaviour instance for disposal registration.</param>
         /// <param name="tuple">Additional data passed to the action.</param>
         /// <param name="onNext">Action called with additional data and MonoBehaviour instance.</param>
-        [UsedImplicitly]
         public static void SubscribeUntilDisable<TSelf, T, TTuple>(
             this Observable<T> observable,
             TSelf self,
@@ -81,7 +77,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="self">MonoBehaviour instance for disposal registration.</param>
         /// <param name="tuple">Additional data passed to the action.</param>
         /// <param name="onNext">Action called with observable value, MonoBehaviour instance, and additional data.</param>
-        [UsedImplicitly]
         public static void SubscribeUntilDisable<TSelf, T, TTuple>(
             this Observable<T> observable,
             TSelf self,

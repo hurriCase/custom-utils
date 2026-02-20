@@ -8,6 +8,7 @@ namespace CustomUtils.Runtime.UI.GradientHelpers
     /// <summary>
     /// Provides gradient effects for TextMeshProUGUI components using built-in vertex gradient functionality.
     /// </summary>
+    [PublicAPI]
     public sealed class TextGradientEffect : GradientEffectBase<TextMeshProUGUI>
     {
         protected override void ApplyGradient(
@@ -35,7 +36,6 @@ namespace CustomUtils.Runtime.UI.GradientHelpers
         /// <remarks>
         /// This method disables vertex gradient rendering, restoring the text to its original uniform color.
         /// </remarks>
-        [UsedImplicitly]
         public override void ClearGradient(TextMeshProUGUI text)
         {
             text.enableVertexGradient = false;

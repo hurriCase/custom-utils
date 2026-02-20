@@ -1,16 +1,16 @@
 ﻿using System.IO;
 using CustomUtils.Runtime.CSV.Base;
+using CustomUtils.Runtime.Serializer;
 using Cysharp.Text;
 using JetBrains.Annotations;
-using MemoryPack;
 using UnityEngine;
 
 namespace CustomUtils.Runtime.CSV
 {
     /// <summary>
-    /// Provides functionality to convert CSV files to binary format using MemoryPack serialization.
+    /// Provides functionality to convert CSV files to binary format.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public sealed class CsvBinarySerializer
     {
         /// <summary>
@@ -20,7 +20,6 @@ namespace CustomUtils.Runtime.CSV
         /// <param name="csvConverter">The converter that maps CSV rows to objects of type T.</param>
         /// <param name="csvFilePath">The file path to the CSV file to convert.</param>
         /// <param name="binaryOutputPath">The file path where the binary output will be saved.</param>
-        [UsedImplicitly]
         public void ConvertCSVToBinary<T>(ICsvConverter<T> csvConverter, string csvFilePath, string binaryOutputPath)
             where T : new()
         {
@@ -28,11 +27,12 @@ namespace CustomUtils.Runtime.CSV
             var csvTable = CsvParser.Parse(csvContent);
             var objects = csvConverter.ConvertToObjects(csvTable);
 
-            var binaryData = MemoryPackSerializer.Serialize(objects);
+            var binaryData = SerializerProvider.Serializer.Serialize(objects);
             File.WriteAllBytes(binaryOutputPath, binaryData);
 
-            Debug.Log(ZString.Format("[CsvBinarySerializer::ConvertCSVToBinary] " +
-                                     "Converted {0} objects to binary: {1}", objects.Length, binaryOutputPath));
+            var logMessage = ZString.Format("[CsvBinarySerializer::ConvertCSVToBinary] " +
+                                            "Converted {0} objects to binary: {1}", objects.Length, binaryOutputPath);
+            Debug.Log(logMessage);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace CustomUtils.Runtime.UI.GradientHelpers.Base
     /// <summary>
     /// Defines the direction in which a gradient effect should be applied to UI components.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public enum GradientDirection
     {
         /// <summary>

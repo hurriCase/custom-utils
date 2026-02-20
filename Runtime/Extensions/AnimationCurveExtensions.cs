@@ -6,7 +6,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="AnimationCurve"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class AnimationCurveExtensions
     {
         /// <summary>
@@ -16,7 +16,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="animationCurve">The animation curve to evaluate.</param>
         /// <returns>The curve value at the last keyframe's time position.</returns>
         /// <exception cref="System.IndexOutOfRangeException">Thrown if the curve has no keyframes.</exception>
-        [UsedImplicitly]
         public static float GetLastValue(this AnimationCurve animationCurve)
             => animationCurve.Evaluate(animationCurve.keys[^1].time);
     }

@@ -10,6 +10,7 @@ namespace CustomUtils.Runtime.Logger
     /// The LogCollector provides a way to capture and store Unity logs in scenarios where
     /// the standard Unity console is not accessible, such as in release builds or on mobile devices.
     /// </summary>
+    [PublicAPI]
     public static class LogCollector
     {
         private static int _maxLogEntries;
@@ -41,7 +42,6 @@ namespace CustomUtils.Runtime.Logger
         /// <summary>
         /// Initializes the log collector with specified parameters from LogCollectorSettings.
         /// </summary>
-        [UsedImplicitly]
         public static void Init()
         {
             StopCollection();
@@ -61,7 +61,6 @@ namespace CustomUtils.Runtime.Logger
         /// <remarks>
         /// If collection is already in progress, this method has no effect.
         /// </remarks>
-        [UsedImplicitly]
         public static void StartCollection()
         {
             if (_isCollecting)
@@ -80,7 +79,6 @@ namespace CustomUtils.Runtime.Logger
         /// <remarks>
         /// If collection is not in progress, this method has no effect.
         /// </remarks>
-        [UsedImplicitly]
         public static void StopCollection()
         {
             if (_isCollecting is false)
@@ -102,7 +100,6 @@ namespace CustomUtils.Runtime.Logger
         /// Includes device information, operating system, and application version.
         /// Restores the collection state when complete.
         /// </remarks>
-        [UsedImplicitly]
         public static void CopyLogs()
         {
             var wasCollecting = _isCollecting;
@@ -149,7 +146,6 @@ namespace CustomUtils.Runtime.Logger
         /// <remarks>
         /// Resets the internal log counter and index.
         /// </remarks>
-        [UsedImplicitly]
         public static void ClearLogs()
         {
             _currentIndex = 0;

@@ -10,7 +10,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="PersistentReactiveProperty{T}"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class PersistentReactivePropertyExtensions
     {
         /// <summary>
@@ -21,7 +21,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="observable">PersistentReactiveProperty to subscribe to.</param>
         /// <param name="self">MonoBehaviour instance for disposal registration.</param>
         /// <param name="onNext">Action called with MonoBehaviour instance.</param>
-        [UsedImplicitly]
         public static void SubscribeUntilDestroy<TSelf, T>(
             this PersistentReactiveProperty<T> observable,
             TSelf self,
@@ -40,7 +39,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="observable">PersistentReactiveProperty to subscribe to.</param>
         /// <param name="self">MonoBehaviour instance for disposal registration.</param>
         /// <param name="onNext">Action called with property value and MonoBehaviour instance.</param>
-        [UsedImplicitly]
         public static void SubscribeUntilDestroy<TSelf, T>(
             this PersistentReactiveProperty<T> observable,
             TSelf self,

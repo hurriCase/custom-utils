@@ -2,7 +2,7 @@
 
 namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles
 {
-    [UsedImplicitly]
+    [PublicAPI]
     public enum ToggleStateType
     {
         Normal = 0,

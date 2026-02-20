@@ -10,13 +10,13 @@ namespace CustomUtils.Runtime.Localization
     /// Reactive localization controller with GUID-based key support.
     /// Manages localized text retrieval and language switching for Unity applications.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class LocalizationController
     {
         /// <summary>
         /// Reactive property for current language with automatic localization updates.
         /// </summary>
-        [UsedImplicitly]
+
         public static ReactiveProperty<SystemLanguage> Language { get; } =
             new(LocalizationDatabase.Instance.DefaultLanguage);
 
@@ -39,14 +39,12 @@ namespace CustomUtils.Runtime.Localization
         /// <summary>
         /// Gets the localized text for the specified localization key using the current language.
         /// </summary>
-        [UsedImplicitly]
         public static string Localize(LocalizationKey localizationKey) =>
             Localize(localizationKey, Language.Value);
 
         /// <summary>
         /// Gets the localized text for the specified localization key and language.
         /// </summary>
-        [UsedImplicitly]
         public static string Localize(LocalizationKey localizationKey, SystemLanguage language)
         {
             if (localizationKey.IsValid is false
@@ -67,14 +65,12 @@ namespace CustomUtils.Runtime.Localization
         /// <summary>
         /// Checks if localization data exists for the specified language.
         /// </summary>
-        [UsedImplicitly]
         public static bool HasLanguage(SystemLanguage language)
             => LocalizationRegistry.Instance.SupportedLanguages.Contains(language);
 
         /// <summary>
         /// Retrieves all localization keys across all available languages.
         /// </summary>
-        [UsedImplicitly]
         public static string[] GetAllKeys() =>
             LocalizationRegistry.Instance.Entries.Values
                 .Select(static localizationEntry => localizationEntry.Key)

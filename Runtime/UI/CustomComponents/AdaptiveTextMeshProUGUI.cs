@@ -9,6 +9,7 @@ using UnityEngine.UI;
 
 namespace CustomUtils.Runtime.UI.CustomComponents
 {
+    [PublicAPI]
     public sealed class AdaptiveTextMeshProUGUI : TextMeshProUGUI, ILayoutSelfController
     {
         [field: SerializeField] public DimensionType StaticDimensionType { get; private set; }
@@ -71,7 +72,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents
         /// </summary>
         /// <param name="notifiable">An object implementing the <see cref="ITextSizeNotifiable"/> interface,
         /// which will receive notifications when the text size changes.</param>
-        [UsedImplicitly]
         public void RegisterSizeNotifiable(ITextSizeNotifiable notifiable)
         {
             _sizeNotifiable.Add(notifiable);
@@ -82,7 +82,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents
         /// </summary>
         /// <param name="notifiable">An object implementing the <see cref="ITextSizeNotifiable"/> interface,
         /// which will be removed from receiving text size change notifications.</param>
-        [UsedImplicitly]
         public void UnregisterSizeNotifiable(ITextSizeNotifiable notifiable)
         {
             _sizeNotifiable.Remove(notifiable);

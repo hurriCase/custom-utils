@@ -18,7 +18,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="behaviour">Instance for callback.</param>
         /// <param name="onNext">Action called with instance.</param>
         /// <returns>Disposable subscription.</returns>
-        [UsedImplicitly]
         public static IDisposable SubscribeSelf<TSelf, T>(
             this Observable<T> observable,
             TSelf behaviour,
@@ -34,7 +33,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="observable">Observable to subscribe to.</param>
         /// <param name="behaviour">Instance for callback.</param>
         /// <param name="onNext">Action called with observable value and instance.</param>
-        [UsedImplicitly]
         public static void SubscribeSelf<TSelf, T>(
             this Observable<T> observable,
             TSelf behaviour,
@@ -52,7 +50,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="behaviour">Instance for callback.</param>
         /// <param name="tuple">Additional data passed to the action.</param>
         /// <param name="onNext">Action called with additional data and instance.</param>
-        [UsedImplicitly]
         public static void SubscribeSelf<TSelf, T, TTuple>(
             this Observable<T> observable,
             TSelf behaviour,
@@ -71,7 +68,6 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="behaviour">Instance for callback.</param>
         /// <param name="tuple">Additional data passed to the action.</param>
         /// <param name="onNext">Action called with observable value, instance, and additional data.</param>
-        [UsedImplicitly]
         public static void SubscribeSelf<TSelf, T, TTuple>(
             this Observable<T> observable,
             TSelf behaviour,

@@ -8,7 +8,7 @@ namespace CustomUtils.Runtime.Attributes
     /// <summary>
     /// Attribute that makes an enum field contains only distinct values.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class DistinctEnumAttribute : PropertyAttribute { }
 }

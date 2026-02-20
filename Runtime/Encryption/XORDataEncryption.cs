@@ -9,7 +9,7 @@ namespace CustomUtils.Runtime.Encryption
     /// <summary>
     /// Provides XOR encryption and decryption functionality with SHA256-based key generation.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class XORDataEncryption
     {
         private static byte[] _xorKey;
@@ -20,7 +20,6 @@ namespace CustomUtils.Runtime.Encryption
         /// <param name="data">The plaintext data to encrypt.</param>
         /// <param name="password">The password used for key generation.</param>
         /// <returns>A Base64-encoded string containing the encrypted data.</returns>
-        [UsedImplicitly]
         public static string Encrypt(string data, string password)
         {
             var dataBytes = Encoding.UTF8.GetBytes(data);
@@ -35,7 +34,6 @@ namespace CustomUtils.Runtime.Encryption
         /// <param name="encryptedData">The Base64-encoded encrypted data.</param>
         /// <param name="password">The password used for key generation.</param>
         /// <returns>The decrypted plaintext string.</returns>
-        [UsedImplicitly]
         public static string Decrypt(string encryptedData, string password)
         {
             var data = Convert.FromBase64String(encryptedData);

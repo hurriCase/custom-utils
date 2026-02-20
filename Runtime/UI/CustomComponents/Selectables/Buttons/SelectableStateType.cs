@@ -2,7 +2,7 @@
 
 namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Buttons
 {
-    [UsedImplicitly]
+    [PublicAPI]
     public enum SelectableStateType
     {
         Normal = 0,

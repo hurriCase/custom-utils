@@ -11,7 +11,7 @@ namespace CustomUtils.Runtime.Animations
     /// Animates the local scale of a Transform based on state.
     /// </summary>
     /// <typeparam name="TState">The enum type representing animation states.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     [Serializable]
     public sealed class ScaleAnimation<TState> : AnimationBase<TState, Vector3, Vector3AnimationSettings>
         where TState : unmanaged, Enum

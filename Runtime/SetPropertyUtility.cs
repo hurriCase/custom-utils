@@ -3,10 +3,9 @@ using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime
 {
-    [UsedImplicitly]
+    [PublicAPI]
     public static class SetPropertyUtility
     {
-        [UsedImplicitly]
         public static bool TrySetStruct<T>(ref T currentValue, T newValue) where T : struct
         {
             if (EqualityComparer<T>.Default.Equals(currentValue, newValue))

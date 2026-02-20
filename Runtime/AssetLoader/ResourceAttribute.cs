@@ -1,14 +1,15 @@
 ﻿using System;
 using System.IO;
+using JetBrains.Annotations;
 using UnityEngine;
 
-// ReSharper disable MemberCanBeInternal
 namespace CustomUtils.Runtime.AssetLoader
 {
     /// <inheritdoc />
     /// <summary>
     /// Attribute for specifying the location of a resource asset.
     /// </summary>
+    [PublicAPI]
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class ResourceAttribute : Attribute
     {

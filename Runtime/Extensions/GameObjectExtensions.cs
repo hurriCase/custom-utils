@@ -6,7 +6,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="GameObject"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class GameObjectExtensions
     {
         /// <summary>
@@ -16,7 +16,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <typeparam name="T">The type of component to retrieve or add, must inherit from Component.</typeparam>
         /// <param name="gameObject">The gameObject is searched for the specified type.</param>
         /// <returns>The existing component of type T, or the newly added component if it did not exist.</returns>
-        [UsedImplicitly]
         public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
         {
             var component = gameObject.GetComponent<T>();

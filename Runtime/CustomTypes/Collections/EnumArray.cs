@@ -5,8 +5,11 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using CustomUtils.Unsafe;
 using JetBrains.Annotations;
-using MemoryPack;
 using UnityEngine;
+
+#if MEMORY_PACK_INSTALLED
+using MemoryPack;
+#endif
 
 namespace CustomUtils.Runtime.CustomTypes.Collections
 {
@@ -17,7 +20,9 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
     /// <typeparam name="TValue">The type of values to be stored in the array.</typeparam>
     [PublicAPI]
     [Serializable]
+#if MEMORY_PACK_INSTALLED
     [MemoryPackable]
+#endif
     public partial class EnumArray<TEnum, TValue> : IEnumerable<TValue>, IEquatable<EnumArray<TEnum, TValue>>
         where TEnum : unmanaged, Enum
     {
@@ -54,7 +59,9 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
 
         internal static string EntriesPropertyName => nameof(Entries);
 
+#if MEMORY_PACK_INSTALLED
         [MemoryPackIgnore]
+#endif
         private static readonly TEnum[] _cachedKeys = (TEnum[])Enum.GetValues(typeof(TEnum));
 
         /// <summary>
@@ -93,7 +100,10 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
                 Entries[i] = new Entry<TValue> { Value = factory() };
         }
 
-        [MemoryPackConstructor, EditorBrowsable(EditorBrowsableState.Never)]
+#if MEMORY_PACK_INSTALLED
+        [MemoryPackConstructor]
+#endif
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public EnumArray(Entry<TValue>[] entries)
         {
             Entries = entries;

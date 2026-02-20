@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace CustomUtils.Runtime.UI.CustomComponents
 {
-    [UsedImplicitly]
+    [PublicAPI]
     [RequireComponent(typeof(CanvasGroup))]
     public sealed class GlobalMessageComponent : MonoBehaviour
     {
@@ -36,7 +36,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents
             _canvasGroup.blocksRaycasts = false;
         }
 
-        [UsedImplicitly]
         public void ShowMessage(string message)
         {
             _canvasGroup.interactable = true;
@@ -61,7 +60,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents
             });
         }
 
-        [UsedImplicitly]
         public void HideMessage()
         {
             _canvasGroup.interactable = false;

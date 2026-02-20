@@ -7,7 +7,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="AspectRatioFitter"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class AspectRatioFitterExtensions
     {
         /// <summary>
@@ -17,12 +17,11 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="spacing">Aspect ratio value.</param>
         /// <param name="container">Parent container.</param>
         /// <returns>New AspectRatioFitter with WidthControlsHeight mode.</returns>
-        [UsedImplicitly]
         public static AspectRatioFitter CreateWidthSpacing(
             this AspectRatioFitter aspectRatioFitter,
             float spacing,
             RectTransform container) =>
-            CreateSpacing(aspectRatioFitter, spacing, container, AspectRatioFitter.AspectMode.WidthControlsHeight);
+            aspectRatioFitter.CreateSpacing(spacing, container, AspectRatioFitter.AspectMode.WidthControlsHeight);
 
         /// <summary>
         /// Creates a copy with HeightControlsWidth mode.
@@ -31,12 +30,11 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="spacing">Aspect ratio value.</param>
         /// <param name="container">Parent container.</param>
         /// <returns>New AspectRatioFitter with HeightControlsWidth mode.</returns>
-        [UsedImplicitly]
         public static AspectRatioFitter CreateHeightSpacing(
             this AspectRatioFitter aspectRatioFitter,
             float spacing,
             RectTransform container) =>
-            CreateSpacing(aspectRatioFitter, spacing, container);
+            aspectRatioFitter.CreateSpacing(spacing, container);
 
         /// <summary>
         /// Creates a copy with specified aspect mode.
@@ -46,7 +44,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="container">Parent container.</param>
         /// <param name="aspectMode">Aspect mode. Defaults to HeightControlsWidth.</param>
         /// <returns>New AspectRatioFitter with specified configuration.</returns>
-        [UsedImplicitly]
         public static AspectRatioFitter CreateSpacing(
             this AspectRatioFitter aspectRatioFitter,
             float spacing,

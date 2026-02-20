@@ -6,7 +6,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for ZLinq.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class ZLinqExtensions
     {
         /// <summary>
@@ -16,7 +16,6 @@ namespace CustomUtils.Runtime.Extensions
         /// <typeparam name="TSource">The type of elements in the enumerable.</typeparam>
         /// <param name="source">The ZLinq ValueEnumerable to get a random element from.</param>
         /// <returns>A randomly selected element from the enumerable.</returns>
-        [UsedImplicitly]
         public static TSource Random<TEnumerator, TSource>(this ValueEnumerable<TEnumerator, TSource> source)
             where TEnumerator : struct, IValueEnumerator<TSource>
         {

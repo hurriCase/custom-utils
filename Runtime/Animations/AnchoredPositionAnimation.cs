@@ -11,7 +11,7 @@ namespace CustomUtils.Runtime.Animations
     /// Animates the anchored position of a RectTransform based on state, with optional axis restriction.
     /// </summary>
     /// <typeparam name="TState">The enum type representing animation states.</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     [Serializable]
     public sealed class AnchoredPositionAnimation<TState> : AnimationBase<TState, Vector2, Vector2AnimationSettings>
         where TState : unmanaged, Enum

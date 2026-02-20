@@ -7,7 +7,7 @@ namespace CustomUtils.Runtime.Extensions
     /// <summary>
     /// Provides extension methods for <see cref="IReadOnlyList{T}"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class ReadOnlyListExtensions
     {
         /// <summary>
@@ -15,7 +15,6 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <param name="data">The list of integers to analyze.</param>
         /// <returns>A tuple containing the start and end indices of the non-zero range, or null if all values are zero.</returns>
-        [UsedImplicitly]
         public static (int startIndex, int endIndex)? GetNonZeroRange(this IReadOnlyList<int> data)
         {
             using var nonZeroIndices = data

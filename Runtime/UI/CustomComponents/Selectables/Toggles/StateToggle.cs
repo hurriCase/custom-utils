@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles
 {
-    [UsedImplicitly]
+    [PublicAPI]
     public class StateToggle : Toggle
     {
         [field: SerializeField] public TextMeshProUGUI Text { get; private set; }

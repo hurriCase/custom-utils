@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Buttons
 {
-    [UsedImplicitly]
+    [PublicAPI]
     public class ThemeButton : Button
     {
         [field: SerializeField] public TextMeshProUGUI Text { get; private set; }

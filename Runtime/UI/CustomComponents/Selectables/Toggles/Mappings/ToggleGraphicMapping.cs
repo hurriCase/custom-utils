@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles.Mappings
 {
     [Serializable]
-    [UsedImplicitly]
+    [PublicAPI]
     public struct ToggleGraphicMapping
     {
         [SerializeField] private Selectable.Transition _transitionType;
@@ -18,7 +18,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles.Mappings
         [SerializeField] private Image _targetImage;
         [SerializeField] private ToggleSpriteMapping _spriteMapping;
 
-        [UsedImplicitly]
         public void ApplyState(ToggleStateType state)
         {
             switch (_transitionType)

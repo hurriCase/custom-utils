@@ -9,6 +9,7 @@ namespace CustomUtils.Runtime.CustomTypes
     /// Base class for ScriptableObjects that can notify subscribers when their values change.
     /// </summary>
     /// <typeparam name="T">The type of ScriptableObject being observed.</typeparam>
+    [PublicAPI]
     public abstract class ObservableScriptableObject<T> : ScriptableObject where T : ScriptableObject
     {
         /// <summary>
@@ -17,12 +18,12 @@ namespace CustomUtils.Runtime.CustomTypes
         /// <remarks>
         /// Subscribers receive the changed ScriptableObject instance as a parameter.
         /// </remarks>
-        [UsedImplicitly] public event Action<T> OnValueChanged;
+        public event Action<T> OnValueChanged;
 
         /// <summary>
         /// Notifies subscribers that a value has changed.
         /// </summary>
         /// <param name="value">The updated ScriptableObject instance.</param>
-        [UsedImplicitly] protected void NotifyValueChanged(T value) => OnValueChanged?.Invoke(value);
+        protected void NotifyValueChanged(T value) => OnValueChanged?.Invoke(value);
     }
 }

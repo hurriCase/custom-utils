@@ -9,7 +9,7 @@ namespace CustomUtils.Runtime.UI.Theme
     /// This structure is used to identify and retrieve specific colors from theme databases.
     /// </summary>
     [Serializable]
-    [UsedImplicitly]
+    [PublicAPI]
     public struct ColorData : IEquatable<ColorData>
     {
         /// <summary>
