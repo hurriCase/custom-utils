@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using CustomUtils.Runtime.Serializer;
 using CustomUtils.Runtime.Storage.Base;
 using CustomUtils.Runtime.Storage.DataTransformers;
 using Cysharp.Threading.Tasks;
@@ -12,7 +13,7 @@ using UnityEngine;
 
 namespace CustomUtils.Runtime.Storage.Providers
 {
-    [UsedImplicitly]
+    [PublicAPI]
     internal sealed class FirebaseStorageProvider : BaseStorageProvider
     {
         private const long MaxDownloadSize = 5 * 1024 * 1024;
@@ -21,7 +22,8 @@ namespace CustomUtils.Runtime.Storage.Providers
         private readonly string _storagePath;
         private readonly Dictionary<string, byte[]> _memoryCache = new();
 
-        internal FirebaseStorageProvider(string userId = null) : base(new IdentityDataTransformer())
+        internal FirebaseStorageProvider(string userId = null) :
+            base(new IdentityDataTransformer(), SerializerProvider.Serializer)
         {
             _firebaseStorage = FirebaseStorage.DefaultInstance;
 
@@ -35,8 +37,7 @@ namespace CustomUtils.Runtime.Storage.Providers
         private StorageReference GetFileReference(string key)
             => _firebaseStorage.GetReference($"{_storagePath}/{key}");
 
-        protected override async UniTask PlatformSaveAsync(string key, object transformData,
-            CancellationToken cancellationToken)
+        protected override async UniTask PlatformSaveAsync(string key, object transformData, CancellationToken token)
         {
             if (transformData is not byte[] byteData)
                 return;
@@ -47,8 +48,8 @@ namespace CustomUtils.Runtime.Storage.Providers
 
                 var reference = GetFileReference(key);
 
-                await reference.PutBytesAsync(byteData, cancelToken: cancellationToken)
-                    .AsUniTask().AttachExternalCancellation(cancellationToken);
+                await reference.PutBytesAsync(byteData, cancelToken: token)
+                    .AsUniTask().AttachExternalCancellation(token);
             }
             catch (Exception ex)
             {
@@ -57,7 +58,7 @@ namespace CustomUtils.Runtime.Storage.Providers
             }
         }
 
-        protected override async UniTask<object> PlatformLoadAsync(string key, CancellationToken cancellationToken)
+        protected override async UniTask<object> PlatformLoadAsync(string key, CancellationToken token)
         {
             try
             {
@@ -66,11 +67,11 @@ namespace CustomUtils.Runtime.Storage.Providers
 
                 var reference = GetFileReference(key);
 
-                if (await PlatformHasKeyAsync(key, cancellationToken) is false)
+                if (await PlatformHasKeyAsync(key, token) is false)
                     return null;
 
                 var downloadTask = await reference.GetBytesAsync(MaxDownloadSize)
-                    .AsUniTask().AttachExternalCancellation(cancellationToken);
+                    .AsUniTask().AttachExternalCancellation(token);
 
                 if (downloadTask == null || downloadTask.Length == 0)
                     return null;
@@ -87,7 +88,7 @@ namespace CustomUtils.Runtime.Storage.Providers
             }
         }
 
-        protected override async UniTask<bool> PlatformHasKeyAsync(string key, CancellationToken cancellationToken)
+        protected override async UniTask<bool> PlatformHasKeyAsync(string key, CancellationToken token)
         {
             if (_memoryCache.ContainsKey(key))
                 return true;
@@ -99,7 +100,7 @@ namespace CustomUtils.Runtime.Storage.Providers
                 var result = await reference.GetMetadataAsync()
                     .ContinueWithOnMainThread(static task => task.IsFaulted is false && task.IsCanceled is false)
                     .AsUniTask()
-                    .AttachExternalCancellation(cancellationToken);
+                    .AttachExternalCancellation(token);
 
                 return result;
             }
@@ -109,7 +110,7 @@ namespace CustomUtils.Runtime.Storage.Providers
             }
         }
 
-        protected override async UniTask PlatformDeleteKeyAsync(string key, CancellationToken cancellationToken)
+        protected override async UniTask PlatformDeleteKeyAsync(string key, CancellationToken token)
         {
             try
             {
@@ -117,10 +118,10 @@ namespace CustomUtils.Runtime.Storage.Providers
 
                 var reference = GetFileReference(key);
 
-                if (await PlatformHasKeyAsync(key, cancellationToken) is false)
+                if (await PlatformHasKeyAsync(key, token) is false)
                     return;
 
-                await reference.DeleteAsync().AsUniTask().AttachExternalCancellation(cancellationToken);
+                await reference.DeleteAsync().AsUniTask().AttachExternalCancellation(token);
             }
             catch (Exception ex)
             {
@@ -129,7 +130,7 @@ namespace CustomUtils.Runtime.Storage.Providers
             }
         }
 
-        protected override UniTask<bool> PlatformTryDeleteAllAsync(CancellationToken cancellationToken) =>
+        protected override UniTask<bool> PlatformTryDeleteAllAsync(CancellationToken token) =>
             UniTask.FromResult(false);
     }
 }

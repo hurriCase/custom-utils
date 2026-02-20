@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using CustomUtils.Runtime.Serializer;
 using Cysharp.Threading.Tasks;
-using MemoryPack;
 using UnityEngine;
 
 namespace CustomUtils.Runtime.Storage.Base
@@ -10,18 +10,21 @@ namespace CustomUtils.Runtime.Storage.Base
     internal abstract class BaseStorageProvider : IStorageProvider
     {
         private readonly Dictionary<string, byte[]> _cache = new();
-        private readonly IDataTransformer _dataTransformer;
 
-        protected BaseStorageProvider(IDataTransformer dataTransformer)
+        private readonly IDataTransformer _dataTransformer;
+        private readonly ISerializer _serializer;
+
+        protected BaseStorageProvider(IDataTransformer dataTransformer, ISerializer serializer)
         {
             _dataTransformer = dataTransformer;
+            _serializer = serializer;
         }
 
         public async UniTask<bool> TrySaveAsync<TData>(string key, TData data, CancellationToken cancellationToken)
         {
             try
             {
-                var serialized = MemoryPackSerializer.Serialize(data);
+                var serialized = _serializer.Serialize(data);
                 _cache[key] = serialized;
 
                 var transformedData = _dataTransformer.TransformForStorage(serialized);
@@ -45,7 +48,7 @@ namespace CustomUtils.Runtime.Storage.Base
             try
             {
                 if (_cache.TryGetValue(key, out var cachedData))
-                    return MemoryPackSerializer.Deserialize<TData>(cachedData);
+                    return _serializer.Deserialize<TData>(cachedData);
 
                 var storedData = await PlatformLoadAsync(key, cancellationToken);
                 if (storedData == null)
@@ -57,7 +60,7 @@ namespace CustomUtils.Runtime.Storage.Base
 
                 _cache[key] = buffer;
 
-                var data = MemoryPackSerializer.Deserialize<TData>(buffer);
+                var data = _serializer.Deserialize<TData>(buffer);
 
 #if IS_TEST
                 Debug.Log("[{GetType().Name}::LoadAsync] " +

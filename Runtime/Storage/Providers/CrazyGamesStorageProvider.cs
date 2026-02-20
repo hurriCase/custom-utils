@@ -5,18 +5,19 @@ using CustomUtils.Runtime.Storage.DataTransformers;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using CrazyGames;
+using CustomUtils.Runtime.Serializer;
 
 namespace CustomUtils.Runtime.Storage.Providers
 {
     /// <summary>
     /// PlayerPrefs provider with TryDeleteAll support
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     internal sealed class CrazyGamesStorageProvider : BaseStorageProvider
     {
-        public CrazyGamesStorageProvider() : base(new StringDataTransformer()) { }
+        public CrazyGamesStorageProvider() : base(new StringDataTransformer(), SerializerProvider.Serializer) { }
 
-        protected override UniTask PlatformSaveAsync(string key, object transformData, CancellationToken cancellationToken)
+        protected override UniTask PlatformSaveAsync(string key, object transformData, CancellationToken token)
         {
             if (transformData is not string serializedString)
                 return UniTask.CompletedTask;
@@ -26,20 +27,20 @@ namespace CustomUtils.Runtime.Storage.Providers
             return UniTask.CompletedTask;
         }
 
-        protected override UniTask<object> PlatformLoadAsync(string key, CancellationToken cancellationToken)
+        protected override UniTask<object> PlatformLoadAsync(string key, CancellationToken token)
             => UniTask.FromResult<object>(CrazySDK.Data.GetString(key, null));
 
-        protected override UniTask<bool> PlatformHasKeyAsync(string key, CancellationToken cancellationToken)
+        protected override UniTask<bool> PlatformHasKeyAsync(string key, CancellationToken token)
             => UniTask.FromResult(CrazySDK.Data.HasKey(key));
 
-        protected override UniTask PlatformDeleteKeyAsync(string key, CancellationToken cancellationToken)
+        protected override UniTask PlatformDeleteKeyAsync(string key, CancellationToken token)
         {
             CrazySDK.Data.DeleteKey(key);
 
             return UniTask.CompletedTask;
         }
 
-        protected override UniTask<bool> PlatformTryDeleteAllAsync(CancellationToken cancellationToken)
+        protected override UniTask<bool> PlatformTryDeleteAllAsync(CancellationToken token)
         {
             CrazySDK.Data.DeleteAll();
             return UniTask.FromResult(true);
