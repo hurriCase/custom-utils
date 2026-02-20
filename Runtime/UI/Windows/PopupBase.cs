@@ -15,7 +15,7 @@ namespace CustomUtils.Runtime.UI.Windows
 
         [SerializeField] private VisibilityHandler _visibilityHandler;
 
-        [SerializeField] private ThemeButton _closeButton;
+        [SerializeField] protected ThemeButton closeButton;
 
         public Observable<Unit> OnShown => _shown;
         private readonly Subject<Unit> _shown = new();
@@ -25,7 +25,7 @@ namespace CustomUtils.Runtime.UI.Windows
 
         internal override void BaseInitialize()
         {
-            _closeButton.AsNullable()?.OnClickAsObservable()
+            closeButton.AsNullable()?.OnClickAsObservable()
                 .SubscribeUntilDestroy(this, static self => self.HideAsync().Forget());
         }
 
