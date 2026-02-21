@@ -5,7 +5,7 @@ using CustomUtils.Runtime.AddressableSystem;
 using CustomUtils.Runtime.CustomTypes.Collections;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Extensions.Observables;
-using Cysharp.Text;
+using CustomUtils.Runtime.Formatter;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using R3;
@@ -111,8 +111,8 @@ namespace CustomUtils.Runtime.UI.Windows
 
             if (!screenBase)
             {
-                var message = ZString.Format("[WindowsControllerBase::OpenScreenByType] " +
-                                             "There is no screen with type: {0}", screenType);
+                var message = StringFormatter.Concat("[WindowsControllerBase::OpenScreenByType] " +
+                                                     "There is no screen with type: ", screenType);
                 Debug.LogError(message);
                 return;
             }
@@ -131,8 +131,8 @@ namespace CustomUtils.Runtime.UI.Windows
 
             if (!popupBase)
             {
-                var message = ZString.Format("[WindowsControllerBase::OpenPopupByType] " +
-                                             "There is no popup with type: {0}", popupType);
+                var message = StringFormatter.Concat("[WindowsControllerBase::OpenPopupByType] " +
+                                                     "There is no popup with type: ", popupType);
                 Debug.LogError(message);
                 return;
             }
@@ -151,8 +151,8 @@ namespace CustomUtils.Runtime.UI.Windows
                 return popupBase as TPopupType;
             }
 
-            var errorMessage = ZString.Format("[WindowsControllerBase::OpenPopup] " +
-                                              "There is no popup with type: {0}", typeof(TPopupType));
+            var errorMessage = StringFormatter.Concat("[WindowsControllerBase::OpenPopup] " +
+                                                      "There is no popup with type: ", typeof(TPopupType));
             Debug.LogError(errorMessage);
 
             return null;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CustomUtils.Runtime.CSV.CSVEntry;
-using Cysharp.Text;
+using CustomUtils.Runtime.Formatter;
 
 namespace CustomUtils.Runtime.CSV
 {
@@ -70,7 +70,7 @@ namespace CustomUtils.Runtime.CSV
             var fields = new List<string>();
             var inQuotes = false;
 
-            using var fieldBuilder = ZString.CreateStringBuilder(false);
+            using var fieldBuilder = StringBuilderScope.Create();
 
             for (var i = 0; i < line.Length; i++)
             {

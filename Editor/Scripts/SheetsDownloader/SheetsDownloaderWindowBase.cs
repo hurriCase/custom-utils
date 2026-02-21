@@ -2,7 +2,7 @@
 using CustomUtils.Editor.Scripts.Extensions;
 using CustomUtils.Runtime.Downloader;
 using CustomUtils.Runtime.Extensions;
-using Cysharp.Text;
+using CustomUtils.Runtime.Formatter;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEditor;
@@ -108,7 +108,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
         private void OpenGoogleSheet()
         {
-            var url = ZString.Format(SheetDownloaderConstants.TableUrlPattern, Database.TableId);
+            var url = StringFormatter.Concat(SheetDownloaderConstants.TableUrlPattern, Database.TableId);
             Application.OpenURL(url);
         }
     }

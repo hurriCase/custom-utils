@@ -4,7 +4,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using Cysharp.Text;
+using CustomUtils.Runtime.Formatter;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -131,7 +131,7 @@ namespace CustomUtils.Runtime.Extensions
             if (start > end)
                 return string.Empty;
 
-            using var builder = ZString.CreateStringBuilder(false);
+            using var builder = StringBuilderScope.Create();
             builder.Append(str, start, end - start + 1);
             return builder.ToString();
         }

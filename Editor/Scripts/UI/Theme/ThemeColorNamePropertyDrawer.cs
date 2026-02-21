@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using CustomUtils.Editor.Scripts.CustomEditorUtilities;
 using CustomUtils.Editor.Scripts.Extensions;
+using CustomUtils.Runtime.Formatter;
 using CustomUtils.Runtime.UI.Theme;
 using CustomUtils.Runtime.UI.Theme.Databases;
-using Cysharp.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -35,7 +35,7 @@ namespace CustomUtils.Editor.Scripts.UI.Theme
 
             if (TryGetColorNamesForType(colorType, out var colorNames) is false)
             {
-                var message = ZString.Format("No {0} colors found in database.", colorType);
+                var message = StringFormatter.Format("No {0} colors found in database.", colorType);
                 EditorVisualControls.WarningBox(position, message);
                 return;
             }

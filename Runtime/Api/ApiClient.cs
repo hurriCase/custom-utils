@@ -2,7 +2,7 @@
 using System.Text;
 using System.Threading;
 using CustomUtils.Runtime.Api.Interfaces;
-using Cysharp.Text;
+using CustomUtils.Runtime.Formatter;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -64,11 +64,11 @@ namespace CustomUtils.Runtime.Api
                 if (request.result == UnityWebRequest.Result.Success)
                     return request.downloadHandler.text;
 
-                var message = ZString.Format("[AppHelper::SendRequestAsync] " +
-                                             "Request failed: {0} " +
-                                             "Response Code: {1}" +
-                                             "Response Headers: {2} " +
-                                             "Response Body: {3} With Json Data: {4}",
+                var message = StringFormatter.Format("[AppHelper::SendRequestAsync] " +
+                                                     "Request failed: {0} " +
+                                                     "Response Code: {1}" +
+                                                     "Response Headers: {2} " +
+                                                     "Response Body: {3} With Json Data: {4}",
                     request.responseCode, request.GetResponseHeaders(), request.downloadHandler?.text, jsonData);
 
                 Debug.LogError(message);
@@ -76,10 +76,11 @@ namespace CustomUtils.Runtime.Api
             }
             catch (Exception e)
             {
-                var message = ZString.Format("[AppHelper::SendRequestAsync] Request failed with exception: {0}" +
-                                             "Stack trace: {1}" +
-                                             "Request failed: {2}" +
-                                             "With Json Data: {3}",
+                var message = StringFormatter.Format(
+                    "[AppHelper::SendRequestAsync] Request failed with exception: {0}" +
+                    "Stack trace: {1}" +
+                    "Request failed: {2}" +
+                    "With Json Data: {3}",
                     e, e.StackTrace, e.Message, jsonData);
 
                 Debug.LogError(message);

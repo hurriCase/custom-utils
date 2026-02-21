@@ -1,4 +1,4 @@
-﻿using Cysharp.Text;
+﻿using CustomUtils.Runtime.Formatter;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
@@ -34,7 +34,7 @@ namespace CustomUtils.Editor.Scripts.Extensions
                 ? globalId.ToString().GetHashCode()
                 : target.GetInstanceID();
 
-            return ZString.Format("{0}.{1}", baseKey, objectId);
+            return StringFormatter.Format("{0}.{1}", baseKey, objectId);
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using CustomUtils.Runtime.Localization;
-using Cysharp.Text;
+﻿using CustomUtils.Runtime.Formatter;
+using CustomUtils.Runtime.Localization;
 using UnityEngine;
 using ZLinq;
 
@@ -21,7 +21,7 @@ namespace CustomUtils.Editor.Scripts.Localization
                 return string.Empty;
             }
 
-            using var tsvBuilder = ZString.CreateStringBuilder();
+            using var tsvBuilder = StringBuilderScope.Create();
 
             tsvBuilder.Append("GUID");
             tsvBuilder.Append(Separator);
@@ -63,7 +63,7 @@ namespace CustomUtils.Editor.Scripts.Localization
             if (field.Contains("\n") is false && field.Contains("\t") is false && field.Contains("\"") is false)
                 return field;
 
-            using var escaped = ZString.CreateStringBuilder();
+            using var escaped = StringBuilderScope.Create();
             escaped.Append('"');
 
             foreach (var character in field)

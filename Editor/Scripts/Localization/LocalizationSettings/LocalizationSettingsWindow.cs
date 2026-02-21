@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using CustomUtils.Editor.Scripts.SheetsDownloader;
 using CustomUtils.Runtime.Downloader;
 using CustomUtils.Runtime.Extensions;
+using CustomUtils.Runtime.Formatter;
 using CustomUtils.Runtime.Localization;
 using CustomUtils.Runtime.ResponseTypes;
-using Cysharp.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -96,7 +96,7 @@ namespace CustomUtils.Editor.Scripts.Localization.LocalizationSettings
         {
             if (choiceNames.Count == 0)
             {
-                var noChoiceMessage = ZString.Format(LocalizationConstants.NoChoiceMessageFormat, valueName);
+                var noChoiceMessage = StringFormatter.Format(LocalizationConstants.NoChoiceMessageFormat, valueName);
                 dropdownField.choices = new List<string> { noChoiceMessage };
                 dropdownField.value = noChoiceMessage;
                 return;
@@ -119,12 +119,12 @@ namespace CustomUtils.Editor.Scripts.Localization.LocalizationSettings
 
             if (string.IsNullOrEmpty(csvContent))
             {
-                var errorMessage = ZString.Format(LocalizationConstants.ExportFailedMessageFormat, selectedSheet);
+                var errorMessage = StringFormatter.Format(LocalizationConstants.ExportFailedMessageFormat, selectedSheet);
                 return Result.Invalid(errorMessage);
             }
 
             EditorGUIUtility.systemCopyBuffer = csvContent;
-            var successMessage = ZString.Format(LocalizationConstants.ExportSuccessMessageFormat, selectedSheet);
+            var successMessage = StringFormatter.Format(LocalizationConstants.ExportSuccessMessageFormat, selectedSheet);
             return Result.Valid(successMessage);
         }
 
@@ -144,7 +144,7 @@ namespace CustomUtils.Editor.Scripts.Localization.LocalizationSettings
             if (allEntries.Count == 0)
                 return Result.Invalid(LocalizationConstants.NoLocalizationEntriesMessage);
 
-            using var textBuilder = ZString.CreateStringBuilder();
+            using var textBuilder = StringBuilderScope.Create();
             var copiedCount = 0;
 
             foreach (var entry in allEntries)
@@ -159,11 +159,11 @@ namespace CustomUtils.Editor.Scripts.Localization.LocalizationSettings
             }
 
             if (copiedCount == 0)
-                return Result.Invalid(ZString.Format(LocalizationConstants.NoTranslationsFoundFormat,
+                return Result.Invalid(StringFormatter.Concat(LocalizationConstants.NoTranslationsFoundFormat,
                     language));
 
             EditorGUIUtility.systemCopyBuffer = textBuilder.ToString();
-            return Result.Valid(ZString.Format(LocalizationConstants.CopySuccessMessageFormat,
+            return Result.Valid(StringFormatter.Format(LocalizationConstants.CopySuccessMessageFormat,
                 copiedCount, language));
         }
     }

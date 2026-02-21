@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Cysharp.Text;
+using CustomUtils.Runtime.Formatter;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using R3;
@@ -42,7 +42,7 @@ namespace CustomUtils.Runtime.StartUp
 
         private void LogStepCompletion(StepData stepData)
         {
-            var message = ZString.Format("[StartUpController::LogStepCompletion] Step {0} completed: {1}",
+            var message = StringFormatter.Format("[StartUpController::LogStepCompletion] Step {0} completed: {1}",
                 stepData.Step, stepData.StepName);
 
             Debug.Log(message);

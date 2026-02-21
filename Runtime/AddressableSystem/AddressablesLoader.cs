@@ -1,5 +1,5 @@
 ﻿using System.Threading;
-using Cysharp.Text;
+using CustomUtils.Runtime.Formatter;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -17,7 +17,7 @@ namespace CustomUtils.Runtime.AddressableSystem
 
         public async UniTask<T> LoadAsync<T>(string assetGuid, CancellationToken token) where T : Object
         {
-            AddressablesLogger.Log(ZString.Format("[PrefabLoader::LoadAsync] Loading {0}...", typeof(T).Name));
+            AddressablesLogger.Log(StringFormatter.Format("[PrefabLoader::LoadAsync] Loading {0}...", typeof(T).Name));
 
 #if ADDRESSABLES_LOG_ALL
             using var stopWatchScope = AddressablesLogger.LogWithTimePast("[PrefabLoader::LoadAsync]");
@@ -33,7 +33,8 @@ namespace CustomUtils.Runtime.AddressableSystem
             CancellationToken token)
             where TComponent : Component
         {
-            AddressablesLogger.Log(ZString.Format("[PrefabLoader::LoadAsync] Loading {0}...", typeof(TComponent).Name));
+            AddressablesLogger.Log(StringFormatter.Format("[PrefabLoader::LoadAsync] " +
+                                                          "Loading {0}...", typeof(TComponent).Name));
 
 #if ADDRESSABLES_LOG_ALL
             using var stopWatchScope = AddressablesLogger.LogWithTimePast("[PrefabLoader::LoadAsync]");
@@ -41,7 +42,7 @@ namespace CustomUtils.Runtime.AddressableSystem
             var asset =
                 await Addressables.LoadAssetAsync<GameObject>(assetReference).WithCancellation(token);
 
-            AddressablesLogger.Log(ZString.Format("[PrefabLoader::LoadAsync] Loaded '{0}' ({0})",
+            AddressablesLogger.Log(StringFormatter.Format("[PrefabLoader::LoadAsync] Loaded '{0}' ({0})",
                 asset.name,
                 typeof(TComponent).Name));
 

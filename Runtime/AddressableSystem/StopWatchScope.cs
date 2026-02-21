@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using Cysharp.Text;
+using CustomUtils.Runtime.Formatter;
 using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime.AddressableSystem
@@ -31,7 +31,7 @@ namespace CustomUtils.Runtime.AddressableSystem
         {
             _stopwatch.Stop();
 
-            AddressablesLogger.Log(ZString.Format("{0} Operation was done in {1}ms",
+            AddressablesLogger.Log(StringFormatter.Format("{0} Operation was done in {1}ms",
                 _message,
                 _stopwatch.ElapsedMilliseconds));
         }

@@ -5,8 +5,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using CustomUtils.Runtime.Downloader;
 using CustomUtils.Runtime.Extensions;
+using CustomUtils.Runtime.Formatter;
 using CustomUtils.Runtime.ResponseTypes;
-using Cysharp.Text;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using Unity.Plastic.Newtonsoft.Json;
@@ -31,7 +31,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
         private readonly TDatabase _database;
         private readonly List<TSheet> _sheetsToDownload = new();
 
-        private string RequestUrl => ZString.Format(
+        private string RequestUrl => StringFormatter.Format(
             SheetDownloaderConstants.RequestUrlFormat,
             SheetDownloaderConstants.SheetResolverUrl,
             _database.TableId);
@@ -65,7 +65,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
             return string.IsNullOrEmpty(request.error)
                 ? ProcessResolveResponse(request)
-                : Result.Invalid(ZString.Format(SheetDownloaderConstants.NetworkErrorFormat, request.error));
+                : Result.Invalid(StringFormatter.Concat(SheetDownloaderConstants.NetworkErrorFormat, request.error));
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
             _database.MarkAsDirty();
 
             var changeResult = changedCount > 0
-                ? Result.Valid(ZString.Format(SheetDownloaderConstants.ChangedSheetsDownloadedFormat, changedCount))
+                ? Result.Valid(StringFormatter.Format(SheetDownloaderConstants.ChangedSheetsDownloadedFormat, changedCount))
                 : Result.Invalid(SheetDownloaderConstants.AllSheetsUpToDateMessage);
 
             return changeResult;
@@ -138,13 +138,13 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
                 var sheetFile = await SaveSheetDataAsync(sheet, result.Data, token);
                 sheet.UpdateSheetData(sheetFile, result.Data.Length);
 
-                var successMessage = ZString.Format(SheetDownloaderConstants.SheetDownloadedSuccessFormat, sheet.Name);
+                var successMessage = StringFormatter.Format(SheetDownloaderConstants.SheetDownloadedSuccessFormat, sheet.Name);
                 return Result.Valid(successMessage);
             }
             catch (Exception ex)
             {
                 Debug.LogException(ex);
-                var errorMessage = ZString.Format(
+                var errorMessage = StringFormatter.Format(
                     SheetDownloaderConstants.SheetDownloadFailedFormat,
                     sheet.Name,
                     ex.Message);
@@ -155,7 +155,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
         private async UniTask<Result<byte[]>> GetSheetContent(long id)
         {
-            var url = ZString.Format(SheetDownloaderConstants.UrlPattern, _database.TableId, id);
+            var url = StringFormatter.Format(SheetDownloaderConstants.UrlPattern, _database.TableId, id);
 
             using var request = UnityWebRequest.Get(url);
             await request.SendWebRequest().ToUniTask();
@@ -196,7 +196,11 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
         {
             var error = ExtractInternalError(request);
             if (error != null)
-                return Result.Invalid(ZString.Format(SheetDownloaderConstants.TableNotFoundOrNoPermissionFormat, error));
+            {
+                var message =
+                    StringFormatter.Concat(SheetDownloaderConstants.TableNotFoundOrNoPermissionFormat, error);
+                return Result.Invalid(message);
+            }
 
             var sheets = JsonConvert.DeserializeObject<Dictionary<string, long>>(request.downloadHandler.text);
 
@@ -210,7 +214,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
         private async UniTask<long> GetSheetContentLengthAsync(long sheetId, CancellationToken token)
         {
-            var url = ZString.Format(SheetDownloaderConstants.UrlPattern, _database.TableId, sheetId);
+            var url = StringFormatter.Format(SheetDownloaderConstants.UrlPattern, _database.TableId, sheetId);
 
             using var request = UnityWebRequest.Head(url);
             await request.SendWebRequest().ToUniTask(cancellationToken: token);
@@ -226,7 +230,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
         private async UniTask<TextAsset> SaveSheetDataAsync(TSheet sheet, byte[] data, CancellationToken token)
         {
-            var fileName = ZString.Concat(sheet.Name, SheetDownloaderConstants.CsvExtension);
+            var fileName = StringFormatter.Concat(sheet.Name, SheetDownloaderConstants.CsvExtension);
             var path = Path.Combine(_database.GetDownloadPath(), fileName);
             await File.WriteAllBytesAsync(path, data, token);
 

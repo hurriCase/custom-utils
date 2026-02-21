@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using CustomUtils.Runtime.CSV.Base;
+using CustomUtils.Runtime.Formatter;
 using CustomUtils.Runtime.Serializer;
-using Cysharp.Text;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -30,8 +30,9 @@ namespace CustomUtils.Runtime.CSV
             var binaryData = SerializerProvider.Serializer.Serialize(objects);
             File.WriteAllBytes(binaryOutputPath, binaryData);
 
-            var logMessage = ZString.Format("[CsvBinarySerializer::ConvertCSVToBinary] " +
-                                            "Converted {0} objects to binary: {1}", objects.Length, binaryOutputPath);
+            var logMessage = StringFormatter.Format("[CsvBinarySerializer::ConvertCSVToBinary] " +
+                                                    "Converted {0} objects to binary: {1}", objects.Length,
+                binaryOutputPath);
             Debug.Log(logMessage);
         }
     }
