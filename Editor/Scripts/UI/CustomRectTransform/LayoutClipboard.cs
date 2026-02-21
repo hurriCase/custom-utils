@@ -1,6 +1,6 @@
 ﻿#if IS_RECTTRANSFORM_EXTENDED_ENABLED
 using System;
-using MemoryPack;
+using CustomUtils.Runtime.Serializer;
 using UnityEngine;
 
 namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
@@ -15,7 +15,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
         {
             try
             {
-                _clipboardData = MemoryPackSerializer.Serialize(layoutData);
+                _clipboardData = SerializerProvider.Serializer.Serialize(layoutData);
                 HasData = true;
             }
             catch (Exception e)
@@ -34,7 +34,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
 
             try
             {
-                layoutData = MemoryPackSerializer.Deserialize<LayoutData>(_clipboardData);
+                layoutData = SerializerProvider.Serializer.Deserialize<LayoutData>(_clipboardData);
                 return true;
             }
             catch (Exception e)

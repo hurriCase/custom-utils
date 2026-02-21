@@ -1,6 +1,9 @@
-﻿namespace CustomUtils.Runtime.Serializer
+﻿using JetBrains.Annotations;
+
+namespace CustomUtils.Runtime.Serializer
 {
-    internal static class SerializerProvider
+    [PublicAPI]
+    public static class SerializerProvider
     {
         static SerializerProvider()
         {
@@ -8,9 +11,11 @@
             Serializer = new MemoryPackSerializer();
 #elif NEWTONSOFT_INSTALLED
             Serializer = new NewtonsoftSerializer();
+#else
+            Serializer = new SystemTextJsonSerializer();
 #endif
         }
 
-        internal static ISerializer Serializer { get; }
+        public static ISerializer Serializer { get; }
     }
 }

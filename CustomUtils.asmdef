@@ -29,6 +29,16 @@
             "name": "com.cysharp.memorypack",
             "expression": "",
             "define": "MEMORY_PACK_INSTALLED"
+        },
+        {
+            "name": "com.cysharp.zstring",
+            "expression": "",
+            "define": "ZSTRING_INSTALLED"
+        },
+        {
+            "name": "com.unity.nuget.newtonsoft-json",
+            "expression": "",
+            "define": "NEWTONSOFT_INSTALLED"
         }
     ],
     "noEngineReferences": false

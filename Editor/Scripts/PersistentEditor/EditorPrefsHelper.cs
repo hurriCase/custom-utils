@@ -1,5 +1,5 @@
 ﻿using System;
-using MemoryPack;
+using CustomUtils.Runtime.Serializer;
 using UnityEditor;
 
 namespace CustomUtils.Editor.Scripts.PersistentEditor
@@ -36,7 +36,7 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
                     break;
 
                 default:
-                    var serialized = MemoryPackSerializer.Serialize(value);
+                    var serialized = SerializerProvider.Serializer.Serialize(value);
                     EditorPrefs.SetString(key, Convert.ToBase64String(serialized));
                     break;
             }
@@ -68,7 +68,8 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
 
             try
             {
-                return MemoryPackSerializer.Deserialize<T>(Convert.FromBase64String(serialized));
+                var data = Convert.FromBase64String(serialized);
+                return SerializerProvider.Serializer.Deserialize<T>(data);
             }
             catch
             {

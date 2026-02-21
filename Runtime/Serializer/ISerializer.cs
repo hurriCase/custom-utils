@@ -1,10 +1,12 @@
-﻿namespace CustomUtils.Runtime.Serializer
+﻿using JetBrains.Annotations;
+
+namespace CustomUtils.Runtime.Serializer
 {
-    internal interface ISerializer
+    [PublicAPI]
+    public interface ISerializer
     {
         byte[] Serialize<T>(T data);
         T Deserialize<T>(byte[] data);
-        byte[] SerializeArray<T>(T[] objects);
-        void DeserializeArray<T>(byte[] data, ref T[] result);
+        void Deserialize<T>(byte[] data, ref T result) => result = Deserialize<T>(data);
     }
 }
