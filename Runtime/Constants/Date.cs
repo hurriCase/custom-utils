@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DATEONLY_INSTALLED
+using System;
 using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime.Constants
@@ -16,3 +17,4 @@ namespace CustomUtils.Runtime.Constants
         public static DateOnly Today => DateOnly.FromDateTime(DateTime.Now);
     }
 }
+#endif
