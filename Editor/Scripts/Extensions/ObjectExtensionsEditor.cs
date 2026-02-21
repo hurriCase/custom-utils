@@ -8,7 +8,7 @@ namespace CustomUtils.Editor.Scripts.Extensions
     /// <summary>
     /// Provides Editor time extension methods for <see cref="Object"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class ObjectExtensionsEditor
     {
         /// <summary>
@@ -26,7 +26,7 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// If GlobalObjectId parsing fails, it falls back to using the instance ID, which is unique
         /// within the current session but may not persist across Unity sessions.
         /// </remarks>
-        [UsedImplicitly, MustUseReturnValue]
+        [MustUseReturnValue]
         public static string GetObjectUniqueKey([NotNull] this Object target, string baseKey)
         {
             var objectId = GlobalObjectId.TryParse(GlobalObjectId.GetGlobalObjectIdSlow(target).ToString(),

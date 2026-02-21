@@ -13,19 +13,19 @@ namespace CustomUtils.Editor.Scripts.InputDialog
     /// This class inherits from WindowBase and provides a simple password input dialog
     /// with OK and Cancel buttons. It raises an event when the user completes the input.
     /// </remarks>
-    [UsedImplicitly]
+    [PublicAPI]
     public sealed class InputDialogWindow : WindowBase
     {
         /// <summary>
         /// Gets or sets the message displayed to the user.
         /// </summary>
-        [UsedImplicitly]
+
         public string Message { get; set; }
 
         /// <summary>
         /// Gets or sets the text entered by the user.
         /// </summary>
-        [UsedImplicitly]
+
         public string InputText { get; set; }
 
         /// <summary>
@@ -34,7 +34,6 @@ namespace CustomUtils.Editor.Scripts.InputDialog
         /// <remarks>
         /// The string parameter contains the entered text, or an empty string if canceled.
         /// </remarks>
-        [UsedImplicitly]
         public event Action<string> OnComplete;
 
         protected override void DrawWindowContent()

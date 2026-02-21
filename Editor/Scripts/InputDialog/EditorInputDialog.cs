@@ -11,7 +11,7 @@ namespace CustomUtils.Editor.Scripts.InputDialog
     /// This static class offers a convenient way to show password input dialogs
     /// and retrieve user input without having to directly manage window instances.
     /// </remarks>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class EditorInputDialog
     {
         /// <summary>
@@ -28,7 +28,6 @@ namespace CustomUtils.Editor.Scripts.InputDialog
         /// This method creates and shows a modal InputDialogWindow, blocking the editor
         /// until the user completes the input process.
         /// </remarks>
-        [UsedImplicitly]
         public static string Show(string title, string message, string inputText)
         {
             var result = inputText;

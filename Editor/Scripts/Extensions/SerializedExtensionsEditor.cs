@@ -12,7 +12,7 @@ namespace CustomUtils.Editor.Scripts.Extensions
     /// <summary>
     /// Provides Editor time extension methods for serialized-based operations.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class SerializedExtensionsEditor
     {
         private const string ValuePropertyName = "value";
@@ -25,7 +25,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// <param name="serializedObject">The serialized object containing the reactive property.</param>
         /// <param name="propertyName">The name of the reactive property to access.</param>
         /// <returns>The serialized property representing the "value" field of the specified reactive property.</returns>
-        [UsedImplicitly]
         public static SerializedProperty GetReactiveSerializedProperty(
             this SerializedObject serializedObject,
             string propertyName)
@@ -43,7 +42,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// <param name="element">The UI element to bind the property to.</param>
         /// <param name="serializedObject">The serialized object containing the property to bind.</param>
         /// <param name="propertyName">The name of the reactive property to bind.</param>
-        [UsedImplicitly]
         public static void BindReactiveProperty<T>(
             this SerializedObject serializedObject,
             BaseField<T> element,
@@ -68,7 +66,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// <param name="serializedObject">The serialized object to search in.</param>
         /// <param name="name">The property name to find (will be converted to backing field format).</param>
         /// <returns>The found serialized property or null if not found.</returns>
-        [UsedImplicitly]
         public static SerializedProperty FindField(this SerializedObject serializedObject, string name) =>
             serializedObject.FindProperty(name.ConvertToBackingField());
 
@@ -78,7 +75,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// <param name="serializedProperty">The serialized property to search in.</param>
         /// <param name="name">The property name to find (will be converted to backing field format).</param>
         /// <returns>The found relative serialized property or null if not found.</returns>
-        [UsedImplicitly]
         public static SerializedProperty FindFieldRelative(this SerializedProperty serializedProperty, string name) =>
             serializedProperty.FindPropertyRelative(name.ConvertToBackingField());
 
@@ -88,7 +84,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// <param name="serializedProperty">The serialized property to get the component from.</param>
         /// <param name="requestedComponent">The requested component.</param>
         /// <returns>True if the component was found; otherwise, false.</returns>
-        [UsedImplicitly]
         public static bool TryGetComponent<TComponent>(
             this SerializedProperty serializedProperty,
             out TComponent requestedComponent)
@@ -107,7 +102,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// <param name="componentType">The type of the component to retrieve.</param>
         /// <param name="requestedComponent">When this method returns, contains the component if found, otherwise null.</param>
         /// <returns>True if the component of the specified type is found; otherwise, false.</returns>
-        [UsedImplicitly]
         public static bool TryGetComponent(
             this SerializedProperty serializedProperty,
             Type componentType,
@@ -126,7 +120,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// <param name="serializedProperty">The serialized property whose target object is searched for the component.</param>
         /// <param name="requestedComponent">The output parameter that will hold the retrieved component if found, or null if not found.</param>
         /// <returns>True if the component of the specified type is found; otherwise, false.</returns>
-        [UsedImplicitly]
         public static bool TryGetComponent<TComponent>(
             this SerializedObject serializedProperty,
             out TComponent requestedComponent)
@@ -147,7 +140,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// <param name="propertyName">The name of the field in the parent to retrieve the value from.</param>
         /// <returns>The value of the specified type retrieved from the parent's property,
         /// or the default value of the type if retrieval fails.</returns>
-        [UsedImplicitly]
         public static T GetPropertyFromParent<T>(this SerializedProperty property, string propertyName)
         {
             var parentPath = property.propertyPath[..property.propertyPath.LastIndexOf('.')];
@@ -164,7 +156,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// <param name="serializedObject">The serialized object containing the property to be displayed.</param>
         /// <param name="propertyName">The name of the property within the serialized object to create the field for.</param>
         /// <param name="container">The container to which the UI property field will be added.</param>
-        [UsedImplicitly]
         public static void CreateProperty(
             this SerializedObject serializedObject,
             string propertyName,

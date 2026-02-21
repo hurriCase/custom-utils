@@ -9,7 +9,7 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
     /// Reactive property that automatically persists to EditorPrefs
     /// </summary>
     /// <typeparam name="TProperty">Type of the property value</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     public sealed class PersistentEditorProperty<TProperty> : IDisposable
     {
         private readonly string _key;
@@ -21,7 +21,7 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
         /// <summary>
         /// Gets or sets the current value of the property
         /// </summary>
-        [UsedImplicitly]
+
         public TProperty Value
         {
             get => _property.Value;
@@ -33,7 +33,6 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
         /// </summary>
         /// <param name="key">Unique key for EditorPrefs storage</param>
         /// <param name="defaultValue">Default value if no saved value exists</param>
-        [UsedImplicitly]
         public PersistentEditorProperty(string key, TProperty defaultValue = default)
         {
             _key = key;
@@ -55,7 +54,6 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
         /// <param name="target">Target object to pass to callback</param>
         /// <param name="onNext">Action to execute when value changes</param>
         /// <returns>Disposable subscription</returns>
-        [UsedImplicitly]
         public IDisposable Subscribe<TTarget>(TTarget target, Action<TTarget, TProperty> onNext) where TTarget : class
             => _property.Subscribe(
                 (target, onNext),
@@ -64,7 +62,6 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
         /// <summary>
         /// Manually saves the current value to EditorPrefs
         /// </summary>
-        [UsedImplicitly]
         public void Save() => EditorPrefsHelper.SetValue(_key, _property.Value);
 
         private void Initialize()
@@ -89,7 +86,6 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
         /// <summary>
         /// Disposes the property and stops persistence
         /// </summary>
-        [UsedImplicitly]
         public void Dispose()
         {
             _subscription?.Dispose();

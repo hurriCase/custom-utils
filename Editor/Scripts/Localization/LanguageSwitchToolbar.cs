@@ -6,10 +6,9 @@ using UnityEngine;
 
 namespace CustomUtils.Editor.Scripts.Localization
 {
-    [UsedImplicitly]
+    [PublicAPI]
     internal sealed class LanguageSwitchToolbar
     {
-        [UsedImplicitly]
         [MainToolbarElement(LocalizationConstants.ToolbarPath, defaultDockPosition = MainToolbarDockPosition.Right)]
         public static MainToolbarDropdown LanguageSwitchButton()
         {

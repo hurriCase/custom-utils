@@ -24,7 +24,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
     /// <typeparam name="TDatabase">The type of sheet database that inherits from <see cref="SheetsDatabase{T, T}"/>
     /// .</typeparam>
     /// <typeparam name="TSheet">The type of sheets to use it for a database</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     public sealed class SheetsDownloader<TDatabase, TSheet> where TDatabase : SheetsDatabase<TDatabase, TSheet>
         where TSheet : Sheet, new()
     {
@@ -42,7 +42,6 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
         /// <param name="database">The database instance that contains sheet configuration
         /// and will store downloaded data.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="database"/> is null.</exception>
-        [UsedImplicitly]
         public SheetsDownloader(TDatabase database)
         {
             _database = database;
@@ -56,7 +55,6 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
         /// <returns>A <see cref="UniTask"/> representing the asynchronous resolve operation.</returns>
         /// <exception cref="Exception">Thrown when network errors occur, when the table is not found,
         /// when public read permission is not set, or when the response cannot be parsed.</exception>
-        [UsedImplicitly]
         public async UniTask<Result> TryResolveGoogleSheetsAsync()
         {
             using var request = UnityWebRequest.Get(RequestUrl);
@@ -77,7 +75,6 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
         /// <exception cref="ArgumentException">Thrown when the database's TableId is null or empty.</exception>
         /// <exception cref="Exception">Thrown when network errors occur
         /// or when access to the Google Sheets document is denied.</exception>
-        [UsedImplicitly]
         public async UniTask<Result> DownloadSheetsAsync(CancellationToken token)
         {
             Debug.Log("[SheetsDownloader::DownloadSheetsAsync] Start downloading sheets ...");
@@ -102,7 +99,8 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
             _database.MarkAsDirty();
 
             var changeResult = changedCount > 0
-                ? Result.Valid(StringFormatter.Format(SheetDownloaderConstants.ChangedSheetsDownloadedFormat, changedCount))
+                ? Result.Valid(StringFormatter.Format(SheetDownloaderConstants.ChangedSheetsDownloadedFormat,
+                    changedCount))
                 : Result.Invalid(SheetDownloaderConstants.AllSheetsUpToDateMessage);
 
             return changeResult;
@@ -120,7 +118,6 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
         /// <exception cref="ArgumentException">Thrown when the database's TableId is null or empty.</exception>
         /// <exception cref="Exception">Thrown when network errors occur
         /// or when access to the Google Sheets document is denied.</exception>
-        [UsedImplicitly]
         public async UniTask<Result> DownloadSingleSheetAsync(TSheet sheet, CancellationToken token)
         {
             if (sheet == null)
@@ -138,7 +135,8 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
                 var sheetFile = await SaveSheetDataAsync(sheet, result.Data, token);
                 sheet.UpdateSheetData(sheetFile, result.Data.Length);
 
-                var successMessage = StringFormatter.Format(SheetDownloaderConstants.SheetDownloadedSuccessFormat, sheet.Name);
+                var successMessage =
+                    StringFormatter.Format(SheetDownloaderConstants.SheetDownloadedSuccessFormat, sheet.Name);
                 return Result.Valid(successMessage);
             }
             catch (Exception ex)
@@ -162,7 +160,9 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
             var error = GetRequestError(request);
             if (string.IsNullOrEmpty(error) is true)
-            {return new Result<byte[]>(request.downloadHandler.data);}
+            {
+                return new Result<byte[]>(request.downloadHandler.data);
+            }
 
             var errorMessage = error.Contains(SheetDownloaderConstants.Error404Indicator)
                 ? SheetDownloaderConstants.TableIdWrongMessage

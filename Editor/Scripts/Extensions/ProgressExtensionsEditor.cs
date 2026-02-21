@@ -6,7 +6,7 @@ namespace CustomUtils.Editor.Scripts.Extensions
     /// <summary>
     /// Provides Editor time extension methods for <see cref="IProgress{T}"/>.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class ProgressExtensionsEditor
     {
         /// <summary>
@@ -15,7 +15,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// <param name="progress">The progress indicator to report updates to.</param>
         /// <param name="processedCount">The number of items that have been processed. This is incremented by the method.</param>
         /// <param name="totalCount">The total number of items to process.</param>
-        [UsedImplicitly]
         public static void UpdateProgress(this IProgress<float> progress, ref int processedCount, int totalCount)
         {
             processedCount++;

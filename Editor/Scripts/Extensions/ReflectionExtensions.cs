@@ -8,7 +8,7 @@ namespace CustomUtils.Editor.Scripts.Extensions
     /// <summary>
     /// Provides Editor time extension methods for reflection-based operations.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class ReflectionExtensionsEditor
     {
         /// <summary>
@@ -23,7 +23,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// This method is useful when you need to reference a field by name in serialized properties
         /// but want to avoid hardcoding strings. Throws an exception if no matching field is found.
         /// </remarks>
-        [UsedImplicitly]
         public static string GetFieldName<TClass, TField>(this TClass _,
             BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Instance)
             where TClass : class =>
@@ -44,7 +43,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// This method is useful when you need to reference a List field by name in serialized properties
         /// but want to avoid hardcoding strings. Throws an exception if no matching field is found.
         /// </remarks>
-        [UsedImplicitly]
         public static string GetListFieldName<TClass, TElement>(this TClass _,
             BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Instance)
             where TClass : class =>
@@ -59,7 +57,6 @@ namespace CustomUtils.Editor.Scripts.Extensions
         /// <param name="type">The type to search for the field.</param>
         /// <param name="fieldName">The name of the field to find.</param>
         /// <returns>The <see cref="FieldInfo"/> object representing the field if found; otherwise, null.</returns>
-        [UsedImplicitly]
         public static FieldInfo GetFieldInfo(this Type type, string fieldName)
         {
             while (type != null)

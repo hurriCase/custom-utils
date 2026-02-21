@@ -16,7 +16,7 @@ namespace CustomUtils.Editor.Scripts
     /// <typeparam name="TDatabase">The database type</typeparam>
     /// <typeparam name="TData">The data item type</typeparam>
     /// <typeparam name="TEnum">The enum type used for identifying data items</typeparam>
-    [UsedImplicitly]
+    [PublicAPI]
     public abstract class EnumDrivenHandlerEditor<TDatabase, TData, TEnum> : UnityEditor.Editor
         where TDatabase : ScriptableObject
         where TEnum : Enum

@@ -19,7 +19,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
     /// Provides consistent styling and layout methods for creating uniform editor UI elements.
     /// All methods use Unity's default editor styles for consistency with native Unity editors.
     /// </remarks>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class EditorVisualControls
     {
         /// <summary>
@@ -29,7 +29,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// Creates a header using Unity's default bold label style with standard spacing.
         /// </remarks>
-        [UsedImplicitly]
         public static void DrawSectionHeader(string title)
         {
             EditorGUILayout.Space(EditorGUIUtility.singleLineHeight * 0.5f);
@@ -43,7 +42,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// Adds consistent spacing before and after the content using Unity's standard spacing.
         /// </remarks>
-        [UsedImplicitly]
         public static void DrawPanel(Action drawContent)
         {
             EditorGUILayout.Space(EditorGUIUtility.standardVerticalSpacing);
@@ -59,7 +57,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Use this with the 'using' statement to create a panel with consistent spacing around content.
         /// Adds spacing before and after the content using Unity's standard spacing.
         /// </remarks>
-        [UsedImplicitly]
         public static PanelScope BeginPanel() => new();
 
         /// <summary>
@@ -70,7 +67,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// Uses Unity's standard single line height for property fields.
         /// </remarks>
-        [UsedImplicitly]
         public static void DrawPropertyFieldWithLabel(SerializedProperty property, string label)
         {
             EditorGUILayout.PropertyField(property, new GUIContent(label),
@@ -84,7 +80,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// Useful for displaying related properties side-by-side to save vertical space.
         /// </remarks>
-        [UsedImplicitly]
         public static void HorizontalProperties(params (SerializedProperty property, string label)[] properties)
         {
             EditorGUILayout.BeginHorizontal();
@@ -102,7 +97,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// Adds consistent spacing before and after the warning box using Unity's standard spacing.
         /// </remarks>
-        [UsedImplicitly]
         public static void WarningBox(string message)
         {
             EditorGUILayout.Space(EditorGUIUtility.standardVerticalSpacing);
@@ -119,7 +113,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Uses EditorGUI for manual positioning instead of EditorGUILayout.
         /// Designed for use in PropertyDrawer contexts where position is manually controlled.
         /// </remarks>
-        [UsedImplicitly]
         public static void WarningBox(Rect position, string message)
         {
             EditorGUI.HelpBox(position, message, MessageType.Warning);
@@ -132,7 +125,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// Adds consistent spacing before and after the info box using Unity's standard spacing.
         /// </remarks>
-        [UsedImplicitly]
         public static void InfoBox(string message)
         {
             EditorGUILayout.Space(EditorGUIUtility.standardVerticalSpacing);
@@ -149,7 +141,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Uses EditorGUI for manual positioning instead of EditorGUILayout.
         /// Designed for use in PropertyDrawer contexts where position is manually controlled.
         /// </remarks>
-        [UsedImplicitly]
         public static void InfoBox(Rect position, string message)
         {
             EditorGUI.HelpBox(position, message, MessageType.Info);
@@ -163,7 +154,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Adds consistent spacing before and after the help box using Unity's standard spacing.
         /// Uses MessageType.None to display a box without an icon.
         /// </remarks>
-        [UsedImplicitly]
         public static void HelpBox(string message)
         {
             EditorGUILayout.Space(EditorGUIUtility.standardVerticalSpacing);
@@ -181,7 +171,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Uses MessageType.None to display a box without an icon.
         /// Designed for use in PropertyDrawer contexts where position is manually controlled.
         /// </remarks>
-        [UsedImplicitly]
         public static void HelpBox(Rect position, string message)
         {
             EditorGUI.HelpBox(position, message, MessageType.None);
@@ -194,7 +183,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// Adds consistent spacing before and after the error box using Unity's standard spacing.
         /// </remarks>
-        [UsedImplicitly]
         public static void ErrorBox(string message)
         {
             EditorGUILayout.Space(EditorGUIUtility.standardVerticalSpacing);
@@ -211,7 +199,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Uses EditorGUI for manual positioning instead of EditorGUILayout.
         /// Designed for use in PropertyDrawer contexts where position is manually controlled.
         /// </remarks>
-        [UsedImplicitly]
         public static void ErrorBox(Rect position, string message)
         {
             EditorGUI.HelpBox(position, message, MessageType.Error);
@@ -225,7 +212,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// Creates a visually distinct boxed area using Unity's help box style with standard padding and spacing.
         /// </remarks>
-        [UsedImplicitly]
         public static void DrawBoxedSection(string title, Action drawContent)
         {
             EditorGUILayout.Space(EditorGUIUtility.standardVerticalSpacing);
@@ -256,7 +242,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Use this with the 'using' statement to create a boxed section with clearly defined boundaries.
         /// The box will use Unity's standard help box styling with consistent padding and spacing.
         /// </remarks>
-        [UsedImplicitly]
         public static BoxedScope BeginBoxedSection(string title = null) => new(title);
 
         /// <summary>
@@ -267,7 +252,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// Use this with the 'using' statement to create a section with clearly defined boundaries.
         /// </remarks>
-        [UsedImplicitly]
         public static SectionScope BeginSection(string title)
         {
             EditorGUILayout.Space(EditorGUIUtility.standardVerticalSpacing);
@@ -288,7 +272,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// This method applies Unity's standard foldout styling for consistency with native editors.
         /// When enableSaving is true, the foldout state is automatically saved to and restored from EditorPrefs using the title as a key.
         /// </remarks>
-        [UsedImplicitly]
         public static bool Foldout(string title, ref bool showFoldout, Action drawContent,
             bool toggleOnLabelClick = true, GUIStyle foldoutStyle = null, bool enableSaving = true)
         {
@@ -318,7 +301,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Creates a collapsible section using Unity's standard help box and foldout styles.
         /// When enableSaving is true, the foldout state is automatically saved to and restored from EditorPrefs using the title as a key.
         /// </remarks>
-        [UsedImplicitly]
         public static void DrawBoxWithFoldout(string title, ref bool showFoldout, Action drawContent,
             bool withFoldout = true, bool enableSaving = true)
         {
@@ -356,7 +338,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Uses Unity's standard foldout styling for consistency across the editor interface.
         /// When enableSaving is true, the foldout state is automatically saved to and restored from EditorPrefs using the title and index as a key.
         /// </remarks>
-        [UsedImplicitly]
         public static List<bool> Foldout(string title, in List<bool> showFoldouts, int index, Action drawContent,
             bool toggleOnLabelClick = true, bool enableSaving = true)
         {
@@ -393,7 +374,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// the foldout state is automatically saved to and restored from EditorPrefs using the title as a key.
         /// This method applies Unity's standard foldout styling for consistency with native editors.
         /// </remarks>
-        [UsedImplicitly]
         public static bool Foldout(Rect foldoutRect, string title, ref bool showFoldout, Action drawContent,
             bool toggleOnLabelClick = true, GUIStyle foldoutStyle = null, bool enableSaving = true)
         {
@@ -417,7 +397,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="text">The text to display on the button.</param>
         /// <param name="options">Optional GUILayout options for customizing button appearance and behavior.</param>
         /// <returns>True if the button was clicked in this frame, false otherwise.</returns>
-        [UsedImplicitly]
         public static bool Button(string text, params GUILayoutOption[] options) => GUILayout.Button(text, options);
 
         /// <summary>
@@ -426,7 +405,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="text">The text to display on the button.</param>
         /// <param name="drawContent">Action to execute when the button is clicked. Can be null.</param>
         /// <param name="options">Optional GUILayout options for customizing button appearance and behavior.</param>
-        [UsedImplicitly]
         public static void Button(string text, Action drawContent, params GUILayoutOption[] options)
         {
             if (GUILayout.Button(text, options))
@@ -438,7 +416,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// </summary>
         /// <param name="text">The text to display on the button.</param>
         /// <param name="buttonStyle">The GUIStyle to use for rendering the button.</param>
-        [UsedImplicitly]
         public static bool Button(string text, GUIStyle buttonStyle) => GUILayout.Button(text, buttonStyle);
 
         /// <summary>
@@ -447,7 +424,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="text">The text to display on the button.</param>
         /// <param name="drawContent">Action to execute when the button is clicked. Can be null.</param>
         /// <param name="buttonStyle">The GUIStyle to use for rendering the button.</param>
-        [UsedImplicitly]
         public static void Button(string text, Action drawContent, GUIStyle buttonStyle)
         {
             if (GUILayout.Button(text, buttonStyle))
@@ -461,7 +437,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// This method applies Unity's large label style for main section titles or page headers.
         /// </remarks>
-        [UsedImplicitly]
         public static void H1Label(string text)
         {
             EditorGUILayout.Space(EditorGUIUtility.singleLineHeight * 0.5f);
@@ -476,7 +451,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// This method applies Unity's bold label style for section headers within a larger content area.
         /// </remarks>
-        [UsedImplicitly]
         public static void H2Label(string text)
         {
             EditorGUILayout.Space(EditorGUIUtility.singleLineHeight * 0.25f);
@@ -491,7 +465,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// This method applies Unity's mini bold label style for subsection headers or group titles.
         /// </remarks>
-        [UsedImplicitly]
         public static void H3Label(string text)
         {
             EditorGUILayout.Space(EditorGUIUtility.singleLineHeight * 0.125f);
@@ -506,7 +479,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// This method applies Unity's standard label styling for regular text content.
         /// </remarks>
-        [UsedImplicitly]
         public static void LabelField(string text)
         {
             EditorGUILayout.LabelField(text, EditorStyles.label);
@@ -519,7 +491,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// This method applies Unity's standard label styling for image content.
         /// </remarks>
-        [UsedImplicitly]
         public static void Label(Texture image)
         {
             GUILayout.Label(image, EditorStyles.label);
@@ -533,7 +504,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// This method applies Unity's standard label styling with custom layout options.
         /// </remarks>
-        [UsedImplicitly]
         public static void Label(Texture image, params GUILayoutOption[] options)
         {
             GUILayout.Label(image, EditorStyles.label, options);
@@ -548,7 +518,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// This method applies custom styling with layout options for specialized use cases.
         /// </remarks>
-        [UsedImplicitly]
         public static void Label(Texture image, GUIStyle style, params GUILayoutOption[] options)
         {
             GUILayout.Label(image, style, options);
@@ -562,7 +531,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// This method applies custom styling for specialized use cases.
         /// </remarks>
-        [UsedImplicitly]
         public static void LabelField(string text, GUIStyle style)
         {
             EditorGUILayout.LabelField(text, style);
@@ -574,7 +542,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="rect">The rect where the label should be drawn.</param>
         /// <param name="text">The text to display in the label.</param>
         /// <param name="style">Optional style for the label. If null, uses EditorStyles.label.</param>
-        [UsedImplicitly]
         public static void LabelField(Rect rect, string text, GUIStyle style = null)
         {
             EditorGUI.LabelField(rect, text, style ?? EditorStyles.label);
@@ -588,7 +555,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// This method applies Unity's standard label styling with custom layout options.
         /// </remarks>
-        [UsedImplicitly]
         public static void LabelField(string text, GUILayoutOption option)
         {
             EditorGUILayout.LabelField(text, EditorStyles.label, option);
@@ -599,7 +565,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// </summary>
         /// <param name="text">The text to display in the selectable label.</param>
         /// <param name="style">The base style to use for the label. If null, EditorStyles.label will be used.</param>
-        [UsedImplicitly]
         public static void DrawWrappedSelectableLabel(string text, GUIStyle style = null)
         {
             style = style ?? EditorStyles.label;
@@ -624,7 +589,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// that maintains Unity's standard visual appearance. The field appears grayed out to
         /// indicate its read-only state.
         /// </remarks>
-        [UsedImplicitly]
         public static void ReadOnlyFloatField(string label, float value)
         {
             var originalEnabled = GUI.enabled;
@@ -642,7 +606,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// This method temporarily disables GUI interaction to create a non-editable float field
         /// with precise positioning control. The field appears grayed out to indicate its read-only state.
         /// </remarks>
-        [UsedImplicitly]
         public static void ReadOnlyFloatField(Rect rect, float value)
         {
             var originalEnabled = GUI.enabled;
@@ -657,7 +620,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// </summary>
         /// <param name="scrollPosition">Reference to the scroll position Vector2.</param>
         /// <returns>A disposable scroll scope that handles Begin/End scroll view pairs.</returns>
-        [UsedImplicitly]
         public static ScrollScope CreateScrollView(ref Vector2 scrollPosition) => new(ref scrollPosition);
 
         /// <summary>
@@ -665,7 +627,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// </summary>
         /// <param name="drawContent">Action to execute inside the horizontal group.</param>
         /// <param name="options">Optional GUILayout options.</param>
-        [UsedImplicitly]
         public static void DrawHorizontalGroup(Action drawContent, params GUILayoutOption[] options)
         {
             EditorGUILayout.BeginHorizontal(options);
@@ -679,7 +640,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="style">The GUIStyle to use for the horizontal group.</param>
         /// <param name="drawContent">Action to execute inside the horizontal group.</param>
         /// <param name="options">Optional GUILayout options.</param>
-        [UsedImplicitly]
         public static void DrawHorizontalGroup(GUIStyle style, Action drawContent, params GUILayoutOption[] options)
         {
             EditorGUILayout.BeginHorizontal(style, options);
@@ -692,7 +652,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// </summary>
         /// <param name="drawContent">Action to execute inside the horizontal group.</param>
         /// <param name="options">Optional GUILayout options.</param>
-        [UsedImplicitly]
         public static void DrawHorizontalBoxGroup(Action drawContent, params GUILayoutOption[] options)
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.helpBox, options);
@@ -705,7 +664,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// </summary>
         /// <param name="options">Optional GUILayout options.</param>
         /// <returns>A disposable scope object.</returns>
-        [UsedImplicitly]
         public static HorizontalScope CreateHorizontalGroup(params GUILayoutOption[] options) => new(options);
 
         /// <summary>
@@ -714,7 +672,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="style">The GUIStyle to use for the horizontal group.</param>
         /// <param name="options">Optional GUILayout options.</param>
         /// <returns>A disposable scope object.</returns>
-        [UsedImplicitly]
         public static HorizontalScope CreateHorizontalGroup(GUIStyle style, params GUILayoutOption[] options)
             => new(style, options);
 
@@ -724,7 +681,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// Adds a visual separator between UI elements using Unity's standard divider appearance.
         /// </remarks>
-        [UsedImplicitly]
         public static void DrawHorizontalLine()
         {
             EditorGUILayout.Space(EditorGUIUtility.standardVerticalSpacing);
@@ -747,7 +703,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// This utility method creates text styles based on Unity's built-in editor styles.
         /// </remarks>
-        [UsedImplicitly]
         public static GUIStyle CreateTextStyle(GUIStyle baseStyle, int? fontSize = null, FontStyle? fontStyle = null,
             TextAnchor? alignment = null)
         {
@@ -776,7 +731,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <remarks>
         /// This utility method creates box styles based on Unity's help box style.
         /// </remarks>
-        [UsedImplicitly]
         public static GUIStyle CreateBoxStyle(int paddingLeft, int paddingRight, int paddingTop, int paddingBottom)
         {
             var style = new GUIStyle(EditorStyles.helpBox)
@@ -802,7 +756,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Creates a visual drop area where users can drag Unity Objects.
         /// When objects are dropped, the provided callback is invoked with the list of objects.
         /// </remarks>
-        [UsedImplicitly]
         public static bool DrawObjectDropArea(float height, string message, in List<Object> droppedObject)
         {
             var dropArea = GUILayoutUtility.GetRect(0.0f, height, GUILayout.ExpandWidth(true));
@@ -849,7 +802,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="title">Title of the progress operation</param>
         /// <param name="info">Additional information to display</param>
         /// <param name="progress">Progress value between 0 and 1</param>
-        [UsedImplicitly]
         public static void DrawProgressBar(string title, string info, float progress)
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -879,7 +831,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Text automatically wraps to new lines when it exceeds the available width, and the control height adjusts accordingly.
         /// This is a wrapper around the URL-opening version that provides more flexibility for custom actions.
         /// </remarks>
-        [UsedImplicitly]
         public static bool ClickableTextWithCursor(string text, Action onClick)
         {
             var labelStyle = new GUIStyle(EditorStyles.label)
@@ -918,7 +869,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Text automatically wraps to new lines when it exceeds the available width, and the control height adjusts accordingly.
         /// This is a convenience wrapper around the action-based version for URL opening specifically.
         /// </remarks>
-        [UsedImplicitly]
         public static bool ClickableTextWithCursor(string text, string url)
             => ClickableTextWithCursor(text, () => Application.OpenURL(url));
 
@@ -928,7 +878,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="label">The label to display next to the field.</param>
         /// <param name="value">The current color value.</param>
         /// <param name="useConsistentHeight">Whether to use Unity's single line height. Default is true.</param>
-        [UsedImplicitly]
         public static void ColorField(string label, Color value, bool useConsistentHeight = true) =>
             EditorGUILayout.ColorField(label, value, useConsistentHeight
                 ? GUILayout.Height(EditorGUIUtility.singleLineHeight)
@@ -941,7 +890,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="label">The label to display next to the field.</param>
         /// <param name="value">The current color value.</param>
         /// <param name="useConsistentHeight">Whether to use Unity's single line height. Default is true.</param>
-        [UsedImplicitly]
         public static void ColorField(Rect rect, string label, Color value, bool useConsistentHeight = true) =>
             EditorGUI.ColorField(rect, label, value);
 
@@ -951,7 +899,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="label">The label to display next to the field.</param>
         /// <param name="value">The current gradient value.</param>
         /// <param name="useConsistentHeight">Whether to use Unity's single line height. Default is true.</param>
-        [UsedImplicitly]
         public static void GradientField(string label, Gradient value, bool useConsistentHeight = true) =>
             EditorGUILayout.GradientField(label, value, useConsistentHeight
                 ? GUILayout.Height(EditorGUIUtility.singleLineHeight)
@@ -964,7 +911,6 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// <param name="label">The label to display next to the field.</param>
         /// <param name="value">The current gradient value.</param>
         /// <param name="useConsistentHeight">Whether to use Unity's single line height. Default is true.</param>
-        [UsedImplicitly]
         public static void GradientField(Rect rect, string label, Gradient value, bool useConsistentHeight = true) =>
             EditorGUI.GradientField(rect, label, value);
     }

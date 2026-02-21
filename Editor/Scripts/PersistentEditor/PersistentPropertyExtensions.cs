@@ -7,7 +7,7 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
     /// <summary>
     /// Extension methods for creating persistent editor properties
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public static class PersistentPropertyExtensions
     {
         /// <summary>
@@ -18,7 +18,6 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
         /// <param name="key">Base key for storage</param>
         /// <param name="defaultValue">Default value if no saved value exists</param>
         /// <returns>New persistent editor property</returns>
-        [UsedImplicitly]
         public static PersistentEditorProperty<TProperty> CreatePersistentProperty<TProperty>(
             this Object target,
             string key,
