@@ -140,22 +140,38 @@ namespace CustomUtils.Runtime.UI.Windows
             OpenPopupAsync(popupBase, popupType).Forget();
         }
 
-        public TPopupType OpenPopup<TPopupType>() where TPopupType : PopupBase
+        public void OpenScreen<TParameters>(TScreenEnum screenType, TParameters parameters)
         {
-            foreach (var (popupEnum, popupBase) in _createdPopups.AsTuples())
-            {
-                if (popupBase.GetType() != typeof(TPopupType))
-                    continue;
+            var screenBase = _createdScreens[screenType];
 
-                OpenPopupAsync(popupBase, popupEnum).Forget();
-                return popupBase as TPopupType;
+            // ReSharper disable once SuspiciousTypeConversion.Global | will be inherited on the user side
+            // ReSharper disable once Unity.NoNullPatternMatching | checked on the left
+            if (!screenBase || screenBase is not IParameterizedWindow<TParameters> parameterizedScreen)
+            {
+                Debug.LogWarning("[WindowsControllerBase::OpenScreen] " +
+                                 $"Screen {screenType} does not implement {nameof(IParameterizedWindow<TParameters>)}");
+                return;
             }
 
-            var errorMessage = StringFormatter.Concat("[WindowsControllerBase::OpenPopup] " +
-                                                      "There is no popup with type: ", typeof(TPopupType));
-            Debug.LogError(errorMessage);
+            parameterizedScreen.SetParameters(parameters);
+            OpenScreenByType(screenType);
+        }
 
-            return null;
+        public void OpenPopup<TParameters>(TPopupEnum popupType, TParameters parameters)
+        {
+            var popupBase = _createdPopups[popupType];
+
+            // ReSharper disable once SuspiciousTypeConversion.Global | will be inherited on the user side
+            // ReSharper disable once Unity.NoNullPatternMatching | checked on the left
+            if (!popupBase || popupBase is not IParameterizedWindow<TParameters> parameterizedPopup)
+            {
+                Debug.LogWarning("[WindowsControllerBase::OpenPopup] " +
+                                 $"Popup {popupType} does not implement {nameof(IParameterizedWindow<TParameters>)}");
+                return;
+            }
+
+            parameterizedPopup.SetParameters(parameters);
+            OpenPopupAsync(popupBase, popupType).Forget();
         }
 
         public void BindPopupOpen(UIBehaviour component, TPopupEnum popupType)
