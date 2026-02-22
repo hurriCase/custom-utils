@@ -81,6 +81,10 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
             PrepareDownloadFolderIfNeeded();
 
+            var resolveResult = await TryResolveGoogleSheetsAsync();
+            if (!resolveResult.IsValid)
+                return resolveResult;
+
             await FillSheetsToDownloadAsync(token);
 
             if (_sheetsToDownload.Count == 0)

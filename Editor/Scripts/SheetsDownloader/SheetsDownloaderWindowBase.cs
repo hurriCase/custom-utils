@@ -90,12 +90,6 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
         private async UniTaskVoid ProcessDownloadSheetsAsync()
         {
-            if (Database.Sheets.Count == 0)
-            {
-                var resolveResult = await _sheetsDownloader.TryResolveGoogleSheetsAsync();
-                resolveResult.DisplayMessage();
-            }
-
             var token = CancellationExtensions.GetFreshToken(ref _downloadTokenSource);
             var downloadResult = await _sheetsDownloader.DownloadSheetsAsync(token);
 
