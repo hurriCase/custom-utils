@@ -15,8 +15,8 @@ namespace CustomUtils.Runtime.StartUp
         /// Initializes the specified startup steps in sequence.
         /// </summary>
         /// <param name="steps">The list of steps to initialize.</param>
-        /// <param name="cancellationToken">The cancellation token to stop initialization.</param>
+        /// <param name="token">The cancellation token to stop initialization.</param>
         /// <returns>A task representing the asynchronous initialization operation.</returns>
-        UniTask InitializeSteps(List<StepBase> steps, CancellationToken cancellationToken);
+        UniTask InitializeSteps(List<StepBase> steps, CancellationToken token);
     }
 }

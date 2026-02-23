@@ -17,25 +17,28 @@ namespace CustomUtils.Runtime.StartUp
         /// <summary>
         /// Gets an observable that emits when the step completes execution.
         /// </summary>
-        public Observable<StepData> OnStepCompletedObservable => _stepCompletedSubject.AsObservable();
-
-        private readonly Subject<StepData> _stepCompletedSubject = new();
+        public Observable<string> OnStepCompletedObservable => _stepCompletedSubject;
 
         protected virtual string LoadingText { get; }
 
         protected const string InitializationStepsPath = "Initialization Steps/";
 
-        internal async UniTask ExecuteAsync(int step, CancellationToken token)
+        private readonly Subject<string> _stepCompletedSubject = new();
+
+        public virtual async UniTask<bool> ExecuteAsync(CancellationToken token)
         {
             try
             {
-                await ExecuteInternalAsync(token);
-                _stepCompletedSubject.OnNext(new StepData(step, GetType().Name, LoadingText));
+                var isSuccess = await ExecuteInternalAsync(token);
+                _stepCompletedSubject.OnNext(LoadingText);
+                LogStep(isSuccess);
+                return isSuccess;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[{GetType().Name}::ExecuteAsync] Step initialization failed: {ex.Message}");
+                LogStep(false, ex.Message);
                 Debug.LogException(ex);
+                return false;
             }
         }
 
@@ -44,6 +47,18 @@ namespace CustomUtils.Runtime.StartUp
         /// </summary>
         /// <param name="token">The cancellation token to stop execution.</param>
         /// <returns>A task representing the asynchronous execution operation.</returns>
-        protected abstract UniTask ExecuteInternalAsync(CancellationToken token);
+        protected abstract UniTask<bool> ExecuteInternalAsync(CancellationToken token);
+
+        private void LogStep(bool isSuccess, string message = null)
+        {
+            if (isSuccess)
+            {
+                Debug.Log($"[{GetType().Name}::LogStep] Step {GetType().Name} completed");
+                return;
+            }
+
+            Debug.LogError($"[{GetType().Name}::LogStep] " +
+                           $"Step initialization failed {(string.IsNullOrEmpty(message) ? "" : message)}");
+        }
     }
 }
