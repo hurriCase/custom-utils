@@ -48,7 +48,7 @@ namespace CustomUtils.Runtime.Api.Base
         /// Initializes the configuration with an encrypted API key.
         /// </summary>
         /// <param name="encryptedApiKey">The encrypted API key.</param>
-        public void Init(string encryptedApiKey)
+        public void Initialize(string encryptedApiKey)
         {
             _encryptedApiKey = encryptedApiKey;
         }

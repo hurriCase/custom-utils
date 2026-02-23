@@ -65,7 +65,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             BorderWidth.SubscribeUntilDestroy(this, static self => self.SetVerticesDirty());
             FalloffDistance.SubscribeUntilDestroy(this, static self => self.SetVerticesDirty());
 
-            Init();
+            Initialize();
         }
 
         protected override void OnDisable()
@@ -75,7 +75,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             m_OnDirtyVertsCallback -= OnVerticesDirty;
         }
 
-        private void Init()
+        private void Initialize()
         {
             FixTexCoordsInCanvas();
 

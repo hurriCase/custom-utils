@@ -33,7 +33,7 @@ namespace CustomUtils.Runtime
         /// <param name="onReleaseCallback">Called when an object is returned to the pool</param>
         /// <param name="onDestroyCallback">Called when an object is destroyed</param>
         /// <param name="parent">Transform parent for instantiated objects</param>
-        public void Init(
+        public void Initialize(
             TPoolEntity prefab,
             int defaultPoolSize = 10,
             int maxPoolSize = 100,

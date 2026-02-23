@@ -42,7 +42,7 @@ namespace CustomUtils.Runtime.Logger
         /// <summary>
         /// Initializes the log collector with specified parameters from LogCollectorSettings.
         /// </summary>
-        public static void Init()
+        public static void Initialize()
         {
             StopCollection();
 

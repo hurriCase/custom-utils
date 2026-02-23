@@ -46,7 +46,7 @@ namespace CustomUtils.Runtime.Audio
             await SoundVolume.InitAsync(SoundVolumeKey, destroyCancellationToken, defaultSoundVolume);
 
             _soundPool = new PoolHandler<AudioSource>();
-            _soundPool.Init(_soundSourcePrefab, _soundPoolSize, _maxPoolSize, parent: transform);
+            _soundPool.Initialize(_soundSourcePrefab, _soundPoolSize, _maxPoolSize, parent: transform);
 
             SoundVolume.SubscribeUntilDestroy(this, static (volume, self) => self.OnSoundVolumeChanged(volume));
             MusicVolume.SubscribeUntilDestroy(this, static (volume, self) => self.OnMusicVolumeChanged(volume));
