@@ -20,7 +20,7 @@ namespace CustomUtils.Runtime.StartUp
             _objectResolver = objectResolver;
         }
 
-        public async UniTask InitSteps(List<StepBase> steps, CancellationToken cancellationToken)
+        public async UniTask InitializeSteps(List<StepBase> steps, CancellationToken cancellationToken)
         {
             try
             {
@@ -31,7 +31,7 @@ namespace CustomUtils.Runtime.StartUp
                         .RegisterTo(cancellationToken);
 
                     _objectResolver.Inject(steps[i]);
-                    await steps[i].Execute(i, cancellationToken);
+                    await steps[i].ExecuteAsync(i, cancellationToken);
                 }
             }
             catch (Exception ex)

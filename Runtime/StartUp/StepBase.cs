@@ -21,18 +21,20 @@ namespace CustomUtils.Runtime.StartUp
 
         private readonly Subject<StepData> _stepCompletedSubject = new();
 
+        protected virtual string LoadingText { get; }
+
         protected const string InitializationStepsPath = "Initialization Steps/";
 
-        internal async UniTask Execute(int step, CancellationToken token)
+        internal async UniTask ExecuteAsync(int step, CancellationToken token)
         {
             try
             {
-                await ExecuteInternal(token);
-                _stepCompletedSubject.OnNext(new StepData(step, GetType().Name));
+                await ExecuteInternalAsync(token);
+                _stepCompletedSubject.OnNext(new StepData(step, GetType().Name, LoadingText));
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[{GetType().Name}::Execute] Step initialization failed: {ex.Message}");
+                Debug.LogError($"[{GetType().Name}::ExecuteAsync] Step initialization failed: {ex.Message}");
                 Debug.LogException(ex);
             }
         }
@@ -42,6 +44,6 @@ namespace CustomUtils.Runtime.StartUp
         /// </summary>
         /// <param name="token">The cancellation token to stop execution.</param>
         /// <returns>A task representing the asynchronous execution operation.</returns>
-        protected abstract UniTask ExecuteInternal(CancellationToken token);
+        protected abstract UniTask ExecuteInternalAsync(CancellationToken token);
     }
 }

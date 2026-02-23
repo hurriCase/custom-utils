@@ -19,14 +19,21 @@ namespace CustomUtils.Runtime.StartUp
         public string StepName { get; }
 
         /// <summary>
+        /// Gets the loading text displayed during step execution.
+        /// </summary>
+        public string LoadingText { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="StepData"/> struct.
         /// </summary>
         /// <param name="step">The step number in the initialization sequence.</param>
         /// <param name="stepName">The name of the step.</param>
-        public StepData(int step, string stepName)
+        /// <param name="loadingText">The loading text displayed during step execution.</param>
+        public StepData(int step, string stepName, string loadingText)
         {
             Step = step;
             StepName = stepName;
+            LoadingText = loadingText;
         }
     }
 }
