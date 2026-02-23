@@ -9,7 +9,7 @@ namespace CustomUtils.Runtime.StartUp
     /// Defines a controller for managing startup initialization steps.
     /// </summary>
     [PublicAPI]
-    public interface IStartUpController
+    public interface IInitializationStepsHandler
     {
         /// <summary>
         /// Initializes the specified startup steps in sequence.

@@ -7,11 +7,11 @@ using VContainer;
 namespace CustomUtils.Runtime.StartUp
 {
     [PublicAPI]
-    public sealed class StartUpController : IStartUpController
+    public sealed class InitializationStepsHandler : IInitializationStepsHandler
     {
         private readonly IObjectResolver _objectResolver;
 
-        internal StartUpController(IObjectResolver objectResolver)
+        internal InitializationStepsHandler(IObjectResolver objectResolver)
         {
             _objectResolver = objectResolver;
         }
