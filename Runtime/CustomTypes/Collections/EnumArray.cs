@@ -2,10 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using CustomUtils.Unsafe;
 using JetBrains.Annotations;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 #if MEMORY_PACK_INSTALLED
 using MemoryPack;
@@ -69,6 +71,8 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         /// </summary>
         public EnumArray()
         {
+            ValidateEnumOrdering();
+
             Entries = new Entry<TValue>[_cachedKeys.Length];
 
             for (var i = 0; i < Entries.Length; i++)
@@ -81,6 +85,8 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         /// <param name="defaultValue">The default value to assign to all elements in the array.</param>
         public EnumArray(TValue defaultValue)
         {
+            ValidateEnumOrdering();
+
             Entries = new Entry<TValue>[_cachedKeys.Length];
 
             for (var i = 0; i < Entries.Length; i++)
@@ -94,6 +100,8 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         /// <param name="factory">A factory method that creates default values for each array element.</param>
         public EnumArray(Func<TValue> factory)
         {
+            ValidateEnumOrdering();
+
             Entries = new Entry<TValue>[_cachedKeys.Length];
 
             for (var i = 0; i < Entries.Length; i++)
@@ -106,6 +114,8 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         [EditorBrowsable(EditorBrowsableState.Never)]
         public EnumArray(Entry<TValue>[] entries)
         {
+            ValidateEnumOrdering();
+
             Entries = entries;
         }
 
@@ -209,5 +219,20 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         /// </summary>
         public static bool operator !=(EnumArray<TEnum, TValue> left, EnumArray<TEnum, TValue> right) =>
             Equals(left, right) is false;
+
+        [Conditional("UNITY_EDITOR")]
+        private static void ValidateEnumOrdering()
+        {
+            for (var i = 0; i < _cachedKeys.Length; i++)
+            {
+                var ordinal = UnsafeEnumConverter<TEnum>.ToInt32(_cachedKeys[i]);
+                if (ordinal == i)
+                    continue;
+
+                Debug.LogError("[EnumArray::ValidateEnumOrdering] " +
+                               $"{typeof(TEnum).Name} requires zero-based contiguous values. " +
+                               $"{_cachedKeys[i]} has ordinal {ordinal}, expected {i}.");
+            }
+        }
     }
 }
