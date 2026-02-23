@@ -13,7 +13,8 @@ namespace CustomUtils.Runtime.Scenes
     {
         public bool IsLoading { get; private set; }
 
-        private SceneInstance _transitionsScene;
+        private Scene _initialScene;
+        private SceneInstance _transitionScene;
         private SceneInstance _currentScene;
 
         private readonly ISceneLoader _sceneLoader;
@@ -21,24 +22,29 @@ namespace CustomUtils.Runtime.Scenes
         public SceneTransitionController(ISceneLoader sceneLoader)
         {
             _sceneLoader = sceneLoader;
+            _initialScene = SceneManager.GetActiveScene();
         }
 
         public async UniTask StartTransition(
             SceneReference transitionScene,
             SceneReference destinationScene,
+            CancellationToken token,
             bool isEndAfterTransition = true)
         {
             IsLoading = true;
 
-            _transitionsScene = await _sceneLoader.LoadSceneAsync(
+            _transitionScene = await _sceneLoader.LoadSceneAsync(
                 transitionScene.Address,
-                CancellationToken.None,
+                token,
                 LoadSceneMode.Additive);
+
+            if (_initialScene.isLoaded)
+                SceneManager.UnloadSceneAsync(_initialScene);
 
             if (_currentScene.Scene.IsValid())
                 _sceneLoader.TryUnloadScene(_currentScene);
 
-            _currentScene = await _sceneLoader.LoadSceneAsync(destinationScene.Address, CancellationToken.None);
+            _currentScene = await _sceneLoader.LoadSceneAsync(destinationScene.Address, token, LoadSceneMode.Additive);
 
             IsLoading = false;
 
@@ -50,7 +56,7 @@ namespace CustomUtils.Runtime.Scenes
         {
             await UniTask.WaitUntil(this, static self => self.IsLoading is false);
 
-            _sceneLoader.TryUnloadScene(_transitionsScene);
+            _sceneLoader.TryUnloadScene(_transitionScene);
         }
     }
 }
