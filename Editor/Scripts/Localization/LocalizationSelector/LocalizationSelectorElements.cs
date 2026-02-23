@@ -1,4 +1,5 @@
-﻿using UnityEngine.UIElements;
+﻿#if CUSTOM_LOCALIZATION
+using UnityEngine.UIElements;
 
 namespace CustomUtils.Editor.Scripts.Localization.LocalizationSelector
 {
@@ -28,3 +29,4 @@ namespace CustomUtils.Editor.Scripts.Localization.LocalizationSelector
         }
     }
 }
+#endif

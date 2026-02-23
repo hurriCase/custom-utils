@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if CUSTOM_LOCALIZATION
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using AYellowpaper.SerializedCollections;
@@ -74,3 +75,4 @@ namespace CustomUtils.Runtime.Localization
         }
     }
 }
+#endif

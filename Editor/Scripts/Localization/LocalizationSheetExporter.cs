@@ -1,4 +1,5 @@
-﻿using CustomUtils.Runtime.Formatter;
+﻿#if CUSTOM_LOCALIZATION
+using CustomUtils.Runtime.Formatter;
 using CustomUtils.Runtime.Localization;
 using UnityEngine;
 using ZLinq;
@@ -79,3 +80,4 @@ namespace CustomUtils.Editor.Scripts.Localization
         }
     }
 }
+#endif

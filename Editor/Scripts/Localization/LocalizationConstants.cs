@@ -1,4 +1,5 @@
-﻿namespace CustomUtils.Editor.Scripts.Localization
+﻿#if CUSTOM_LOCALIZATION
+namespace CustomUtils.Editor.Scripts.Localization
 {
     internal static class LocalizationConstants
     {
@@ -24,3 +25,4 @@
         internal const string ToolbarPath = "Localization/Change Language";
     }
 }
+#endif

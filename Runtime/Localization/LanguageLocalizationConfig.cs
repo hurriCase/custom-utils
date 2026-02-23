@@ -1,4 +1,5 @@
-﻿using CustomUtils.Runtime.AssetLoader;
+﻿#if CUSTOM_LOCALIZATION
+using CustomUtils.Runtime.AssetLoader;
 using CustomUtils.Runtime.CustomTypes.Collections;
 using CustomUtils.Runtime.CustomTypes.Singletons;
 using CustomUtils.Unsafe;
@@ -20,3 +21,4 @@ namespace CustomUtils.Runtime.Localization
         }
     }
 }
+#endif

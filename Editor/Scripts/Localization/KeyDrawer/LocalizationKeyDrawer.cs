@@ -1,4 +1,5 @@
-﻿using CustomUtils.Editor.Scripts.Extensions;
+﻿#if CUSTOM_LOCALIZATION
+using CustomUtils.Editor.Scripts.Extensions;
 using CustomUtils.Editor.Scripts.Localization.LocalizationSelector;
 using CustomUtils.Runtime.Localization;
 using UnityEditor;
@@ -43,3 +44,4 @@ namespace CustomUtils.Editor.Scripts.Localization.KeyDrawer
         }
     }
 }
+#endif

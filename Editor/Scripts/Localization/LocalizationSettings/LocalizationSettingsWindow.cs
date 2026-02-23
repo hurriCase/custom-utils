@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if CUSTOM_LOCALIZATION
+using System;
 using System.Collections.Generic;
 using CustomUtils.Editor.Scripts.SheetsDownloader;
 using CustomUtils.Runtime.Downloader;
@@ -168,3 +169,4 @@ namespace CustomUtils.Editor.Scripts.Localization.LocalizationSettings
         }
     }
 }
+#endif

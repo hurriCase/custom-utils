@@ -1,4 +1,5 @@
-﻿using CustomUtils.Runtime.Localization;
+﻿#if CUSTOM_LOCALIZATION
+using CustomUtils.Runtime.Localization;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEditor.Toolbars;
@@ -33,3 +34,4 @@ namespace CustomUtils.Editor.Scripts.Localization
         }
     }
 }
+#endif

@@ -1,4 +1,5 @@
-﻿using AYellowpaper.SerializedCollections;
+﻿#if CUSTOM_LOCALIZATION
+using AYellowpaper.SerializedCollections;
 using CustomUtils.Editor.Scripts.Localization.LocalizationSelector;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Localization;
@@ -165,3 +166,4 @@ namespace CustomUtils.Editor.Scripts.Localization.KeyDrawer
         }
     }
 }
+#endif

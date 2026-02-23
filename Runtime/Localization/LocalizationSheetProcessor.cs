@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if CUSTOM_LOCALIZATION
+using System;
 using System.Collections.Generic;
 using CustomUtils.Runtime.CSV;
 using CustomUtils.Runtime.CSV.CSVEntry;
@@ -89,3 +90,4 @@ namespace CustomUtils.Runtime.Localization
         }
     }
 }
+#endif

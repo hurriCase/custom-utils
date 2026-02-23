@@ -1,4 +1,5 @@
-﻿using CustomUtils.Runtime.Localization;
+﻿#if CUSTOM_LOCALIZATION
+using CustomUtils.Runtime.Localization;
 using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime.Extensions
@@ -17,3 +18,4 @@ namespace CustomUtils.Runtime.Extensions
         public static string GetLocalization(this LocalizationKey key) => LocalizationController.Localize(key);
     }
 }
+#endif

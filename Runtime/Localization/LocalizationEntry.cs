@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if CUSTOM_LOCALIZATION
+using System;
 using AYellowpaper.SerializedCollections;
 using CustomUtils.Runtime.Attributes;
 using UnityEngine;
@@ -35,3 +36,4 @@ namespace CustomUtils.Runtime.Localization
             => Translations.TryGetValue(language, out translation);
     }
 }
+#endif

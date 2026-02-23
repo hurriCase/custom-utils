@@ -1,4 +1,5 @@
-﻿using CustomUtils.Runtime.AssetLoader;
+﻿#if CUSTOM_LOCALIZATION
+using CustomUtils.Runtime.AssetLoader;
 using CustomUtils.Runtime.Downloader;
 using UnityEngine;
 
@@ -17,3 +18,4 @@ namespace CustomUtils.Runtime.Localization
         public override string GetDownloadPath() => ResourcePaths.LocalizationSheetsPath;
     }
 }
+#endif

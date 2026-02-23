@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if CUSTOM_LOCALIZATION
+using System;
 using UnityEngine;
 
 namespace CustomUtils.Runtime.Localization
@@ -11,3 +12,4 @@ namespace CustomUtils.Runtime.Localization
         public bool IsValid => string.IsNullOrEmpty(GUID) is false;
     }
 }
+#endif

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if CUSTOM_LOCALIZATION
+using System;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Localization;
 using UnityEditor;
@@ -125,3 +126,4 @@ namespace CustomUtils.Editor.Scripts.Localization.LocalizationSelector
         }
     }
 }
+#endif
