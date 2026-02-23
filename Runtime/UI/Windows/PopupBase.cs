@@ -1,10 +1,10 @@
 ﻿using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Extensions.Observables;
-using CustomUtils.Runtime.UI.CustomComponents.Selectables.Buttons;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using R3;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CustomUtils.Runtime.UI.Windows
 {
@@ -15,7 +15,7 @@ namespace CustomUtils.Runtime.UI.Windows
 
         [SerializeField] private VisibilityHandler _visibilityHandler;
 
-        [SerializeField] protected ThemeButton closeButton;
+        [SerializeField] protected Button closeButton;
 
         public Observable<Unit> OnShown => _shown;
         private readonly Subject<Unit> _shown = new();
