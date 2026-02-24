@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using CustomUtils.Runtime.LocalizationProviders;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using R3;
@@ -14,12 +15,12 @@ namespace CustomUtils.Runtime.StartUp
     [PublicAPI]
     public abstract class StepBase : ScriptableObject
     {
+        [SerializeReference, SerializeReferenceDropdown] private ILocalization _loadingKey;
+
         /// <summary>
         /// Gets an observable that emits when the step completes execution.
         /// </summary>
         public Observable<string> OnStepCompletedObservable => _stepCompletedSubject;
-
-        protected virtual string LoadingText { get; }
 
         protected const string InitializationStepsPath = "Initialization Steps/";
 
@@ -30,7 +31,10 @@ namespace CustomUtils.Runtime.StartUp
             try
             {
                 var isSuccess = await ExecuteInternalAsync(token);
-                _stepCompletedSubject.OnNext(LoadingText);
+
+                var loadingText = await _loadingKey.GetLocalizationAsync(token);
+                _stepCompletedSubject.OnNext(loadingText);
+
                 LogStep(isSuccess);
                 return isSuccess;
             }
