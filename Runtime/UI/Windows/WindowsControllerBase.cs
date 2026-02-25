@@ -148,8 +148,8 @@ namespace CustomUtils.Runtime.UI.Windows
             // ReSharper disable once Unity.NoNullPatternMatching | checked on the left
             if (!screenBase || screenBase is not IParameterizedWindow<TParameters> parameterizedScreen)
             {
-                Debug.LogWarning("[WindowsControllerBase::OpenScreen] " +
-                                 $"Screen {screenType} does not implement {nameof(IParameterizedWindow<TParameters>)}");
+                Debug.LogError("[WindowsControllerBase::OpenScreen] " +
+                               $"Screen {screenType} does not implement {nameof(IParameterizedWindow<TParameters>)}");
                 return;
             }
 
@@ -165,8 +165,8 @@ namespace CustomUtils.Runtime.UI.Windows
             // ReSharper disable once Unity.NoNullPatternMatching | checked on the left
             if (!popupBase || popupBase is not IParameterizedWindow<TParameters> parameterizedPopup)
             {
-                Debug.LogWarning("[WindowsControllerBase::OpenPopup] " +
-                                 $"Popup {popupType} does not implement {nameof(IParameterizedWindow<TParameters>)}");
+                Debug.LogError("[WindowsControllerBase::OpenPopup] " +
+                               $"Popup {popupType} does not implement {nameof(IParameterizedWindow<TParameters>)}");
                 return;
             }
 
