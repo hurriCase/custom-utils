@@ -1,5 +1,7 @@
-﻿using R3;
+﻿using System;
+using R3;
 using TMPro;
+using UnityEngine.UI;
 
 namespace CustomUtils.Runtime.Extensions.Observables
 {
@@ -26,6 +28,23 @@ namespace CustomUtils.Runtime.Extensions.Observables
                 return inputField.onValueChanged.AsObservable(inputField.destroyCancellationToken)
                     .Subscribe(observer);
             });
+        }
+
+        /// <summary>
+        /// Binds a <see cref="Toggle"/> to a <see cref="ReactiveProperty{T}"/> of type <see cref="bool"/>,
+        /// synchronizing the toggle's state with the property value.
+        /// Sets the initial toggle state from the property and updates the property whenever the toggle changes.
+        /// </summary>
+        /// <param name="toggle">The <see cref="Toggle"/> to bind.</param>
+        /// <param name="property">The <see cref="ReactiveProperty{T}"/> that receives toggle value changes.</param>
+        /// <returns>
+        /// An <see cref="IDisposable"/> that, when disposed, stops synchronization between the toggle and the property.
+        /// </returns>
+        public static IDisposable BindOnValueChanged(this Toggle toggle, ReactiveProperty<bool> property)
+        {
+            toggle.isOn = property.Value;
+            return toggle.OnValueChangedAsObservable()
+                .Subscribe(property, static (isOn, property) => property.Value = isOn);
         }
     }
 }
