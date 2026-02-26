@@ -11,7 +11,7 @@ namespace CustomUtils.Runtime.Storage
 {
     /// <summary>
     /// A reactive property that automatically persists its value to storage.
-    /// Must call <see cref="InitAsync"/> before use to load saved values.
+    /// Must call <see cref="InitializeAsync"/> before use to load saved values.
     /// </summary>
     /// <typeparam name="TProperty">The type of value to store and persist</typeparam>
     [PublicAPI]
@@ -75,7 +75,7 @@ namespace CustomUtils.Runtime.Storage
         /// <param name="defaultValue">Default value to use if no saved value exists or loading fails</param>
         /// <returns>A task that completes when initialization is finished</returns>
         /// <exception cref="InvalidOperationException">Thrown if called multiple times</exception>
-        public async UniTask InitAsync(string key, CancellationToken token = default, TProperty defaultValue = default)
+        public async UniTask InitializeAsync(string key, CancellationToken token = default, TProperty defaultValue = default)
         {
             _provider = ServiceProvider.Provider;
 
@@ -92,10 +92,11 @@ namespace CustomUtils.Runtime.Storage
                 if (loaded != null && EqualityComparer<TProperty>.Default.Equals(loaded, default) is false)
                     Property.Value = loaded;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
+                Debug.LogException(e);
                 Debug.LogError("[PersistentReactiveProperty::InitializeAsync] " +
-                               $"Failed to load key '{_key}': {ex.Message}");
+                               $"Failed to load key '{_key}': {e.Message}");
             }
             finally
             {

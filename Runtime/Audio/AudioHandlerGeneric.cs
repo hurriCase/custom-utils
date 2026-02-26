@@ -42,8 +42,8 @@ namespace CustomUtils.Runtime.Audio
             float defaultSoundVolume = 1f,
             CancellationToken cancellationToken = default)
         {
-            await MusicVolume.InitAsync(MusicVolumeKey, destroyCancellationToken, defaultMusicVolume);
-            await SoundVolume.InitAsync(SoundVolumeKey, destroyCancellationToken, defaultSoundVolume);
+            await MusicVolume.InitializeAsync(MusicVolumeKey, destroyCancellationToken, defaultMusicVolume);
+            await SoundVolume.InitializeAsync(SoundVolumeKey, destroyCancellationToken, defaultSoundVolume);
 
             _soundPool = new PoolHandler<AudioSource>();
             _soundPool.Initialize(_soundSourcePrefab, _soundPoolSize, _maxPoolSize, parent: transform);
