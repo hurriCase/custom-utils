@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Threading;
 using CustomUtils.Runtime.Serializer;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 
 namespace CustomUtils.Runtime.Storage.Base
 {
-    internal abstract class BaseStorageProvider : IStorageProvider
+    /// <inheritdoc />
+    /// <summary>
+    /// Base class for storage providers. Handles serialization, caching, and error logging.
+    /// Extend this to implement a custom storage backend.
+    /// </summary>
+    public abstract class BaseStorageProvider : IStorageProvider
     {
         private readonly Dictionary<string, byte[]> _cache = new();
 
@@ -31,14 +35,13 @@ namespace CustomUtils.Runtime.Storage.Base
 
                 await PlatformSaveAsync(key, transformedData, cancellationToken);
 
-#if IS_TEST
-                Debug.Log($"[{GetType().Name}::SaveAsync] Saved data for key '{key}'");
-#endif
+                Logger.Log($"[{GetType().Name}::SaveAsync] Saved data for key '{key}'");
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Debug.LogError($"[{GetType().Name}::SaveAsync] Error during saving data: {ex.Message}");
+                Logger.LogException(e);
+                Logger.LogError($"[{GetType().Name}::SaveAsync] Error during saving data: {e.Message}");
                 return false;
             }
         }
@@ -62,16 +65,15 @@ namespace CustomUtils.Runtime.Storage.Base
 
                 var data = _serializer.Deserialize<TData>(buffer);
 
-#if IS_TEST
-                Debug.Log("[{GetType().Name}::LoadAsync] " +
-                          "Loaded data for key '{key}' with type '{typeof(TData).Name}' and value '{data}'");
-#endif
+                Logger.Log($"[{GetType().Name}::LoadAsync] " +
+                           "Loaded data for key '{key}' with type '{typeof(TData).Name}' and value '{data}'");
 
                 return data;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Debug.LogError($"[{GetType().Name}::LoadAsync] Error loading data: {ex.Message}");
+                Logger.LogException(e);
+                Logger.LogError($"[{GetType().Name}::LoadAsync] Error loading data: {e.Message}");
                 return default;
             }
         }
@@ -91,15 +93,14 @@ namespace CustomUtils.Runtime.Storage.Base
                 _cache.Remove(key);
                 await PlatformDeleteKeyAsync(key, cancellationToken);
 
-#if IS_TEST
-                Debug.Log($"[{GetType().Name}::TryDeleteKeyAsync] Deleted key '{key}'");
-#endif
+                Logger.Log($"[{GetType().Name}::TryDeleteKeyAsync] Deleted key '{key}'");
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Debug.LogError($"[{GetType().Name}::TryDeleteKeyAsync] Error deleting key: {ex.Message}");
+                Logger.LogException(e);
+                Logger.LogError($"[{GetType().Name}::TryDeleteKeyAsync] Error deleting key: {e.Message}");
                 return false;
             }
         }
@@ -111,20 +112,33 @@ namespace CustomUtils.Runtime.Storage.Base
                 _cache.Clear();
                 var success = await PlatformTryDeleteAllAsync(cancellationToken);
 
-#if IS_TEST
                 if (success)
-                    Debug.Log($"[{GetType().Name}::TryDeleteAllAsync] Successfully deleted all data");
+                    Logger.Log($"[{GetType().Name}::TryDeleteAllAsync] Successfully deleted all data");
                 else
-                    Debug.LogWarning($"[{GetType().Name}::TryDeleteAllAsync] DeleteAll not supported or failed");
-#endif
+                    Logger.LogWarning($"[{GetType().Name}::TryDeleteAllAsync] DeleteAll not supported or failed");
 
                 return success;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Debug.LogError($"[{GetType().Name}::TryDeleteAllAsync] Error deleting all data: {ex.Message}");
+                Logger.LogException(e);
+                Logger.LogError($"[{GetType().Name}::TryDeleteAllAsync] Error deleting all data: {e.Message}");
                 return false;
             }
+        }
+
+        protected bool TryGetTransformedData<TTransformed>(object transformData, out TTransformed result)
+        {
+            if (transformData is TTransformed casted)
+            {
+                result = casted;
+                return true;
+            }
+
+            Logger.LogError($"[{GetType().Name}::TryGetTransformedData] " +
+                            $"Unexpected data type: {transformData?.GetType().Name ?? "null"}");
+            result = default;
+            return false;
         }
 
         protected abstract UniTask PlatformSaveAsync(string key, object transformData, CancellationToken cancellationToken);

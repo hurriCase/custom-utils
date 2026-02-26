@@ -9,18 +9,9 @@ using UnityEngine;
 
 namespace CustomUtils.Runtime.Storage
 {
-    /// <summary>
-    /// A reactive property that automatically persists its value to storage.
-    /// Must call <see cref="InitializeAsync"/> before use to load saved values.
-    /// </summary>
-    /// <typeparam name="TProperty">The type of value to store and persist</typeparam>
     [PublicAPI]
     public sealed class PersistentReactiveProperty<TProperty> : IDisposable
     {
-        /// <summary>
-        /// Gets the underlying reactive property.
-        /// </summary>
-
         public ReactiveProperty<TProperty> Property { get; private set; }
 
         private string _key;
@@ -28,53 +19,21 @@ namespace CustomUtils.Runtime.Storage
         private IStorageProvider _provider;
         private bool _savingEnabled;
 
-        /// <summary>
-        /// Gets or sets the current value of the property.
-        /// Setting this value will automatically save it to storage.
-        /// </summary>
-        /// <value>The current value stored in the property</value>
-
         public TProperty Value
         {
             get => Property.Value;
             set => Property.Value = value;
         }
 
-        /// <summary>
-        /// Subscribes to value changes with a target object and callback.
-        /// </summary>
-        /// <typeparam name="TTarget">The type of the target object to pass to the callback</typeparam>
-        /// <param name="target">Target object to pass to the callback</param>
-        /// <param name="onNext">Action to execute when value changes. Receives the new value and target object.</param>
-        /// <returns>A disposable subscription that can be used to unsubscribe</returns>
         public IDisposable Subscribe<TTarget>(TTarget target, Action<TProperty, TTarget> onNext)
             => Property.Subscribe((target, onNext),
                 static (property, tuple) => tuple.onNext(property, tuple.target));
 
-        /// <summary>
-        /// Subscribes to value changes with a simple callback.
-        /// </summary>
-        /// <param name="onNext">Action to execute when value changes. Receives the new value.</param>
-        /// <returns>A disposable subscription that can be used to unsubscribe</returns>
         public IDisposable Subscribe(Action<TProperty> onNext)
             => Property.Subscribe(onNext, static (property, action) => action(property));
 
-        /// <summary>
-        /// Gets the observable stream for this property.
-        /// Use this for advanced reactive operations like filtering, mapping, or combining with other observables.
-        /// </summary>
-        /// <returns>An observable stream of value changes</returns>
         public Observable<TProperty> AsObservable() => Property.AsObservable();
 
-        /// <summary>
-        /// Initializes the property by loading any saved value from storage.
-        /// This method must be called before using the property.
-        /// </summary>
-        /// <param name="key">Unique storage key for this property</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <param name="defaultValue">Default value to use if no saved value exists or loading fails</param>
-        /// <returns>A task that completes when initialization is finished</returns>
-        /// <exception cref="InvalidOperationException">Thrown if called multiple times</exception>
         public async UniTask InitializeAsync(string key, CancellationToken token = default, TProperty defaultValue = default)
         {
             _provider = ServiceProvider.Provider;
@@ -104,17 +63,8 @@ namespace CustomUtils.Runtime.Storage
             }
         }
 
-        /// <summary>
-        /// Manually saves the current value to storage.
-        /// Note: Values are automatically saved when changed, so this is typically not needed.
-        /// </summary>
-        /// <returns>A task that completes when the save operation is finished</returns>
         public async UniTask SaveAsync() => await _provider.TrySaveAsync(_key, Property.Value);
 
-        /// <summary>
-        /// Disposes the property and stops automatic saving.
-        /// This should be called when the property is no longer needed to prevent memory leaks.
-        /// </summary>
         public void Dispose()
         {
             _subscription?.Dispose();

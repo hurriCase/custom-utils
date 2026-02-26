@@ -16,7 +16,8 @@
         "GUID:b0214a6008ed146ff8f122a6a9c2f6cc",
         "GUID:f62c4463da54e444a94f136e514a4e82",
         "GUID:0caab94c8c0a20b4e83e8dc1e4b2a416",
-        "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5"
+        "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5",
+        "GUID:be0d2672886cc45b2bcea5a5053a5347"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -45,6 +46,11 @@
             "name": "com.unity.localization",
             "expression": "",
             "define": "UNITY_LOCALIZATION_INSTALLED"
+        },
+        {
+            "name": "com.unity.services.cloudsave",
+            "expression": "",
+            "define": "CLOUD_SAVE_INSTALLED"
         }
     ],
     "noEngineReferences": false

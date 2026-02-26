@@ -22,6 +22,7 @@ namespace CustomUtils.Runtime.Storage
     [PublicAPI]
     public sealed class PersistentObservableDictionary<TKey, TValue> :
         IObservableCollection<KeyValuePair<TKey, TValue>>,
+        IReadOnlyDictionary<TKey, TValue>,
         IDisposable
         where TKey : notnull
     {
@@ -55,6 +56,9 @@ namespace CustomUtils.Runtime.Storage
         private bool _savingEnabled;
         private readonly Dictionary<TKey, TValue> _serializationBuffer = new();
 
+        public bool ContainsKey(TKey key) => Dictionary!.ContainsKey(key);
+        public bool TryGetValue(TKey key, out TValue value) => Dictionary!.TryGetValue(key, out value);
+
         /// <summary>
         /// Gets or sets the value associated with the specified key.
         /// Setting this value will automatically save the dictionary to storage.
@@ -64,6 +68,9 @@ namespace CustomUtils.Runtime.Storage
             get => Dictionary![key];
             set => Dictionary![key] = value;
         }
+
+        public IEnumerable<TKey> Keys => ((IReadOnlyDictionary<TKey, TValue>)Dictionary!).Keys;
+        public IEnumerable<TValue> Values => ((IReadOnlyDictionary<TKey, TValue>)Dictionary!).Values;
 
         /// <summary>
         /// Initializes the dictionary by loading any saved values from storage.

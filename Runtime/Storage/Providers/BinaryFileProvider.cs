@@ -9,15 +9,17 @@ using UnityEngine;
 
 namespace CustomUtils.Runtime.Storage.Providers
 {
+    /// <inheritdoc />
     /// <summary>
-    /// Binary file provider with TryDeleteAll support
+    /// Stores data as binary files in <see cref="P:UnityEngine.Application.persistentDataPath">UnityEngine.Application.persistentDataPath</see>.
+    /// Recommended for Android builds where PlayerPrefs may be unreliable.
     /// </summary>
     [PublicAPI]
-    internal sealed class BinaryFileProvider : BaseStorageProvider
+    public sealed class BinaryFileProvider : BaseStorageProvider
     {
         private readonly string _saveDirectory;
 
-        internal BinaryFileProvider() : base(new IdentityDataTransformer(), SerializerProvider.Serializer)
+        public BinaryFileProvider() : base(new IdentityDataTransformer(), SerializerProvider.Serializer)
         {
             _saveDirectory = Path.Combine(Application.persistentDataPath, "SaveData");
 
@@ -29,7 +31,7 @@ namespace CustomUtils.Runtime.Storage.Providers
 
         protected override async UniTask PlatformSaveAsync(string key, object transformData, CancellationToken token)
         {
-            if (transformData is byte[] byteData)
+            if (TryGetTransformedData<byte[]>(transformData, out var byteData))
                 await File.WriteAllBytesAsync(GetFilePath(key), byteData, token);
         }
 

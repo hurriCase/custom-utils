@@ -9,17 +9,18 @@ using CustomUtils.Runtime.Serializer;
 
 namespace CustomUtils.Runtime.Storage.Providers
 {
+    /// <inheritdoc />
     /// <summary>
-    /// PlayerPrefs provider with TryDeleteAll support
+    /// Stores data using the CrazyGames SDK. Requires the <c>CRAZY_GAMES</c> scripting define symbol.
     /// </summary>
     [PublicAPI]
-    internal sealed class CrazyGamesStorageProvider : BaseStorageProvider
+    public sealed class CrazyGamesStorageProvider : BaseStorageProvider
     {
         public CrazyGamesStorageProvider() : base(new StringDataTransformer(), SerializerProvider.Serializer) { }
 
         protected override UniTask PlatformSaveAsync(string key, object transformData, CancellationToken token)
         {
-            if (transformData is not string serializedString)
+            if (!TryGetTransformedData<string>(transformData, out var serializedString))
                 return UniTask.CompletedTask;
 
             CrazySDK.Data.SetString(key, serializedString);

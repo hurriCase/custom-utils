@@ -3,24 +3,23 @@ using System.Collections.Generic;
 using CustomUtils.Runtime.Storage.Base;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
-using UnityEngine;
 
 namespace CustomUtils.Runtime.Storage.Migration
 {
     /// <summary>
-    /// Simple storage migration between providers
+    /// Utility for migrating data between storage providers.
     /// </summary>
     [PublicAPI]
     public static class StorageMigrator
     {
         /// <summary>
-        /// Migrate specific keys from one provider to another
+        /// Copies the specified keys from one provider to another.
         /// </summary>
-        /// <param name="fromProvider">Source provider</param>
-        /// <param name="toProvider">Destination provider</param>
-        /// <param name="keys">Keys to migrate</param>
-        /// <param name="deleteFromSource">Delete from source after migration</param>
-        /// <returns>Number of successfully migrated keys</returns>
+        /// <param name="fromProvider">Source provider to read from.</param>
+        /// <param name="toProvider">Destination provider to write to.</param>
+        /// <param name="keys">Keys to migrate.</param>
+        /// <param name="deleteFromSource">If true, deletes each key from the source after a successful migration.</param>
+        /// <returns>The number of successfully migrated keys.</returns>
         public static async UniTask<int> MigrateAsync(
             IStorageProvider fromProvider,
             IStorageProvider toProvider,
@@ -35,7 +34,7 @@ namespace CustomUtils.Runtime.Storage.Migration
                 {
                     if (await fromProvider.HasKeyAsync(key) is false)
                     {
-                        Debug.LogWarning("[StorageMigrator::MigrateAsync] Key '{key}' not found in source provider");
+                        Logger.LogWarning($"[StorageMigrator::MigrateAsync] Key '{key}' not found in source provider");
                         continue;
                     }
 
@@ -51,16 +50,16 @@ namespace CustomUtils.Runtime.Storage.Migration
                         await fromProvider.TryDeleteKeyAsync(key);
 
                     migratedCount++;
-                    Debug.LogWarning($"[StorageMigrator::MigrateAsync] Migrated key: {key}");
+                    Logger.LogWarning($"[StorageMigrator::MigrateAsync] Migrated key: {key}");
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[StorageMigrator::MigrateAsync] Failed to migrate key '{key}': {ex.Message}");
+                    Logger.LogError($"[StorageMigrator::MigrateAsync] Failed to migrate key '{key}': {ex.Message}");
                 }
             }
 
-            Debug.Log("[StorageMigrator::MigrateAsync] " +
-                      $"Migration complete: {migratedCount}/{keys.Count} keys migrated");
+            Logger.Log("[StorageMigrator::MigrateAsync] " +
+                       $"Migration complete: {migratedCount}/{keys.Count} keys migrated");
 
             return migratedCount;
         }

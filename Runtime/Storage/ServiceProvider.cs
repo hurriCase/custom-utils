@@ -1,56 +1,28 @@
-﻿using System;
-using CustomUtils.Runtime.Storage.Base;
-using CustomUtils.Runtime.Storage.Providers;
+﻿using CustomUtils.Runtime.Storage.Base;
 using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime.Storage
 {
     /// <summary>
-    /// Provides platform-specific storage provider instances with lazy initialization.
-    /// Automatically selects the appropriate provider based on the current platform.
+    /// Global access point for the active <see cref="IStorageProvider"/>.
+    /// Call <see cref="SetProvider"/> once at startup before any storage operations.
     /// </summary>
     [PublicAPI]
     public static class ServiceProvider
     {
-        private static readonly Lazy<IStorageProvider> _lazyProvider = new(CreateProvider);
-        private static IStorageProvider _customProvider;
-
         /// <summary>
-        /// Gets the current storage provider instance.
-        /// Returns a platform-specific provider or a custom provider if one was set using SetProvider.
+        /// The active storage provider. Throws if <see cref="SetProvider"/> has not been called.
         /// </summary>
-        /// <returns>The active storage provider instance.</returns>
-
-        public static IStorageProvider Provider => _customProvider ?? _lazyProvider.Value;
+        public static IStorageProvider Provider { get; private set; }
 
         /// <summary>
-        /// Sets a custom storage provider. Must be called before any storage operations.
-        /// </summary>
-        public static void SetProvider<TProvider>() where TProvider : class, IStorageProvider, new()
-        {
-            _customProvider = new TProvider();
-        }
-
-        /// <summary>
-        /// Sets a custom storage provider instance. Must be called before any storage operations.
+        /// Sets the storage provider to use for all persistent storage operations.
+        /// Must be called before any <see cref="PersistentReactiveProperty{T}"/> or
+        /// <see cref="PersistentObservableDictionary{TKey,TValue}"/> initialization.
         /// </summary>
         public static void SetProvider(IStorageProvider provider)
         {
-            _customProvider = provider;
-        }
-
-        private static IStorageProvider CreateProvider()
-        {
-            return
-#if !UNITY_EDITOR && UNITY_ANDROID
-                new BinaryFileProvider();
-#elif CRAZY_GAMES
-                new CrazyGamesStorageProvider();
-#elif UNITY_EDITOR
-                new PlayerPrefsProvider();
-#else
-                new PlayerPrefsProvider();
-#endif
+            Provider = provider;
         }
     }
 }
