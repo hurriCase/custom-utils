@@ -69,5 +69,14 @@ namespace CustomUtils.Runtime.Formatter
             return string.Concat(arg1, arg2);
 #endif
         }
+
+        public static string Join(string separator, string[] values)
+        {
+#if ZSTRING_INSTALLED
+            return ZString.Join(separator, values);
+#else
+            return string.Join(separator, values);
+#endif
+        }
     }
 }
