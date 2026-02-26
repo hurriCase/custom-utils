@@ -83,10 +83,7 @@ namespace CustomUtils.Runtime.Localization
             var settings = LocalizationDatabase.Instance;
 
             if (settings.Sheets is null || settings.Sheets.Count == 0)
-            {
-                Debug.LogWarning("[LocalizationController] No localization sheets found");
                 return;
-            }
 
             LocalizationSheetProcessor.ProcessSheets(settings.Sheets);
         }
