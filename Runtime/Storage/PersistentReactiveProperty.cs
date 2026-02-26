@@ -48,7 +48,7 @@ namespace CustomUtils.Runtime.Storage
             try
             {
                 var loaded = await _provider.LoadAsync<TProperty>(_key, token);
-                if (loaded != null && EqualityComparer<TProperty>.Default.Equals(loaded, default) is false)
+                if (loaded != null)
                     Property.Value = loaded;
             }
             catch (Exception e)
