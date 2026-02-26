@@ -16,6 +16,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
     {
         private const string FoldoutKeyPrefix = nameof(InspectorButtonDrawer) + "_Foldout_";
         private const string ParameterKeyPrefix = nameof(InspectorButtonDrawer) + "_Parameter_";
+        private const string ScriptReferenceLabel = "Script";
 
         private static readonly Dictionary<string, object[]> _parameterValues = new();
 
@@ -68,7 +69,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
             GUI.enabled = false;
 
             EditorGUILayout.ObjectField(
-                monoBehaviour.GetType().Name,
+                ScriptReferenceLabel,
                 MonoScript.FromMonoBehaviour(monoBehaviour),
                 typeof(MonoScript),
                 false);
