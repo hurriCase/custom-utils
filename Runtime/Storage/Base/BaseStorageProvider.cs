@@ -66,7 +66,7 @@ namespace CustomUtils.Runtime.Storage.Base
                 var data = _serializer.Deserialize<TData>(buffer);
 
                 Logger.Log($"[{GetType().Name}::LoadAsync] " +
-                           "Loaded data for key '{key}' with type '{typeof(TData).Name}' and value '{data}'");
+                           $"Loaded data for key '{key}' with type '{typeof(TData).Name}' and value '{data}'");
 
                 return data;
             }

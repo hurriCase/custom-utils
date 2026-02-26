@@ -98,7 +98,7 @@ namespace CustomUtils.Runtime.Storage
             catch (Exception e)
             {
                 Debug.LogException(e);
-                Debug.LogError($"[PersistentObservableDictionary::InitializeAsync] " +
+                Debug.LogError("[PersistentObservableDictionary::InitializeAsync] " +
                                $"Failed to load key '{_key}': {e.Message}");
             }
             finally
