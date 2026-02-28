@@ -76,8 +76,7 @@ namespace CustomUtils.Runtime.AssetLoader
 
             var nameWithExtension = Name;
 
-            if (string.IsNullOrEmpty(Extension) is false
-                && Name.EndsWith(Extension, StringComparison.OrdinalIgnoreCase) is false)
+            if (!string.IsNullOrEmpty(Extension) && !Name.EndsWith(Extension, StringComparison.OrdinalIgnoreCase))
                 nameWithExtension = $"{Name}{Extension}";
 
             if (IsEditorResource)

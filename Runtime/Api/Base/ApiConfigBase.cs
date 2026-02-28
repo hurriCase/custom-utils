@@ -63,7 +63,7 @@ namespace CustomUtils.Runtime.Api.Base
         /// Validates the configuration state.
         /// </summary>
         /// <returns>True if the configuration is valid; otherwise, false.</returns>
-        public virtual bool IsValid() => string.IsNullOrEmpty(endpointFormat) is false && IsEncryptionValid();
+        public virtual bool IsValid() => !string.IsNullOrEmpty(endpointFormat) && IsEncryptionValid();
 
         /// <summary>
         /// Sets the password for API key decryption.
@@ -77,7 +77,7 @@ namespace CustomUtils.Runtime.Api.Base
         /// <returns>The decrypted API key.</returns>
         protected string GetApiKey()
         {
-            if (Application.isEditor is false)
+            if (!Application.isEditor)
                 return XORDataEncryption.Decrypt(_encryptedApiKey, _password);
 
             _apiKeyEnvironmentName.TryGetValueFromEnvironment(out var apiKey);
@@ -89,7 +89,7 @@ namespace CustomUtils.Runtime.Api.Base
             if (Application.isEditor)
                 return true;
 
-            return string.IsNullOrEmpty(_password) is false && string.IsNullOrEmpty(_encryptedApiKey) is false;
+            return !string.IsNullOrEmpty(_password) && !string.IsNullOrEmpty(_encryptedApiKey);
         }
     }
 }

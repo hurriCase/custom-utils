@@ -126,7 +126,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
                 "TexCoord1,2,3 are not enabled as an additional shader channel in parent canvas." +
                 " Procedural Image will not work properly");
 
-            if (EditorVisualControls.Button("Fix: Enable TexCoord1,2,3 in Canvas: " + canvas.name) is false)
+            if (!EditorVisualControls.Button("Fix: Enable TexCoord1,2,3 in Canvas: " + canvas.name))
                 return;
 
             Undo.RecordObject(canvas, "enable TexCoord1,2,3 as additional shader channels");

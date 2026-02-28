@@ -89,7 +89,7 @@ namespace CustomUtils.Runtime.UI.HorizontalVerticalLayout
                 }
             }
 
-            if (alongOtherAxis is false && rectChildren.Count > 0)
+            if (!alongOtherAxis && rectChildren.Count > 0)
             {
                 totalMin -= Spacing;
                 totalPreferred -= Spacing;
@@ -162,7 +162,7 @@ namespace CustomUtils.Runtime.UI.HorizontalVerticalLayout
                 }
 
                 float minMaxLerp = 0;
-                if (Mathf.Approximately(GetTotalMinSize(axis), GetTotalPreferredSize(axis)) is false)
+                if (!Mathf.Approximately(GetTotalMinSize(axis), GetTotalPreferredSize(axis)))
                     minMaxLerp = Mathf.Clamp01((size - GetTotalMinSize(axis)) /
                                                (GetTotalPreferredSize(axis) - GetTotalMinSize(axis)));
 
@@ -179,7 +179,7 @@ namespace CustomUtils.Runtime.UI.HorizontalVerticalLayout
                     else
                     {
                         float offsetInCell = 0;
-                        if (childForceExpandSize is false)
+                        if (!childForceExpandSize)
                             offsetInCell = (childSize - child.sizeDelta[axis]) * alignmentOnAxis;
                         SetChildAlongAxisWithScale(child, axis, pos + offsetInCell, scaleFactor);
                     }

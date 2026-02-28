@@ -43,7 +43,7 @@ namespace CustomUtils.Runtime.Helpers
 
             try
             {
-                if (cancellationTokenSource.IsCancellationRequested is false)
+                if (!cancellationTokenSource.IsCancellationRequested)
                     cancellationTokenSource.Cancel();
 
                 cancellationTokenSource.Dispose();

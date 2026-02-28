@@ -28,7 +28,7 @@ namespace CustomUtils.Editor.Scripts.SpriteFix
         {
             DrawProgressIfNeeded();
 
-            GUI.enabled = EditorProgressTracker.HasOperation is false;
+            GUI.enabled = !EditorProgressTracker.HasOperation;
 
             DrawSection("Project Scanner", DrawScan);
             DrawSection("Manual Sprite Processing", DrawManualSelection);
@@ -105,7 +105,7 @@ namespace CustomUtils.Editor.Scripts.SpriteFix
 
             EditorVisualControls.H3Label($"Current Format: {(isRGBA ? "RGBA" : "RGB")}");
 
-            if (isRGBA is false)
+            if (!isRGBA)
                 EditorVisualControls.DrawPanel(() =>
                 {
                     if (EditorVisualControls.Button("Add Alpha Pixel", GUILayout.Height(25)))
@@ -134,7 +134,7 @@ namespace CustomUtils.Editor.Scripts.SpriteFix
                 await UniTask.Yield(cancellationToken);
 
                 var path = AssetDatabase.GUIDToAssetPath(guid);
-                if (IsProblematicSprite(path, out var importer) is false)
+                if (!IsProblematicSprite(path, out var importer))
                 {
                     progress.UpdateProgress(ref processedCount, totalCount);
                     continue;
@@ -164,8 +164,8 @@ namespace CustomUtils.Editor.Scripts.SpriteFix
             if (!texture)
                 return false;
 
-            var isNPOT = texture.width.IsPowerOfTwo() is false && texture.height.IsPowerOfTwo() is false;
-            var isRGB8 = importer.DoesSourceTextureHaveAlpha() is false;
+            var isNPOT = !texture.width.IsPowerOfTwo() && !texture.height.IsPowerOfTwo();
+            var isRGB8 = !importer.DoesSourceTextureHaveAlpha();
             var hasCrunchEnabled = importer.crunchedCompression;
 
             return isNPOT && isRGB8 && hasCrunchEnabled;
@@ -239,7 +239,7 @@ namespace CustomUtils.Editor.Scripts.SpriteFix
             try
             {
                 var prepareResult = await PrepareTextureForEditing(textureImporter, path, cancellationToken);
-                if (prepareResult.Success is false)
+                if (!prepareResult.Success)
                 {
                     RestoreOriginalSettings(textureImporter, originalSettings, path);
                     return prepareResult;
@@ -248,7 +248,7 @@ namespace CustomUtils.Editor.Scripts.SpriteFix
                 progress.Report(0.4f);
 
                 var modifyResult = await ModifyTextureAlpha(path, cancellationToken);
-                if (modifyResult.Success is false)
+                if (!modifyResult.Success)
                 {
                     RestoreOriginalSettings(textureImporter, originalSettings, path);
                     return modifyResult;
@@ -258,7 +258,7 @@ namespace CustomUtils.Editor.Scripts.SpriteFix
 
                 var finalizeResult =
                     await FinalizeTextureSettings(textureImporter, originalSettings, path, cancellationToken);
-                if (finalizeResult.Success is false)
+                if (!finalizeResult.Success)
                 {
                     RestoreOriginalSettings(textureImporter, originalSettings, path);
                     return finalizeResult;

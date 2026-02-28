@@ -98,7 +98,7 @@ namespace CustomUtils.Editor.Scripts
             var fileName = Path.GetFileName(sourceFile);
             var targetFilePath = Path.Combine(targetPath, fileName);
 
-            if (File.Exists(targetFilePath) is false)
+            if (!File.Exists(targetFilePath))
                 return targetFilePath;
 
             var uniqueName =

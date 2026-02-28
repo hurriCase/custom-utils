@@ -110,7 +110,7 @@ namespace CustomUtils.Editor.Scripts.UI.AspectRatio
 
         private static float CalculateAspectRatio(float width, float height)
         {
-            if ((height <= 0) is false)
+            if (height > 0)
                 return width / height;
 
             Debug.LogWarning("[AspectRatioFitterExtendedEditor::CalculateAspectRatio] " +

@@ -12,13 +12,11 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities.Scopes
     {
         internal BoxedScope(string title = null)
         {
-            var hasTitle = string.IsNullOrEmpty(title) is false;
-
             EditorGUILayout.Space(EditorGUIUtility.standardVerticalSpacing);
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
-            if (hasTitle)
+            if (!string.IsNullOrEmpty(title))
             {
                 EditorGUILayout.Space(EditorGUIUtility.standardVerticalSpacing * 0.5f);
                 EditorGUILayout.LabelField(title, EditorStyles.boldLabel);

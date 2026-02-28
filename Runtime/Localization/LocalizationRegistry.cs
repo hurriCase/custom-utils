@@ -32,7 +32,7 @@ namespace CustomUtils.Runtime.Localization
         {
             Entries[entry.GUID] = entry;
 
-            if (_tableToGuids.ContainsKey(entry.TableName) is false)
+            if (!_tableToGuids.ContainsKey(entry.TableName))
                 _tableToGuids[entry.TableName] = new List<string>();
 
             _tableToGuids[entry.TableName].Add(entry.GUID);
@@ -70,7 +70,7 @@ namespace CustomUtils.Runtime.Localization
             if (string.IsNullOrEmpty(tableName))
                 return Entries.Values.ToArray();
 
-            return _tableToGuids.TryGetValue(tableName, out var guids) is false
+            return !_tableToGuids.TryGetValue(tableName, out var guids)
                 ? Array.Empty<LocalizationEntry>()
                 : guids.Select(guid => Entries[guid]).ToArray();
         }

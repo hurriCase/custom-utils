@@ -64,12 +64,12 @@ namespace CustomUtils.Runtime.UI.CustomComponents
 
         private void UpdateAspectRatio()
         {
-            if (Validate() is false)
+            if (!Validate())
                 return;
 
             var totalTextSize = CalculateTotalTextSize();
 
-            if (TryGetNewRatio(totalTextSize, out var newRatio) is false)
+            if (!TryGetNewRatio(totalTextSize, out var newRatio))
                 return;
 
             _aspectRatioFitter.aspectRatio = newRatio;
@@ -86,7 +86,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents
                 _ => 0f
             };
 
-            if (currentSize.IsReasonable() is false)
+            if (!currentSize.IsReasonable())
                 return false;
 
             var scaledOtherContentSize = _otherContentReferenceSize * (currentSize / _staticReferenceSize);

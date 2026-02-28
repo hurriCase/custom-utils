@@ -63,7 +63,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
                 return false;
             }
 
-            if (path.Contains('/') is false)
+            if (!path.Contains('/'))
             {
                 Debug.LogError(
                     $"[MenuValidationHelper::ValidateMenuPath] Menu path '{path}' should contain a submenu " +
@@ -85,7 +85,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
                 return false;
             }
 
-            if (path.Contains("//") is false)
+            if (!path.Contains("//"))
                 return true;
 
             Debug.LogError(
@@ -98,7 +98,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
             if (string.IsNullOrEmpty(shortcut))
                 return true;
 
-            if (shortcut.StartsWith("_") is false)
+            if (!shortcut.StartsWith("_"))
             {
                 Debug.LogError($"[MenuValidationHelper::ValidateShortcut] Shortcut '{shortcut}' for '{itemName}' " +
                                "must start with underscore (_). Example: '_h' for H key, '_%h' for Ctrl+H");
@@ -112,7 +112,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
                 shortcutPart = shortcutPart[1..];
             }
 
-            if (shortcutPart.Length != 1 && IsValidFunctionKey(shortcutPart) is false)
+            if (shortcutPart.Length != 1 && !IsValidFunctionKey(shortcutPart))
             {
                 Debug.LogError($"[MenuValidationHelper::ValidateShortcut] Shortcut '{shortcut}' for '{itemName}' " +
                                "must end with a single key (a-z) or function key (F1-F12). " +
@@ -120,7 +120,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
                 return false;
             }
 
-            if (_unityShortcuts.TryGetValue(shortcut.ToLower(), out var conflictingAction) is false)
+            if (!_unityShortcuts.TryGetValue(shortcut.ToLower(), out var conflictingAction))
                 return true;
 
             Debug.LogError("[MenuValidationHelper::CheckForUnityShortcutConflicts] " +
@@ -216,7 +216,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
 
             sanitized = sanitized.Trim('_');
 
-            if (string.IsNullOrEmpty(sanitized) is false && char.IsDigit(sanitized[0]))
+            if (!string.IsNullOrEmpty(sanitized) && char.IsDigit(sanitized[0]))
                 sanitized = "_" + sanitized;
 
             return string.IsNullOrEmpty(sanitized) ? "Method" : sanitized;
@@ -224,7 +224,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
 
         private static bool IsValidFunctionKey(string key)
         {
-            if (key.Length < 2 || key.StartsWith("F") is false)
+            if (key.Length < 2 || !key.StartsWith("F"))
                 return false;
 
             if (int.TryParse(key[1..], out var number))

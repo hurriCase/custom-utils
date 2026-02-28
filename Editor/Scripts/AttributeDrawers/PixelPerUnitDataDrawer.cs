@@ -26,7 +26,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
             _imageSizeProperty = property.FindFieldRelative(nameof(PixelPerUnitData.ImageSize));
             _cornerRadiusProperty = property.FindFieldRelative(nameof(PixelPerUnitData.CornerRadius));
 
-            if (ValidatePixelPerUnitTypes(out _) is false)
+            if (!ValidatePixelPerUnitTypes(out _))
                 return EditorGUIUtility.singleLineHeight * 1.5f + EditorGUIUtility.standardVerticalSpacing;
 
             return EditorGUIUtility.singleLineHeight;
@@ -34,7 +34,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (ValidatePixelPerUnitTypes(out var pixelPerUnitTypeNames) is false)
+            if (!ValidatePixelPerUnitTypes(out var pixelPerUnitTypeNames))
             {
                 EditorVisualControls.WarningBox(position, "No pixel per unit types in database");
                 return;

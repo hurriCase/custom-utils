@@ -32,7 +32,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
 
             for (var i = 0; i < property.enumNames.Length; i++)
             {
-                if ((i == currentValue) is false && _usedValues.Contains(i))
+                if (i != currentValue && _usedValues.Contains(i))
                     continue;
 
                 displayNames.Add(property.enumNames[i]);
@@ -86,7 +86,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
 
         private SerializedProperty FindParentProperty(SerializedProperty property)
         {
-            if (property.propertyPath.Contains(".") is false)
+            if (!property.propertyPath.Contains("."))
                 return null;
 
             var path = property.propertyPath;

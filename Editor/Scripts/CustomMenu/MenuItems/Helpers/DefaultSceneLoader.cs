@@ -29,7 +29,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
 
         public static void ToggleAutoLoad()
         {
-            IsChangePlayModeScene = IsChangePlayModeScene is false;
+            IsChangePlayModeScene = !IsChangePlayModeScene;
 
             Debug.Log($"Auto load startup scene is now {(IsChangePlayModeScene ? "enabled" : "disabled")}");
 

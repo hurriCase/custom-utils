@@ -35,7 +35,7 @@ namespace CustomUtils.Runtime.UI.GradientHelpers.GraphicGradient
         /// </remarks>
         public override void ClearGradient(Graphic graphic)
         {
-            if (graphic.TryGetComponent<VertexGradientEffect>(out var gradientEffect) is false)
+            if (!graphic.TryGetComponent<VertexGradientEffect>(out var gradientEffect))
                 return;
 
             gradientEffect.Destroy();

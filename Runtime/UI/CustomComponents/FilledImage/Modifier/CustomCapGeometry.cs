@@ -58,7 +58,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.FilledImage.Modifier
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            if (TryGetComponent<RoundedFilledImage>(out var roundedFilledImage) is false
+            if (!TryGetComponent<RoundedFilledImage>(out var roundedFilledImage)
                 && Mathf.Approximately(_radius, _previousRadius))
                 return;
 

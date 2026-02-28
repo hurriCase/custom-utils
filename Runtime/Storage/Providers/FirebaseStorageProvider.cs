@@ -73,7 +73,7 @@ namespace CustomUtils.Runtime.Storage.Providers
 
                 var reference = GetFileReference(key);
 
-                if (await PlatformHasKeyAsync(key, token) is false)
+                if (!await PlatformHasKeyAsync(key, token))
                     return null;
 
                 var downloadTask = await reference.GetBytesAsync(MaxDownloadSize)
@@ -105,7 +105,7 @@ namespace CustomUtils.Runtime.Storage.Providers
                 var reference = GetFileReference(key);
 
                 var result = await reference.GetMetadataAsync()
-                    .ContinueWithOnMainThread(static task => task.IsFaulted is false && task.IsCanceled is false)
+                    .ContinueWithOnMainThread(static task => !task.IsFaulted && !task.IsCanceled)
                     .AsUniTask()
                     .AttachExternalCancellation(token);
 
@@ -125,7 +125,7 @@ namespace CustomUtils.Runtime.Storage.Providers
 
                 var reference = GetFileReference(key);
 
-                if (await PlatformHasKeyAsync(key, token) is false)
+                if (!await PlatformHasKeyAsync(key, token))
                     return;
 
                 await reference.DeleteAsync().AsUniTask().AttachExternalCancellation(token);

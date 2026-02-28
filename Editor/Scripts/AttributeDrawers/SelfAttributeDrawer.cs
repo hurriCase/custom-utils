@@ -20,7 +20,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
 
         private void AutoAssignComponent(SerializedProperty property)
         {
-            if (property.TryGetComponent(fieldInfo.FieldType, out var targetComponent) is false)
+            if (!property.TryGetComponent(fieldInfo.FieldType, out var targetComponent))
                 return;
 
             property.objectReferenceValue = targetComponent;

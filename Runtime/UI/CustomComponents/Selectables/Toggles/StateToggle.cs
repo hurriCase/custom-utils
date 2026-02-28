@@ -49,7 +49,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles
                 checkedObject.AsNullable()?.SetActive(isOn);
 
             foreach (var uncheckedObject in UncheckedObjects)
-                uncheckedObject.AsNullable()?.SetActive(isOn is false);
+                uncheckedObject.AsNullable()?.SetActive(!isOn);
         }
 
         private void ApplyGraphics(SelectionState state)

@@ -18,7 +18,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
 
             container.Add(propertyField);
 
-            if (TryGetProperty(property, out var sourceProperty) is false)
+            if (!TryGetProperty(property, out var sourceProperty))
                 return container;
 
             UpdateVisibility(container, sourceProperty.boolValue, showIfAttribute.ShowType);
@@ -37,7 +37,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var showIfAttribute = (ShowIfAttribute)attribute;
-            if (TryGetProperty(property, out var sourceProperty) is false
+            if (!TryGetProperty(property, out var sourceProperty)
                 && ShouldShow(sourceProperty.boolValue, showIfAttribute.ShowType))
                 EditorGUI.PropertyField(position, property, label, true);
         }
@@ -45,8 +45,8 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             var showIfAttribute = (ShowIfAttribute)attribute;
-            if (TryGetProperty(property, out var sourceProperty) is false
-                || ShouldShow(sourceProperty.boolValue, showIfAttribute.ShowType) is false)
+            if (!TryGetProperty(property, out var sourceProperty)
+                || !ShouldShow(sourceProperty.boolValue, showIfAttribute.ShowType))
                 return -EditorGUIUtility.standardVerticalSpacing;
 
             return EditorGUI.GetPropertyHeight(property, label);
@@ -62,6 +62,6 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
             return serializedProperty != null;
         }
 
-        private bool ShouldShow(bool value, ShowType showType) => showType == ShowType.True ? value : value is false;
+        private bool ShouldShow(bool value, ShowType showType) => showType == ShowType.True ? value : !value;
     }
 }

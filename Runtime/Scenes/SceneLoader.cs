@@ -44,7 +44,7 @@ namespace CustomUtils.Runtime.Scenes
 
         public void TryUnloadScene(SceneInstance sceneInstance)
         {
-            if (sceneInstance.Scene.IsValid() is false)
+            if (!sceneInstance.Scene.IsValid())
                 return;
 
             AddressablesLogger.Log($"[SceneLoader::TryUnloadScene] Start unloading scene: {sceneInstance.Scene.name}");

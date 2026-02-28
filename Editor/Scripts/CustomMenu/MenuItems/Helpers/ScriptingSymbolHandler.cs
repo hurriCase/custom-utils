@@ -28,7 +28,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
         public static void ToggleSymbol(string symbolName, string prefsKey)
         {
             var isEnabled = EditorPrefs.GetBool(prefsKey, false);
-            isEnabled = isEnabled is false;
+            isEnabled = !isEnabled;
             EditorPrefs.SetBool(prefsKey, isEnabled);
 
             if (isEnabled)
@@ -57,7 +57,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
 
             switch (isEnabled)
             {
-                case true when symbolDefined is false:
+                case true when !symbolDefined:
                     AddDefineSymbol(symbolName);
                     break;
 
@@ -97,7 +97,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
 
             var currentDefines = PlayerSettings.GetScriptingDefineSymbols(currentBuildTarget);
 
-            if (currentDefines.Contains(symbolToRemove) is false)
+            if (!currentDefines.Contains(symbolToRemove))
                 return;
 
             var definesList = currentDefines.Split(';');

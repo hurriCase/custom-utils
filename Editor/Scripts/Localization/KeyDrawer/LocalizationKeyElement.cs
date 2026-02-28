@@ -82,12 +82,12 @@ namespace CustomUtils.Editor.Scripts.Localization.KeyDrawer
 
         private void SetupFoldoutToggle()
         {
-            if (_translationsContainer.TryQ(out Foldout foldout) is false)
+            if (!_translationsContainer.TryQ(out Foldout foldout))
                 return;
 
             foldout.value = false;
 
-            if (foldout.TryQ(out Toggle toggle) is false)
+            if (!foldout.TryQ(out Toggle toggle))
                 return;
 
             if (toggle.TryQ(out Label toggleLabel))
@@ -116,7 +116,7 @@ namespace CustomUtils.Editor.Scripts.Localization.KeyDrawer
 
         private void SetupDropdownLabel(VisualElement dropdown)
         {
-            if (dropdown.TryQ(out Label fieldLabel) is false)
+            if (!dropdown.TryQ(out Label fieldLabel))
                 return;
 
             fieldLabel.style.marginLeft = 0;

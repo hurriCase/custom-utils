@@ -101,7 +101,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// </remarks>
         public void DrawProgressIfNeeded()
         {
-            if (HasOperation is false && _cancellationTween.isAlive is false)
+            if (!HasOperation && !_cancellationTween.isAlive)
                 return;
 
             EditorVisualControls.DrawProgressBar(_currentOperation, _operationInfo, _operationProgress);
@@ -109,7 +109,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
             if (_cancellationTween.isAlive && EditorVisualControls.Button("Ok"))
                 _cancellationTween.Complete();
 
-            if (_cancellationTween.isAlive is false && EditorVisualControls.Button("Cancel"))
+            if (!_cancellationTween.isAlive && EditorVisualControls.Button("Cancel"))
                 CancellationSourceHelper.CancelAndDisposeCancellationTokenSource(ref _cancellationSource);
         }
 

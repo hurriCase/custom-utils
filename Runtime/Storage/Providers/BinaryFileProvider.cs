@@ -23,7 +23,7 @@ namespace CustomUtils.Runtime.Storage.Providers
         {
             _saveDirectory = Path.Combine(Application.persistentDataPath, "SaveData");
 
-            if (Directory.Exists(_saveDirectory) is false)
+            if (!Directory.Exists(_saveDirectory))
                 Directory.CreateDirectory(_saveDirectory);
         }
 
@@ -39,7 +39,7 @@ namespace CustomUtils.Runtime.Storage.Providers
         {
             var filePath = GetFilePath(key);
 
-            if (File.Exists(filePath) is false)
+            if (!File.Exists(filePath))
                 return null;
 
             var result = await File.ReadAllBytesAsync(filePath, token);
@@ -68,7 +68,7 @@ namespace CustomUtils.Runtime.Storage.Providers
         {
             return UniTask.RunOnThreadPool(() =>
                 {
-                    if (Directory.Exists(_saveDirectory) is false)
+                    if (!Directory.Exists(_saveDirectory))
                         return true;
 
                     Directory.Delete(_saveDirectory, true);

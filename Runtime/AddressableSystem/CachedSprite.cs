@@ -59,6 +59,6 @@ namespace CustomUtils.Runtime.AddressableSystem
         /// <summary>
         /// Gets whether the cached sprite has a valid GUID.
         /// </summary>
-        public bool IsValid => string.IsNullOrEmpty(AssetGUID) is false;
+        public bool IsValid => !string.IsNullOrEmpty(AssetGUID);
     }
 }

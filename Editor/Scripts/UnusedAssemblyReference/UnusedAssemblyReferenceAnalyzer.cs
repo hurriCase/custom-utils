@@ -53,7 +53,7 @@ namespace CustomUtils.Editor.Scripts.UnusedAssemblyReference
                     try
                     {
                         var asmdefData = JsonUtility.FromJson<AssemblyDefinitionData>(json);
-                        if (asmdefData != null && string.IsNullOrEmpty(asmdefData.Name) is false)
+                        if (asmdefData != null && !string.IsNullOrEmpty(asmdefData.Name))
                         {
                             names.Add(asmdefData.Name);
                             paths.Add(asmdefPath);
@@ -85,7 +85,7 @@ namespace CustomUtils.Editor.Scripts.UnusedAssemblyReference
             {
                 EditorVisualControls.ErrorBox(_statusMessage);
 
-                if (GUILayout.Button("Retry") is false)
+                if (!GUILayout.Button("Retry"))
                     return;
 
                 _hasError = false;
@@ -193,7 +193,7 @@ namespace CustomUtils.Editor.Scripts.UnusedAssemblyReference
                                     var guid = reference.Substring(5);
                                     var assetPath = AssetDatabase.GUIDToAssetPath(guid);
 
-                                    if (string.IsNullOrEmpty(assetPath) is false)
+                                    if (!string.IsNullOrEmpty(assetPath))
                                         try
                                         {
                                             var asmdefJson = File.ReadAllText(assetPath);
@@ -201,7 +201,7 @@ namespace CustomUtils.Editor.Scripts.UnusedAssemblyReference
                                                 JsonUtility.FromJson<AssemblyDefinitionData>(asmdefJson);
 
                                             if (referencedAsmdef != null &&
-                                                string.IsNullOrEmpty(referencedAsmdef.Name) is false)
+                                                !string.IsNullOrEmpty(referencedAsmdef.Name))
                                                 displayName = $"{referencedAsmdef.Name} ({reference})";
                                         }
                                         catch (Exception)
@@ -356,7 +356,7 @@ namespace CustomUtils.Editor.Scripts.UnusedAssemblyReference
 
                     foreach (var (originalRef, value) in referenceMappings)
                     {
-                        if (potentiallyUnused.Contains(originalRef) is false || usedReferences.Contains(originalRef))
+                        if (!potentiallyUnused.Contains(originalRef) || usedReferences.Contains(originalRef))
                             continue;
 
                         if (IsReferenceUsed(fileContent, value))
@@ -403,16 +403,16 @@ namespace CustomUtils.Editor.Scripts.UnusedAssemblyReference
                     var guid = reference[5..];
                     var assetPath = AssetDatabase.GUIDToAssetPath(guid);
 
-                    if (string.IsNullOrEmpty(assetPath) is false)
+                    if (!string.IsNullOrEmpty(assetPath))
                     {
                         var asmdefJson = File.ReadAllText(assetPath);
                         var referencedAsmdef = JsonUtility.FromJson<AssemblyDefinitionData>(asmdefJson);
 
-                        if (referencedAsmdef != null && string.IsNullOrEmpty(referencedAsmdef.Name) is false)
+                        if (referencedAsmdef != null && !string.IsNullOrEmpty(referencedAsmdef.Name))
                         {
                             simpleName = referencedAsmdef.Name;
 
-                            if (string.IsNullOrEmpty(referencedAsmdef.RootNamespace) is false)
+                            if (!string.IsNullOrEmpty(referencedAsmdef.RootNamespace))
                                 return referencedAsmdef.RootNamespace;
                         }
                     }

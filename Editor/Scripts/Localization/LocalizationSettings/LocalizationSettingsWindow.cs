@@ -137,7 +137,7 @@ namespace CustomUtils.Editor.Scripts.Localization.LocalizationSettings
                 selectedLanguageString == LocalizationConstants.NoLanguagesAvailable)
                 return Result.Invalid(LocalizationConstants.SelectLanguageFirstMessage);
 
-            if (Enum.TryParse<SystemLanguage>(selectedLanguageString, out var language) is false)
+            if (!Enum.TryParse<SystemLanguage>(selectedLanguageString, out var language))
                 return Result.Invalid(LocalizationConstants.InvalidLanguageSelectionMessage);
 
             var allEntries = Registry.Entries.Values;
@@ -150,7 +150,7 @@ namespace CustomUtils.Editor.Scripts.Localization.LocalizationSettings
 
             foreach (var entry in allEntries)
             {
-                if (entry.TryGetTranslation(language, out var localizedText) is false ||
+                if (!entry.TryGetTranslation(language, out var localizedText) ||
                     string.IsNullOrEmpty(localizedText))
                     continue;
 

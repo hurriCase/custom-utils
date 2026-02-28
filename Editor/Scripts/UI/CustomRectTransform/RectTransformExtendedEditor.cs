@@ -50,7 +50,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
 
             serializedObject.Update();
 
-            if (_hasInitialized is false)
+            if (!_hasInitialized)
             {
                 RecalculateFromCurrent();
                 _hasInitialized = true;
@@ -105,7 +105,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
         {
             var currentEvent = Event.current;
 
-            if (currentEvent.type != EventType.ContextClick || rect.Contains(currentEvent.mousePosition) is false)
+            if (currentEvent.type != EventType.ContextClick || !rect.Contains(currentEvent.mousePosition))
                 return;
 
             var menu = new GenericMenu();
@@ -186,7 +186,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
 
         private void PasteLayout()
         {
-            if (LayoutClipboard.TryPaste(out var layoutData) is false)
+            if (!LayoutClipboard.TryPaste(out var layoutData))
             {
                 Debug.LogWarning("[RectTransformExtendedEditor::PasteLayout] " +
                                  "Failed to paste layout data from clipboard");

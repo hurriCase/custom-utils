@@ -49,7 +49,7 @@ namespace CustomUtils.Runtime.CSV
                     continue;
 
                 var line = content.Substring(lineStart, i - lineStart).Trim();
-                if (string.IsNullOrWhiteSpace(line) is false)
+                if (!string.IsNullOrWhiteSpace(line))
                     lines.Add(line);
 
                 lineStart = i + 1;
@@ -59,7 +59,7 @@ namespace CustomUtils.Runtime.CSV
                 return lines;
 
             var lastLine = content[lineStart..].Trim();
-            if (string.IsNullOrWhiteSpace(lastLine) is false)
+            if (!string.IsNullOrWhiteSpace(lastLine))
                 lines.Add(lastLine);
 
             return lines;
@@ -92,7 +92,7 @@ namespace CustomUtils.Runtime.CSV
 
                         break;
                     }
-                    case Comma when inQuotes is false:
+                    case Comma when !inQuotes:
                         fields.Add(fieldBuilder.ToString().Trim());
                         fieldBuilder.Clear();
                         break;

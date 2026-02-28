@@ -768,7 +768,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
             {
                 case EventType.DragUpdated:
                 case EventType.DragPerform:
-                    if (dropArea.Contains(currentEditorEvent.mousePosition) is false)
+                    if (!dropArea.Contains(currentEditorEvent.mousePosition))
                         break;
 
                     DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
@@ -781,7 +781,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
                         {
                             foreach (var draggedObject in DragAndDrop.objectReferences)
                             {
-                                if (draggedObject && droppedObject.Contains(draggedObject) is false)
+                                if (draggedObject && !droppedObject.Contains(draggedObject))
                                     droppedObject.Add(draggedObject);
                             }
 
@@ -808,7 +808,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
 
             EditorGUILayout.LabelField(title, EditorStyles.boldLabel);
 
-            if (string.IsNullOrEmpty(info) is false)
+            if (!string.IsNullOrEmpty(info))
                 EditorGUILayout.LabelField(info, EditorStyles.miniLabel);
 
             var progressRect = EditorGUILayout.GetControlRect(false, 20);

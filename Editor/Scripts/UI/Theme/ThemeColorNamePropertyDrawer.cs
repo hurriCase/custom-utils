@@ -21,7 +21,7 @@ namespace CustomUtils.Editor.Scripts.UI.Theme
 
             var colorType = property.GetPropertyFromParent<ColorType>(nameof(ColorData.ColorType));
 
-            return colorType != ColorType.None && string.IsNullOrEmpty(property.stringValue) is false
+            return colorType != ColorType.None && !string.IsNullOrEmpty(property.stringValue)
                 ? EditorGUIUtility.singleLineHeight * 2 + EditorGUIUtility.standardVerticalSpacing
                 : EditorGUIUtility.singleLineHeight;
         }
@@ -33,7 +33,7 @@ namespace CustomUtils.Editor.Scripts.UI.Theme
             if (colorType == ColorType.None)
                 return;
 
-            if (TryGetColorNamesForType(colorType, out var colorNames) is false)
+            if (!TryGetColorNamesForType(colorType, out var colorNames))
             {
                 var message = StringFormatter.Format("No {0} colors found in database.", colorType);
                 EditorVisualControls.WarningBox(position, message);

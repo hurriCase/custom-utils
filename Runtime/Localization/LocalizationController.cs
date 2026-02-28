@@ -48,16 +48,15 @@ namespace CustomUtils.Runtime.Localization
         /// </summary>
         public static string Localize(LocalizationKey localizationKey, SystemLanguage language)
         {
-            if (localizationKey.IsValid is false
-                || LocalizationRegistry.Instance.Entries.TryGetValue(localizationKey.GUID, out var entry) is false)
+            if (!localizationKey.IsValid
+                || !LocalizationRegistry.Instance.Entries.TryGetValue(localizationKey.GUID, out var entry))
                 return string.Empty;
 
-            if (entry.TryGetTranslation(language, out var translation) &&
-                string.IsNullOrEmpty(translation) is false)
+            if (entry.TryGetTranslation(language, out var translation) && !string.IsNullOrEmpty(translation))
                 return translation;
 
             if (entry.TryGetTranslation(SystemLanguage.English, out var fallback) &&
-                string.IsNullOrEmpty(fallback) is false)
+                !string.IsNullOrEmpty(fallback))
                 return fallback;
 
             return entry.Key;

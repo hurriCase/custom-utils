@@ -52,7 +52,7 @@ namespace CustomUtils.Runtime.Extensions
                 return;
 
             var scene = component.gameObject.scene;
-            if (scene.isLoaded && string.IsNullOrEmpty(scene.path) is false)
+            if (scene.isLoaded && !string.IsNullOrEmpty(scene.path))
                 EditorSceneManager.MarkSceneDirty(scene);
 #endif
         }

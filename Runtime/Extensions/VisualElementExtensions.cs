@@ -107,7 +107,7 @@ namespace CustomUtils.Runtime.Extensions
             var wasFound = queriedElement != null;
 
 #if IS_DEBUG
-            if (wasFound is false)
+            if (!wasFound)
                 Debug.LogWarning($"[BasePopupFieldExtensions::TryQ] Element of {typeof(TElement)} type wasn't found");
 #endif
 

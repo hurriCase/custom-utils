@@ -9,7 +9,7 @@ namespace CustomUtils.Runtime.Localization
     {
         [field: SerializeField] public string GUID { get; private set; }
 
-        public bool IsValid => string.IsNullOrEmpty(GUID) is false;
+        public bool IsValid => !string.IsNullOrEmpty(GUID);
     }
 }
 #endif

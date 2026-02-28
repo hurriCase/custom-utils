@@ -56,7 +56,7 @@ namespace CustomUtils.Runtime.Audio
         public virtual AudioSource PlaySound(TSoundType soundType, float volumeModifier = 1, float pitchModifier = 1)
         {
             var soundData = _audioDatabaseGeneric.SoundContainers[soundType];
-            if (ShouldPlaySound(soundType, soundData) is false)
+            if (!ShouldPlaySound(soundType, soundData))
                 return null;
 
             var soundTypeValue = UnsafeEnumConverter<TSoundType>.ToInt32(soundType);
@@ -178,8 +178,8 @@ namespace CustomUtils.Runtime.Audio
 
             var soundValue = UnsafeEnumConverter<TSoundType>.ToInt32(soundType);
             return soundData.Cooldown == 0 ||
-                   _lastPlayedTimes.TryGetValue(soundValue, out var lastTime) is false ||
-                   (Time.unscaledTime < lastTime + soundData.Cooldown) is false;
+                   !_lastPlayedTimes.TryGetValue(soundValue, out var lastTime) ||
+                   !(Time.unscaledTime < lastTime + soundData.Cooldown);
         }
 
         private async UniTask PlaySoundInternal(AliveAudioData<TSoundType> aliveData)

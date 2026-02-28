@@ -40,7 +40,7 @@ namespace CustomUtils.Runtime.Extensions
         /// <returns>An array of distinct enum member names, or an empty array if the type is not an enum.</returns>
         public static string[] GetDistinctEnumNames(this Type enumType)
         {
-            if (typeof(Enum).IsAssignableFrom(enumType) is false)
+            if (!typeof(Enum).IsAssignableFrom(enumType))
                 return Array.Empty<string>();
 
             var names = Enum.GetNames(enumType);

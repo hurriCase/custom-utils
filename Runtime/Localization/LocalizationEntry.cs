@@ -16,9 +16,9 @@ namespace CustomUtils.Runtime.Localization
         [field: SerializeField, InspectorReadOnly]
         internal SerializedDictionary<SystemLanguage, string> Translations { get; private set; } = new();
 
-        internal bool IsValid => string.IsNullOrEmpty(Key) is false
-                                 && string.IsNullOrEmpty(GUID) is false
-                                 && string.IsNullOrEmpty(TableName) is false;
+        internal bool IsValid => !string.IsNullOrEmpty(Key)
+                                 && !string.IsNullOrEmpty(GUID)
+                                 && !string.IsNullOrEmpty(TableName);
 
         internal LocalizationEntry(string guid, string key, string tableName)
         {

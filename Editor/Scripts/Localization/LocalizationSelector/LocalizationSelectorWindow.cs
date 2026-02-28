@@ -64,10 +64,10 @@ namespace CustomUtils.Editor.Scripts.Localization.LocalizationSelector
             }
 
             var isValid = _currentLocalizationEntry.IsValid;
-            _elements.NoneSelectedLabel.SetActive(isValid is false);
+            _elements.NoneSelectedLabel.SetActive(!isValid);
             _elements.CurrentSelectionInfo.SetActive(isValid);
 
-            if (isValid is false)
+            if (!isValid)
                 return;
 
             DisplayCurrentEntry();

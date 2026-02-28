@@ -36,7 +36,7 @@ namespace CustomUtils.Runtime.AssetLoader
         /// <returns>The loaded resource or null if the resource could not be found.</returns>
         public static TResource Load(string resourcePath = null, string fullPath = null)
         {
-            if (PathUtility.TryGetResourcePath<TResource>(ref resourcePath) is false)
+            if (!PathUtility.TryGetResourcePath<TResource>(ref resourcePath))
                 return null;
 
             var resource = EditorGUIUtility.Load(resourcePath) as TResource;
@@ -45,7 +45,7 @@ namespace CustomUtils.Runtime.AssetLoader
                 ResourceLoader<TResource>.TryLoad(out resource, Path.GetFileNameWithoutExtension(resourcePath)))
                 return resource;
 
-            if (string.IsNullOrEmpty(fullPath) is false)
+            if (!string.IsNullOrEmpty(fullPath))
             {
                 resource = AssetDatabase.LoadAssetAtPath<TResource>(fullPath);
 

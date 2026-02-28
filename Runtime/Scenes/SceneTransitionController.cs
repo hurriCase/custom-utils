@@ -54,7 +54,7 @@ namespace CustomUtils.Runtime.Scenes
 
         public async UniTask EndTransition()
         {
-            await UniTask.WaitUntil(this, static self => self.IsLoading is false);
+            await UniTask.WaitUntil(this, static self => !self.IsLoading);
 
             _sceneLoader.TryUnloadScene(_transitionScene);
         }

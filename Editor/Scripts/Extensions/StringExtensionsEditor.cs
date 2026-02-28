@@ -23,7 +23,7 @@ namespace CustomUtils.Editor.Scripts.Extensions
                 var parentPath = currentPath;
                 currentPath = $"{currentPath}/{folders[i]}";
 
-                if (AssetDatabase.IsValidFolder(currentPath) is false)
+                if (!AssetDatabase.IsValidFolder(currentPath))
                     AssetDatabase.CreateFolder(parentPath, folders[i]);
             }
 

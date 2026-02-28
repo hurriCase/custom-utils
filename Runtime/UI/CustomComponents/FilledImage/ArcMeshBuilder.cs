@@ -12,7 +12,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.FilledImage
 
             BuildArcSegments(vertexHelper, geometry, color);
 
-            if (geometry.HasRoundedCaps is false)
+            if (!geometry.HasRoundedCaps)
                 return;
 
             BuildSingleCap(vertexHelper, geometry.StartCapPoints, color);

@@ -153,7 +153,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         {
             EditorGUI.BeginChangeCheck();
             var newValue = guiMethod(rect, currentValue);
-            if (EditorGUI.EndChangeCheck() is false)
+            if (!EditorGUI.EndChangeCheck())
                 return currentValue;
 
             Undo.RecordObject(_target, $"Change {label}");
@@ -204,7 +204,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
 
             EditorGUILayout.PropertyField(property, new GUIContent(label), includeChildren);
 
-            if (EditorGUI.EndChangeCheck() is false)
+            if (!EditorGUI.EndChangeCheck())
                 return false;
 
             Undo.RecordObject(_target, $"Change {label}");
@@ -439,11 +439,11 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
 
             GUI.backgroundColor = originalBackgroundColor;
 
-            if (EditorGUI.EndChangeCheck() is false || clicked is false)
+            if (!EditorGUI.EndChangeCheck() || !clicked)
                 return isSelected;
 
             Undo.RecordObject(_target, $"Toggle {label}");
-            return isSelected is false;
+            return !isSelected;
         }
 
         /// <summary>
@@ -465,7 +465,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
                 var isSelected = selectedIndex == i;
                 var newIsSelected = ToggleButton(labels[i], isSelected);
 
-                if (EditorGUI.EndChangeCheck() && newIsSelected && isSelected is false)
+                if (EditorGUI.EndChangeCheck() && newIsSelected && !isSelected)
                     newIndex = i;
             }
 
@@ -512,7 +512,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
             if (newToggle1 == oldToggle1 && newToggle2 == oldToggle2)
                 return;
 
-            if (EditorGUI.EndChangeCheck() is false)
+            if (!EditorGUI.EndChangeCheck())
                 return;
 
             Undo.RecordObject(_target, $"Change {label1}/{label2} Selection");
@@ -610,7 +610,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         {
             EditorGUI.BeginChangeCheck();
             var newValue = guiMethod();
-            if (EditorGUI.EndChangeCheck() is false)
+            if (!EditorGUI.EndChangeCheck())
                 return currentValue;
 
             Undo.RecordObject(_target, $"Change {label}");

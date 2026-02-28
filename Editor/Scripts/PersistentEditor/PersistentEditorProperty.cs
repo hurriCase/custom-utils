@@ -70,7 +70,7 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
             {
                 _savingEnabled = false;
 
-                if (EditorPrefsHelper.HasKey(_key) is false)
+                if (!EditorPrefsHelper.HasKey(_key))
                     return;
 
                 var loaded = EditorPrefsHelper.GetValue<TProperty>(_key);

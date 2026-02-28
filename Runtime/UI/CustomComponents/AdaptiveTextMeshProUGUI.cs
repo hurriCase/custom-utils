@@ -93,7 +93,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents
 
         private void SetDirty()
         {
-            if (IsActive() is false)
+            if (!IsActive())
                 return;
 
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
@@ -111,7 +111,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents
                 _ => 0
             };
 
-            if (scaleFactor.IsReasonable() is false)
+            if (!scaleFactor.IsReasonable())
                 return;
 
             fontSize = BaseFontSize * scaleFactor;
@@ -119,7 +119,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents
 
         private void ExpandContainerIfNeeded()
         {
-            if (ExpandToFitText is false || StaticDimensionType == DimensionType.None)
+            if (!ExpandToFitText || StaticDimensionType == DimensionType.None)
             {
                 _tracker.Clear();
                 return;
@@ -130,8 +130,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents
             switch (StaticDimensionType)
             {
                 case DimensionType.Width:
-                    if (Mathf.Approximately(_lastPreferredHeight, preferredHeight)
-                        || preferredHeight.IsReasonable() is false)
+                    if (Mathf.Approximately(_lastPreferredHeight, preferredHeight) || !preferredHeight.IsReasonable())
                         return;
 
                     _tracker.Add(this, rectTransform, DrivenTransformProperties.SizeDeltaY);
@@ -140,8 +139,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents
                     break;
 
                 case DimensionType.Height:
-                    if (Mathf.Approximately(_lastPreferredWidth, preferredWidth)
-                        || preferredWidth.IsReasonable() is false)
+                    if (Mathf.Approximately(_lastPreferredWidth, preferredWidth) || !preferredWidth.IsReasonable())
                         return;
 
                     _tracker.Add(this, rectTransform, DrivenTransformProperties.SizeDeltaX);

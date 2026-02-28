@@ -66,7 +66,7 @@ namespace CustomUtils.Runtime.UI.Windows
                 var loadedScreen = await _addressablesLoader.LoadAsync<GameObject>(screenReference, cancellationToken);
                 var createdWindow = _objectResolver.Instantiate(loadedScreen, _screensContainer);
 
-                if (createdWindow.TryGetComponent<ScreenBase>(out var screenBase) is false)
+                if (!createdWindow.TryGetComponent<ScreenBase>(out var screenBase))
                     continue;
 
                 _createdScreens[screenType] = screenBase;
@@ -91,7 +91,7 @@ namespace CustomUtils.Runtime.UI.Windows
                 var loadedPopup = await _addressablesLoader.LoadAsync<GameObject>(popupReference, cancellationToken);
                 var createdWindow = _objectResolver.Instantiate(loadedPopup, _popupsContainer);
 
-                if (createdWindow.TryGetComponent<PopupBase>(out var popupBase) is false)
+                if (!createdWindow.TryGetComponent<PopupBase>(out var popupBase))
                     continue;
 
                 _createdPopups[popupType] = popupBase;
@@ -190,7 +190,7 @@ namespace CustomUtils.Runtime.UI.Windows
 
         private async UniTask OpenPopupAsync(PopupBase popupBase, TPopupEnum popupEnum)
         {
-            if (_currentOpenedPopup && popupBase.IsInFrontOf(_currentOpenedPopup) is false)
+            if (_currentOpenedPopup && !popupBase.IsInFrontOf(_currentOpenedPopup))
                 popupBase.transform.SetAsLastSibling();
 
             await popupBase.ShowAsync();
@@ -227,7 +227,7 @@ namespace CustomUtils.Runtime.UI.Windows
             var needShow = _currentOpenedPopup && _currentOpenedPopup.IsSingle;
             _currentOpenedPopup = null;
 
-            if (_previousOpenedPopups.TryPop(out var previousPopup) is false)
+            if (!_previousOpenedPopups.TryPop(out var previousPopup))
                 return;
 
             _currentOpenedPopup = previousPopup;

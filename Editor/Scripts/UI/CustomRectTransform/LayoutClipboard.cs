@@ -29,7 +29,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
         {
             layoutData = default;
 
-            if (HasData is false || _clipboardData == null)
+            if (!HasData || _clipboardData == null)
                 return false;
 
             try

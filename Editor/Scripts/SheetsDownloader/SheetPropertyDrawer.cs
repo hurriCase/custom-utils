@@ -22,7 +22,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
             EditorGUI.PropertyField(propertyRect, property, label, true);
 
-            if (property.isExpanded is false)
+            if (!property.isExpanded)
                 return;
 
             if (GUI.Button(buttonRect, "▼ Download"))

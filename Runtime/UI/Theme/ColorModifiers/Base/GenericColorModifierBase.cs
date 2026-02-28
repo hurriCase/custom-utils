@@ -19,7 +19,7 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.Base
 
         internal override void UpdateColor(string colorName)
         {
-            if (ThemeDatabase.TryGetColorByName(colorName, out var color) is false)
+            if (!ThemeDatabase.TryGetColorByName(colorName, out var color))
                 return;
 
             OnUpdateColor(color);

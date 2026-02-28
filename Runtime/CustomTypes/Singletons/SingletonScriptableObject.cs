@@ -77,7 +77,7 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
                 ? EditorLoader<T>.TryLoad(out resource)
                 : ResourceLoader<T>.TryLoad(out resource);
 #else
-            if (attribute.IsEditorResource is false)
+            if (!attribute.IsEditorResource)
                 return ResourceLoader<T>.TryLoad(out resource);
 
             Debug.LogWarning($"[SingletonScriptableObject] Cannot load editor resource {typeof(T).Name} at runtime.");
@@ -101,7 +101,7 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
             }
 
             var directory = Path.GetDirectoryName(assetPath);
-            if (string.IsNullOrEmpty(directory) is false && Directory.Exists(directory) is false)
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
             var resource = CreateInstance<T>();

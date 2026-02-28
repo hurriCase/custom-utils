@@ -223,7 +223,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
             using var request = UnityWebRequest.Head(url);
             await request.SendWebRequest().ToUniTask(cancellationToken: token);
 
-            if (string.IsNullOrEmpty(request.error) is false)
+            if (!string.IsNullOrEmpty(request.error))
                 return 0;
 
             var responseHeader = request.GetResponseHeader(SheetDownloaderConstants.ContentLengthHeader);
@@ -246,7 +246,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
 
         private static string GetRequestError(UnityWebRequest request)
         {
-            if (string.IsNullOrEmpty(request.error) is false)
+            if (!string.IsNullOrEmpty(request.error))
                 return request.error;
 
             return request.downloadHandler.text.Contains(SheetDownloaderConstants.GoogleSignInIndicator)
@@ -260,7 +260,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
                 Regex.Matches(request.downloadHandler.text, SheetDownloaderConstants.ErrorMessagePattern);
 
             if (matches.Count == 0
-                && request.downloadHandler.text.Contains(SheetDownloaderConstants.GoogleScriptErrorIndicator) is false)
+                && !request.downloadHandler.text.Contains(SheetDownloaderConstants.GoogleScriptErrorIndicator))
                 return null;
 
             return matches.Count > 0
@@ -272,7 +272,7 @@ namespace CustomUtils.Editor.Scripts.SheetsDownloader
         private void PrepareDownloadFolderIfNeeded()
         {
             var downloadPath = _database.GetDownloadPath();
-            if (Directory.Exists(downloadPath) is false)
+            if (!Directory.Exists(downloadPath))
                 Directory.CreateDirectory(downloadPath);
         }
     }

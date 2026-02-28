@@ -34,7 +34,7 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
         public bool TryGetValue(string columnName, out string value)
         {
             value = string.Empty;
-            if (_columnMap.TryGetValue(columnName, out var index) is false || index >= _values.Length)
+            if (!_columnMap.TryGetValue(columnName, out var index) || index >= _values.Length)
                 return false;
 
             value = _values[index];
@@ -63,7 +63,7 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
         {
             foreach (var (headerName, index) in _columnMap)
             {
-                if (Regex.IsMatch(headerName, pattern, RegexOptions.IgnoreCase) is false)
+                if (!Regex.IsMatch(headerName, pattern, RegexOptions.IgnoreCase))
                     continue;
 
                 if (index < _values.Length)
@@ -84,10 +84,10 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
 
             foreach (var (headerName, index) in _columnMap)
             {
-                if (Regex.IsMatch(headerName, pattern, RegexOptions.IgnoreCase) is false)
+                if (!Regex.IsMatch(headerName, pattern, RegexOptions.IgnoreCase))
                     continue;
 
-                if (index < _values.Length && string.IsNullOrEmpty(_values[index]) is false)
+                if (index < _values.Length && !string.IsNullOrEmpty(_values[index]))
                     result.Add(_values[index]);
             }
 

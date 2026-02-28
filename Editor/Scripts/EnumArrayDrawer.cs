@@ -22,7 +22,7 @@ namespace CustomUtils.Editor.Scripts
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            if (fieldInfo.FieldType.TryGetEnumType(out var enumType) is false)
+            if (!fieldInfo.FieldType.TryGetEnumType(out var enumType))
                 return null;
 
             _rootProperty = property;

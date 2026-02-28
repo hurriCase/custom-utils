@@ -33,7 +33,7 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="value">The string to convert.</param>
         /// <returns>True if the string equals "true" (case-insensitive) or "1"; otherwise, false.</returns>
         public static bool ToBool(this string value) =>
-            string.IsNullOrWhiteSpace(value) is false &&
+            !string.IsNullOrWhiteSpace(value) &&
             (value.Equals("true", StringComparison.OrdinalIgnoreCase) || value == "1");
 
         /// <summary>

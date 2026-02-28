@@ -105,7 +105,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 #if UNITY_EDITOR
         public void Update()
         {
-            if (Application.isPlaying is false)
+            if (!Application.isPlaying)
                 UpdateGeometry();
         }
 #endif

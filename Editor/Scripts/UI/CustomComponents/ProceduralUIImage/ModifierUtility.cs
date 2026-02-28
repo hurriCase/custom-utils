@@ -12,7 +12,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
         {
             foreach (var type in Assembly.GetAssembly(typeof(ModifierBase)).GetTypes())
             {
-                if (type.IsSubclassOf(typeof(ModifierBase)) is false)
+                if (!type.IsSubclassOf(typeof(ModifierBase)))
                     continue;
 
                 if (((ModifierIDAttribute[])type
@@ -28,7 +28,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             var result = new List<ModifierIDAttribute>();
             foreach (var type in Assembly.GetAssembly(typeof(ModifierBase)).GetTypes())
             {
-                if (type.IsSubclassOf(typeof(ModifierBase)) && type.IsAbstract is false)
+                if (type.IsSubclassOf(typeof(ModifierBase)) && !type.IsAbstract)
                     result.Add(((ModifierIDAttribute[])type
                         .GetCustomAttributes(typeof(ModifierIDAttribute), false))[0]);
             }

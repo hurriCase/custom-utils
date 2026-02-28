@@ -7,7 +7,7 @@ namespace CustomUtils.Runtime.AssetLoader
     {
         internal static bool TryGetResourcePath<TResource>(ref string resourcePath)
         {
-            if (string.IsNullOrWhiteSpace(resourcePath) is false)
+            if (!string.IsNullOrWhiteSpace(resourcePath))
                 return ValidateResourcePath(ref resourcePath);
 
             var type = typeof(TResource);

@@ -55,16 +55,16 @@ namespace Editor_Default_Resources.CustomMenu.Scripts.Editor
             var usedMenuPaths = new HashSet<string>();
             var usedShortcuts = new HashSet<string>();
 
-            if (GenerateSceneMenuItems(settings, ref content, ref isFirstMenuItem, usedMethodNames, usedMenuPaths,
-                    usedShortcuts) is false
-                || GenerateAssetMenuItems(settings, ref content, ref isFirstMenuItem, usedMethodNames, usedMenuPaths,
-                    usedShortcuts) is false
-                || GeneratePrefabMenuItems(settings, ref content, ref isFirstMenuItem, usedMethodNames, usedMenuPaths,
-                    usedShortcuts) is false
-                || GenerateMethodExecutionMenuItems(settings, ref content, ref isFirstMenuItem, usedMethodNames,
-                    usedMenuPaths, usedShortcuts) is false
-                || GenerateScriptingSymbolMenuItems(settings, ref content, ref isFirstMenuItem, usedMethodNames,
-                    usedMenuPaths, usedShortcuts) is false)
+            if (!GenerateSceneMenuItems(settings,
+                    ref content, ref isFirstMenuItem, usedMethodNames, usedMenuPaths, usedShortcuts)
+                || !GenerateAssetMenuItems(settings,
+                    ref content, ref isFirstMenuItem, usedMethodNames, usedMenuPaths, usedShortcuts)
+                || !GeneratePrefabMenuItems(settings,
+                    ref content, ref isFirstMenuItem, usedMethodNames, usedMenuPaths, usedShortcuts)
+                || !GenerateMethodExecutionMenuItems(settings,
+                    ref content, ref isFirstMenuItem, usedMethodNames, usedMenuPaths, usedShortcuts)
+                || !GenerateScriptingSymbolMenuItems(settings,
+                    ref content, ref isFirstMenuItem, usedMethodNames, usedMenuPaths, usedShortcuts))
                 return string.Empty;
 
             content += @"
@@ -87,8 +87,8 @@ namespace Editor_Default_Resources.CustomMenu.Scripts.Editor
 
             foreach (var item in settings.SceneMenuItems)
             {
-                if (MenuValidationHelper.Validate(item.MenuTarget, item.MenuPath, item.Shortcut, item.SceneName,
-                        "scene", usedMenuPaths, usedShortcuts) is false)
+                if (!MenuValidationHelper.Validate(item.MenuTarget, item.MenuPath, item.Shortcut, item.SceneName,
+                        "scene", usedMenuPaths, usedShortcuts))
                     return false;
 
                 var baseMethodName = $"OpenScene{MenuValidationHelper.SanitizeMethodName(item.SceneName)}";
@@ -124,8 +124,8 @@ namespace Editor_Default_Resources.CustomMenu.Scripts.Editor
 
             foreach (var item in settings.AssetMenuItems)
             {
-                if (MenuValidationHelper.Validate(item.MenuTarget, item.MenuPath, item.Shortcut,
-                        item.MenuTarget.name, "asset", usedMenuPaths, usedShortcuts) is false)
+                if (!MenuValidationHelper.Validate(item.MenuTarget, item.MenuPath, item.Shortcut,
+                        item.MenuTarget.name, "asset", usedMenuPaths, usedShortcuts))
                     return false;
 
                 var baseMethodName = $"SelectAsset{MenuValidationHelper.SanitizeMethodName(item.MenuTarget.name)}";
@@ -159,8 +159,8 @@ namespace Editor_Default_Resources.CustomMenu.Scripts.Editor
 
             foreach (var item in settings.PrefabMenuItems)
             {
-                if (MenuValidationHelper.Validate(item.MenuTarget, item.MenuPath, item.Shortcut,
-                        item.MenuTarget.name, "prefab", usedMenuPaths, usedShortcuts) is false)
+                if (!MenuValidationHelper.Validate(item.MenuTarget, item.MenuPath, item.Shortcut,
+                        item.MenuTarget.name, "prefab", usedMenuPaths, usedShortcuts))
                     return false;
 
                 var baseMethodName = $"Create{MenuValidationHelper.SanitizeMethodName(item.MenuTarget.name)}";
@@ -188,8 +188,8 @@ namespace Editor_Default_Resources.CustomMenu.Scripts.Editor
 
             foreach (var item in settings.MethodExecutionItems)
             {
-                if (MenuValidationHelper.Validate(item.MenuTarget, item.MenuPath, item.Shortcut,
-                        item.MenuTarget.ToString(), "method", usedMenuPaths, usedShortcuts) is false)
+                if (!MenuValidationHelper.Validate(item.MenuTarget, item.MenuPath, item.Shortcut,
+                        item.MenuTarget.ToString(), "method", usedMenuPaths, usedShortcuts))
                     return false;
 
                 AddMethodSeparator(ref content, ref isFirstMenuItem);
@@ -213,8 +213,8 @@ namespace Editor_Default_Resources.CustomMenu.Scripts.Editor
 
             foreach (var item in settings.ScriptingSymbols)
             {
-                if (MenuValidationHelper.Validate(item.MenuTarget, item.MenuPath, item.Shortcut,
-                        item.MenuTarget, "symbol", usedMenuPaths, usedShortcuts) is false)
+                if (!MenuValidationHelper.Validate(item.MenuTarget, item.MenuPath, item.Shortcut,
+                        item.MenuTarget, "symbol", usedMenuPaths, usedShortcuts))
                     return false;
 
                 var baseMethodName = $"ToggleSymbol_{MenuValidationHelper.SanitizeMethodName(item.MenuTarget)}";

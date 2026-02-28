@@ -81,7 +81,7 @@ namespace CustomUtils.Runtime.Logger
         /// </remarks>
         public static void StopCollection()
         {
-            if (_isCollecting is false)
+            if (!_isCollecting)
                 return;
 
             Application.logMessageReceived -= HandleLog;
@@ -127,7 +127,7 @@ namespace CustomUtils.Runtime.Logger
                         .Append('[').Append(entry.Type).Append("] ")
                         .AppendLine(entry.Message);
 
-                    if (_captureStackTrace && string.IsNullOrEmpty(entry.StackTrace) is false)
+                    if (_captureStackTrace && !string.IsNullOrEmpty(entry.StackTrace))
                         _logBuilder.AppendLine(entry.StackTrace);
                 }
             }
@@ -156,7 +156,7 @@ namespace CustomUtils.Runtime.Logger
 
         private static void HandleLog(string message, string stackTrace, LogType type)
         {
-            if (_collectLogs is false || (int)type > (int)_minimumLogLevel)
+            if (!_collectLogs || (int)type > (int)_minimumLogLevel)
                 return;
 
             var index = Interlocked.Increment(ref _currentIndex) % _maxLogEntries;

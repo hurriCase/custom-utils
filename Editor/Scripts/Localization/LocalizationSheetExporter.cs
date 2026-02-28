@@ -61,7 +61,7 @@ namespace CustomUtils.Editor.Scripts.Localization
             if (string.IsNullOrEmpty(field))
                 return string.Empty;
 
-            if (field.Contains("\n") is false && field.Contains("\t") is false && field.Contains("\"") is false)
+            if (!field.Contains("\n") && !field.Contains("\t") && !field.Contains("\""))
                 return field;
 
             using var escaped = StringBuilderScope.Create();

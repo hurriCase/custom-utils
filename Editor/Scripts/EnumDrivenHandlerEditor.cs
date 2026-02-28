@@ -85,7 +85,7 @@ namespace CustomUtils.Editor.Scripts
         {
             EditorGUILayout.PropertyField(listProperty, new GUIContent(listProperty.displayName), false);
 
-            if (listProperty.isExpanded is false)
+            if (!listProperty.isExpanded)
                 return;
 
             EditorGUI.indentLevel++;
@@ -175,7 +175,7 @@ namespace CustomUtils.Editor.Scripts
                 return;
 
             var typeName = typeof(TEnum).Name.Replace("Type", "");
-            if (GUILayout.Button($"Add All Missing {typeName} Types ({_unusedValues.Count})") is false)
+            if (!GUILayout.Button($"Add All Missing {typeName} Types ({_unusedValues.Count})"))
                 return;
 
             foreach (var value in _unusedValues) AddNewItem(value);

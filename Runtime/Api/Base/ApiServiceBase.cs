@@ -60,7 +60,7 @@ namespace CustomUtils.Runtime.Api.Base
             where TRequest : class
             where TResponse : class, IValidatable
         {
-            if (_config.IsValid() is false)
+            if (!_config.IsValid())
                 return new ResponseResult<TResponse>(false);
 
             var url = _config.GetApiUrl();
@@ -88,7 +88,7 @@ namespace CustomUtils.Runtime.Api.Base
             where TRequest : class
             where TResponse : class, IValidatable
         {
-            if (_config.IsValid() is false)
+            if (!_config.IsValid())
                 return new ResponseResult<TResponse>(false);
 
             var url = _config.GetApiUrl();

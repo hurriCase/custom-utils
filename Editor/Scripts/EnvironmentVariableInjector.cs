@@ -17,7 +17,7 @@ namespace CustomUtils.Editor.Scripts
             if (!PlayerSettings.Android.useCustomKeystore)
                 return;
 
-            if (Application.identifier.TryGetValueFromEnvironment(out var password) is false)
+            if (!Application.identifier.TryGetValueFromEnvironment(out var password))
             {
                 Debug.LogWarning("No password found in environment variables! Using default or empty value.");
                 password = EditorUtility.DisplayDialog("Password Required",

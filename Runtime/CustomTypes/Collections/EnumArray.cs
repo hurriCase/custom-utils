@@ -212,7 +212,7 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
 
             for (var i = 0; i < Entries.Length; i++)
             {
-                if (EqualityComparer<TValue>.Default.Equals(Entries[i].Value, other.Entries[i].Value) is false)
+                if (!EqualityComparer<TValue>.Default.Equals(Entries[i].Value, other.Entries[i].Value))
                     return false;
             }
 
@@ -243,7 +243,7 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         /// Determines whether two EnumArray instances are not equal.
         /// </summary>
         public static bool operator !=(EnumArray<TEnum, TValue> left, EnumArray<TEnum, TValue> right) =>
-            Equals(left, right) is false;
+            !Equals(left, right);
 
         private static TEnum[] GetUniqueKeys()
         {

@@ -19,7 +19,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities.Scopes
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 _endVertical = true;
 
-                if (string.IsNullOrEmpty(title) is false)
+                if (!string.IsNullOrEmpty(title))
                 {
                     EditorGUILayout.Space(EditorGUIUtility.standardVerticalSpacing * 0.5f);
                     EditorGUILayout.LabelField(title, EditorStyles.boldLabel);

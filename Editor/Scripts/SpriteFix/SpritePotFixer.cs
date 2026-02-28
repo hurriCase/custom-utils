@@ -143,7 +143,7 @@ namespace CustomUtils.Editor.Scripts.SpriteFix
                                            spriteInfo.OriginalSize.y);
                 EditorGUILayout.LabelField("New Size: " + spriteInfo.NewSize.x + " x " + spriteInfo.NewSize.y);
 
-                if (spriteInfo.ShouldResize is false)
+                if (!spriteInfo.ShouldResize)
                     EditorGUILayout.LabelField("(No resize needed)", EditorStyles.miniLabel);
 
                 EditorGUILayout.EndVertical();
@@ -197,7 +197,7 @@ namespace CustomUtils.Editor.Scripts.SpriteFix
 
             foreach (var spriteInfo in spriteInfos)
             {
-                if (spriteInfo.ShouldResize is false)
+                if (!spriteInfo.ShouldResize)
                     continue;
 
                 EditorUtility.DisplayProgressBar(

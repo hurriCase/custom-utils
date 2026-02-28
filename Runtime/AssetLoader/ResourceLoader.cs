@@ -58,7 +58,7 @@ namespace CustomUtils.Runtime.AssetLoader
         public static async UniTask<TResource> LoadAsync(string resourcePath = null,
             CancellationToken cancellationToken = default)
         {
-            if (PathUtility.TryGetResourcePath<TResource>(ref resourcePath) is false)
+            if (!PathUtility.TryGetResourcePath<TResource>(ref resourcePath))
                 return null;
 
             var resourceRequest = Resources.LoadAsync<TResource>(resourcePath);

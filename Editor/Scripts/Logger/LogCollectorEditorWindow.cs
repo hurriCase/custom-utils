@@ -33,7 +33,7 @@ namespace CustomUtils.Editor.Scripts.Logger
             PropertyField(nameof(LogCollectorSettings.AutoStartCollect));
             PropertyField(nameof(LogCollectorSettings.MinimumLogLevel));
 
-            if (EditorGUI.EndChangeCheck() is false)
+            if (!EditorGUI.EndChangeCheck())
                 return;
 
             serializedObject.ApplyModifiedProperties();

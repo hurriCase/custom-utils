@@ -92,7 +92,7 @@ namespace CustomUtils.Runtime.Extensions
                 if (i > startIndex)
                 {
                     var element = ExtractTrimmedElement(str, startIndex, i - 1);
-                    if (string.IsNullOrEmpty(str) is false)
+                    if (!string.IsNullOrEmpty(str))
                     {
                         var convertedValue = converter(element);
                         result.Add(convertedValue);
@@ -151,7 +151,7 @@ namespace CustomUtils.Runtime.Extensions
         {
             value = Environment.GetEnvironmentVariable(environmentVariableName, environmentVariableTarget);
 
-            if (string.IsNullOrEmpty(value) is false)
+            if (!string.IsNullOrEmpty(value))
                 return true;
 
             Debug.LogError("[StringExtensions::TryGetValueFromEnvironment] " +
@@ -178,7 +178,7 @@ namespace CustomUtils.Runtime.Extensions
         /// <returns>True if the directory was created, false otherwise.</returns>
         public static void CreateDirectoryIfNotExist(this string path)
         {
-            if (Directory.Exists(path) is false)
+            if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
         }
     }

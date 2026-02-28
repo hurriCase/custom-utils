@@ -43,7 +43,7 @@ namespace CustomUtils.Runtime.Localization
         {
             foreach (var row in csvTable.Rows)
             {
-                if (TryCreateEntryFromRow(row, sheetName, out var entry) is false)
+                if (!TryCreateEntryFromRow(row, sheetName, out var entry))
                     continue;
 
                 LocalizationRegistry.Instance.AddOrUpdateEntry(entry);
@@ -54,7 +54,7 @@ namespace CustomUtils.Runtime.Localization
         {
             localizationEntry = null;
 
-            if (row.TryGetValue(KeyColumnName, out var key) is false)
+            if (!row.TryGetValue(KeyColumnName, out var key))
             {
                 Debug.LogError("[LocalizationSheetProcessor::TryCreateEntryFromRow]" +
                                $"{KeyColumnName} column is missing in sheet '{sheetName}'");
@@ -62,11 +62,11 @@ namespace CustomUtils.Runtime.Localization
             }
 
             var guid = row.TryGetValue(GuidColumnName, out var existingGuid)
-                       && string.IsNullOrEmpty(existingGuid) is false
+                       && !string.IsNullOrEmpty(existingGuid)
                 ? existingGuid
                 : Guid.NewGuid().ToString();
 
-            if (_processedGuids.Add(guid) is false)
+            if (!_processedGuids.Add(guid))
             {
                 Debug.LogError("[LocalizationSheetProcessor::CreateEntryFromRow]" +
                                $" Duplicate GUID '{guid}' in sheet '{sheetName}'");
@@ -77,12 +77,12 @@ namespace CustomUtils.Runtime.Localization
 
             foreach (SystemLanguage language in Enum.GetValues(typeof(SystemLanguage)))
             {
-                if (row.TryGetValue(language.ToString(), out var translation) is false)
+                if (!row.TryGetValue(language.ToString(), out var translation))
                     continue;
 
                 localizationEntry.SetTranslation(language, translation);
 
-                if (_usedLanguages.Contains(language) is false)
+                if (!_usedLanguages.Contains(language))
                     _usedLanguages.Add(language);
             }
 

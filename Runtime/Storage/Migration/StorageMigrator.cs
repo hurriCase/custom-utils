@@ -32,7 +32,7 @@ namespace CustomUtils.Runtime.Storage.Migration
             {
                 try
                 {
-                    if (await fromProvider.HasKeyAsync(key) is false)
+                    if (!await fromProvider.HasKeyAsync(key))
                     {
                         Logger.LogWarning($"[StorageMigrator::MigrateAsync] Key '{key}' not found in source provider");
                         continue;
