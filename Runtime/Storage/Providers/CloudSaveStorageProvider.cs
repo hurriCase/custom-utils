@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if CLOUD_SAVE_INSTALLED
+using System.Collections.Generic;
 using System.Threading;
 using CustomUtils.Runtime.Serializer;
 using CustomUtils.Runtime.Storage.Base;
@@ -62,3 +63,4 @@ namespace CustomUtils.Runtime.Storage.Providers
         }
     }
 }
+#endif
