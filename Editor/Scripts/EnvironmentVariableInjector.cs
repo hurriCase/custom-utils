@@ -14,6 +14,9 @@ namespace CustomUtils.Editor.Scripts
 
         public void OnPreprocessBuild(BuildReport report)
         {
+            if (!PlayerSettings.Android.useCustomKeystore)
+                return;
+
             if (Application.identifier.TryGetValueFromEnvironment(out var password) is false)
             {
                 Debug.LogWarning("No password found in environment variables! Using default or empty value.");
@@ -31,4 +34,5 @@ namespace CustomUtils.Editor.Scripts
         }
     }
 }
+
 #endif
