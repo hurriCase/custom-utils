@@ -108,5 +108,13 @@ namespace CustomUtils.Runtime.Extensions
         /// <returns>The initial velocity needed to achieve the displacement.</returns>
         public static float GetInitialVelocity(this float displacement)
             => Mathf.Sqrt(displacement * -2f * Physics.gravity.y);
+
+        /// <summary>
+        /// Converts a percentage value to a damage multiplier.
+        /// For example, 30% becomes 0.7 multiplier.
+        /// </summary>
+        /// <param name="percent">The percentage to convert.</param>
+        /// <returns>A multiplier representing the remaining percentage as a fraction of 1.</returns>
+        public static float ToMultiplier(this float percent) => (100f - percent) / 100f;
     }
 }
