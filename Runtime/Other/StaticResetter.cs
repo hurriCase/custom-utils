@@ -4,7 +4,7 @@ using System.Diagnostics;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-namespace CustomUtils.Runtime
+namespace CustomUtils.Runtime.Other
 {
     internal static class StaticResetter
     {

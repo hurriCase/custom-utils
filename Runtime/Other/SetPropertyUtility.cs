@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace CustomUtils.Runtime
+namespace CustomUtils.Runtime.Other
 {
     [PublicAPI]
     public static class SetPropertyUtility

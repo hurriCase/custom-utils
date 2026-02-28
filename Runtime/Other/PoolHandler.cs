@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Pool;
 using Object = UnityEngine.Object;
 
-namespace CustomUtils.Runtime
+namespace CustomUtils.Runtime.Other
 {
     /// <summary>
     /// Generic object pool handler for Unity objects with automatic activation management

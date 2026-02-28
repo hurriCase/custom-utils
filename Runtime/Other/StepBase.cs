@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 using R3;
 using UnityEngine;
 
-namespace CustomUtils.Runtime.StartUp
+namespace CustomUtils.Runtime.Other
 {
     /// <inheritdoc />
     /// <summary>

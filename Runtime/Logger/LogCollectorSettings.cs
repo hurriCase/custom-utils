@@ -1,5 +1,6 @@
 ﻿using CustomUtils.Runtime.AssetLoader;
 using CustomUtils.Runtime.CustomTypes.Singletons;
+using CustomUtils.Runtime.Other;
 using UnityEngine;
 
 namespace CustomUtils.Runtime.Logger

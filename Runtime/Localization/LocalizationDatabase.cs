@@ -1,6 +1,7 @@
 ﻿#if CUSTOM_LOCALIZATION
 using CustomUtils.Runtime.AssetLoader;
 using CustomUtils.Runtime.Downloader;
+using CustomUtils.Runtime.Other;
 using UnityEngine;
 
 namespace CustomUtils.Runtime.Localization

@@ -1,4 +1,4 @@
-﻿namespace CustomUtils.Runtime
+﻿namespace CustomUtils.Runtime.Other
 {
     internal static class ResourcePaths
     {

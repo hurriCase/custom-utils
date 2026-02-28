@@ -2,7 +2,7 @@
 using CustomUtils.Runtime.CustomTypes.Singletons;
 using UnityEngine;
 
-namespace CustomUtils.Runtime
+namespace CustomUtils.Runtime.Other
 {
     [Resource(name: nameof(ResourceReferences))]
     internal sealed class ResourceReferences : SingletonScriptableObject<ResourceReferences>

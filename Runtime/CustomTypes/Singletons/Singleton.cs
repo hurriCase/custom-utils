@@ -1,4 +1,5 @@
 using System;
+using CustomUtils.Runtime.Other;
 using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime.CustomTypes.Singletons
