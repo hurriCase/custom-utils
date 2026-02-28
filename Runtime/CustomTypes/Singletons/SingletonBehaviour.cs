@@ -17,16 +17,14 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
 
         public static event Action OnDestroyed;
 
-#if UNITY_EDITOR
         static SingletonBehaviour()
         {
-            SingletonResetter.RegisterResetAction(static () =>
+            StaticResetter.RegisterResetAction(static () =>
             {
                 Instance = null;
                 OnDestroyed = null;
             });
         }
-#endif
 
         protected virtual void Awake()
         {

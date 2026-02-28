@@ -13,12 +13,10 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
     {
         private static T _instance;
 
-#if UNITY_EDITOR
         static Singleton()
         {
-            SingletonResetter.RegisterResetAction(static () => _instance = null);
+            StaticResetter.RegisterResetAction(static () => _instance = null);
         }
-#endif
 
         public static T Instance => _instance = _instance ?? (_instance = Activator.CreateInstance(typeof(T)) as T);
     }

@@ -26,7 +26,7 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         internal TupleEnumerator(EnumArray<TEnum, TValue> enumArray)
         {
             _enumArray = enumArray;
-            _enumValues = (TEnum[])Enum.GetValues(typeof(TEnum));
+            _enumValues = EnumArray<TEnum, TValue>.CachedKeys;
             _index = -1;
         }
 

@@ -37,12 +37,10 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
             }
         }
 
-#if UNITY_EDITOR
         static SingletonScriptableObject()
         {
-            SingletonResetter.RegisterResetAction(static () => _instance = null);
+            StaticResetter.RegisterResetAction(static () => _instance = null);
         }
-#endif
 
         /// <summary>
         /// Loads an existing instance or creates a new one if not found.

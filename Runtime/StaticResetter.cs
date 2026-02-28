@@ -1,11 +1,12 @@
-﻿#if UNITY_EDITOR
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
-namespace CustomUtils.Runtime.CustomTypes.Singletons
+namespace CustomUtils.Runtime
 {
-    internal static class SingletonResetter
+    internal static class StaticResetter
     {
         private static readonly List<Action> _resetActions = new();
         private static readonly object _lock = new();
@@ -21,15 +22,19 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
                     {
                         resetAction();
                     }
-                    catch (Exception ex)
+                    catch (Exception e)
                     {
-                        Debug.LogError("[SingletonResetter::ResetAllSingletons] " +
-                                       $"Failed to reset singleton: {ex.Message}");
+                        Debug.LogException(e);
+                        Debug.LogError("[StaticResetter::ResetAllSingletons] " +
+                                       $"Failed to reset singleton: {e.Message}");
                     }
                 }
+
+                _resetActions.Clear();
             }
         }
 
+        [Conditional("UNITY_EDITOR")]
         internal static void RegisterResetAction(Action resetAction)
         {
             lock (_lock)
@@ -39,4 +44,3 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
         }
     }
 }
-#endif

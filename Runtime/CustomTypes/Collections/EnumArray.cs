@@ -34,19 +34,33 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         [field: SerializeField] public Entry<TValue>[] Entries { get; private set; }
 
         /// <summary>
+        /// Gets all enum keys used in this array.
+        /// </summary>
+        public static TEnum[] CachedKeys => _cachedKeys;
+
+        /// <summary>
         /// Gets the total number of elements in the array associated with the underlying enum type.
         /// </summary>
+#if MEMORY_PACK_INSTALLED
+        [MemoryPackIgnore]
+#endif
         public int Length => Entries.Length;
 
         /// <summary>
         /// Gets all enum keys used in this array.
         /// </summary>
+#if MEMORY_PACK_INSTALLED
+        [MemoryPackIgnore]
+#endif
         public IReadOnlyList<TEnum> Keys => _cachedKeys;
 
         /// <summary>
         /// Gets all key-value pairs from this array.
         /// </summary>
         /// <returns>A new array containing all key-value pairs with current values.</returns>
+#if MEMORY_PACK_INSTALLED
+        [MemoryPackIgnore]
+#endif
         public KeyValuePair<TEnum, TValue>[] KeyValuePairs
         {
             get
@@ -59,12 +73,22 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
             }
         }
 
-        internal static string EntriesPropertyName => nameof(Entries);
-
 #if MEMORY_PACK_INSTALLED
         [MemoryPackIgnore]
 #endif
-        private static readonly TEnum[] _cachedKeys = (TEnum[])Enum.GetValues(typeof(TEnum));
+        private static TEnum[] _cachedKeys = GetUniqueKeys();
+
+#if MEMORY_PACK_INSTALLED
+        static partial void StaticConstructor()
+        {
+            StaticResetter.RegisterResetAction(static () => _cachedKeys = GetUniqueKeys());
+        }
+#else
+        static EnumArray()
+        {
+            StaticResetter.RegisterResetAction(static () => _cachedKeys = GetUniqueKeys());
+        }
+#endif
 
         /// <summary>
         /// Initializes a new instance of the EnumArray with default values for all elements.
@@ -219,6 +243,21 @@ namespace CustomUtils.Runtime.CustomTypes.Collections
         /// </summary>
         public static bool operator !=(EnumArray<TEnum, TValue> left, EnumArray<TEnum, TValue> right) =>
             Equals(left, right) is false;
+
+        private static TEnum[] GetUniqueKeys()
+        {
+            var allValues = (TEnum[])Enum.GetValues(typeof(TEnum));
+            var count = 1;
+
+            for (var i = 1; i < allValues.Length; i++)
+            {
+                if (UnsafeEnumConverter<TEnum>.ToInt32(allValues[i])
+                    != UnsafeEnumConverter<TEnum>.ToInt32(allValues[i - 1]))
+                    allValues[count++] = allValues[i];
+            }
+
+            return allValues.Length == 0 ? allValues : allValues[..count];
+        }
 
         [Conditional("UNITY_EDITOR")]
         private static void ValidateEnumOrdering()

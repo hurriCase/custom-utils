@@ -35,17 +35,16 @@ namespace CustomUtils.Runtime.CustomTypes.Singletons
         // ReSharper disable once StaticMemberInGenericType | intentional, each T has its own creation state
         private static bool _created;
 
-#if UNITY_EDITOR
         static PersistentSingletonBehavior()
         {
-            SingletonResetter.RegisterResetAction(static () =>
+            StaticResetter.RegisterResetAction(static () =>
             {
                 _instance = null;
                 OnDestroyed = null;
                 _created = false;
             });
         }
-#endif
+
         protected virtual void Awake()
         {
             if (!_instance)
