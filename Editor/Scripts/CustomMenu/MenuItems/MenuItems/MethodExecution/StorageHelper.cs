@@ -13,7 +13,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.MenuItems.MethodExecut
         {
             try
             {
-                var provider = ServiceProvider.Provider;
+                var provider = StorageProvider.Provider;
                 var success = await provider.TryDeleteAllAsync();
 
                 if (success)

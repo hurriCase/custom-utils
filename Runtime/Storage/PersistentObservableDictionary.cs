@@ -81,7 +81,7 @@ namespace CustomUtils.Runtime.Storage
         public async UniTask InitializeAsync(string key, CancellationToken token)
         {
             _key = key;
-            _provider = ServiceProvider.Provider;
+            _provider = StorageProvider.Provider;
             Dictionary = new ObservableDictionary<TKey, TValue>();
 
             _subscription = Dictionary.ObserveChanged()

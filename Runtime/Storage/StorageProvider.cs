@@ -8,7 +8,7 @@ namespace CustomUtils.Runtime.Storage
     /// Call <see cref="SetProvider"/> once at startup before any storage operations.
     /// </summary>
     [PublicAPI]
-    public static class ServiceProvider
+    public static class StorageProvider
     {
         /// <summary>
         /// The active storage provider. Throws if <see cref="SetProvider"/> has not been called.

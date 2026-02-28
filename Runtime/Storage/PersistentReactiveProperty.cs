@@ -36,7 +36,7 @@ namespace CustomUtils.Runtime.Storage
 
         public async UniTask InitializeAsync(string key, CancellationToken token = default, TProperty defaultValue = default)
         {
-            _provider = ServiceProvider.Provider;
+            _provider = StorageProvider.Provider;
 
             _key = key;
             Property = new ReactiveProperty<TProperty>(defaultValue);
