@@ -10,6 +10,7 @@ namespace CustomUtils.Runtime.Animations.Base
     public abstract class AnimationBase<TState, TValue, TAnimationSettings> : IAnimation<TState>
         where TState : unmanaged, Enum
         where TAnimationSettings : AnimationSettings<TValue>
+        where TValue : struct
     {
         [SerializeField] protected EnumArray<TState, TAnimationSettings> states;
 
@@ -31,7 +32,7 @@ namespace CustomUtils.Runtime.Animations.Base
 
             if (isInstant)
             {
-                SetValueInstant(currentState.Value);
+                SetValueInstant(currentState.TweenSettings.endValue);
                 return default;
             }
 

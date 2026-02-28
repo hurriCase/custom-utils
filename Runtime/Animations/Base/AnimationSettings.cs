@@ -11,9 +11,9 @@ namespace CustomUtils.Runtime.Animations.Base
     /// <typeparam name="TValue">The type of value being animated.</typeparam>
     [PublicAPI]
     public abstract class AnimationSettings<TValue> : ScriptableObject
+        where TValue : struct
     {
-        [field: SerializeField] public TValue Value { get; private set; }
-        [field: SerializeField] public TweenSettings TweenSettings { get; private set; }
+        [field: SerializeField] public TweenSettings<TValue> TweenSettings { get; private set; }
 
         protected const string AnimationSettingsPath = "Animation Settings/";
     }

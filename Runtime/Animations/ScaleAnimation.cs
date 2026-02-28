@@ -24,6 +24,6 @@ namespace CustomUtils.Runtime.Animations
         }
 
         protected override Tween CreateTween(Vector3AnimationSettings animationSettings)
-            => Tween.Scale(_target, animationSettings.Value, animationSettings.TweenSettings);
+            => Tween.Scale(_target, animationSettings.TweenSettings);
     }
 }

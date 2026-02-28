@@ -10,7 +10,6 @@ namespace CustomUtils.Runtime.Animations.Base
     {
         None = 0,
         X = 1,
-        Y = 2,
-        Both = 3
+        Y = 2
     }
 }

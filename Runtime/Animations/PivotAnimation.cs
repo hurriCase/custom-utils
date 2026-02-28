@@ -24,6 +24,6 @@ namespace CustomUtils.Runtime.Animations
         }
 
         protected override Tween CreateTween(Vector2AnimationSettings animationSettings)
-            => Tween.UIPivot(_target, animationSettings.Value, animationSettings.TweenSettings);
+            => Tween.UIPivot(_target, animationSettings.TweenSettings);
     }
 }

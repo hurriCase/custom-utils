@@ -29,8 +29,8 @@ namespace CustomUtils.Runtime.Animations
 
         protected override Tween CreateTween(FloatAnimationSettings animationSettings)
         {
-            _targetAlpha = animationSettings.Value;
-            return Tween.Alpha(_target, animationSettings.Value, animationSettings.TweenSettings)
+            _targetAlpha = animationSettings.TweenSettings.endValue;
+            return Tween.Alpha(_target, animationSettings.TweenSettings)
                 .OnComplete(this, static self => self.SetValueInstant(self._targetAlpha));
         }
     }

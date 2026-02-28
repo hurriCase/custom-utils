@@ -19,18 +19,25 @@ namespace CustomUtils.Runtime.Animations
         [SerializeField] private RectTransform _target;
 
         private float _currentRotationZ;
+        private bool _isInitialized;
 
         protected override void SetValueInstant(float value)
         {
-            var endValue = CalculateFinalZ(value);
-            SetRotation(endValue);
+            EnsureInitialized();
+
+            var deltaZ = Mathf.DeltaAngle(_currentRotationZ, value);
+            SetRotation(_currentRotationZ + deltaZ);
         }
 
         protected override Tween CreateTween(FloatAnimationSettings animationSettings)
-            => Tween.Custom(this,
-                _currentRotationZ,
-                CalculateFinalZ(animationSettings.Value),
-                animationSettings.TweenSettings, static (self, rotationZ) => self.SetRotation(rotationZ));
+        {
+            EnsureInitialized();
+
+            return Tween.Custom(
+                this,
+                RecalculateFinalZ(animationSettings.TweenSettings),
+                static (self, rotationZ) => self.SetRotation(rotationZ));
+        }
 
         private void SetRotation(float rotationZ)
         {
@@ -42,10 +49,20 @@ namespace CustomUtils.Runtime.Animations
             _currentRotationZ = rotationZ;
         }
 
-        private float CalculateFinalZ(float targetZ)
+        private TweenSettings<float> RecalculateFinalZ(TweenSettings<float> tweenSettings)
         {
-            var deltaZ = Mathf.DeltaAngle(_currentRotationZ, targetZ);
-            return _currentRotationZ + deltaZ;
+            var deltaZ = Mathf.DeltaAngle(_currentRotationZ, tweenSettings.endValue);
+            tweenSettings.endValue = _currentRotationZ + deltaZ;
+            return tweenSettings;
+        }
+
+        private void EnsureInitialized()
+        {
+            if (_isInitialized)
+                return;
+
+            _currentRotationZ = _target.eulerAngles.z;
+            _isInitialized = true;
         }
     }
 }
