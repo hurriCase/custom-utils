@@ -16,10 +16,19 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
     public class ProceduralImage : Image
     {
         [field: SerializeField] public SerializableReactiveProperty<float> BorderWidth { get; set; } = new();
-
         [field: SerializeField] public SerializableReactiveProperty<float> FalloffDistance { get; set; } = new();
+        [field: SerializeField] public Vector2 CornerOffsetTopLeft { get; set; }
+        [field: SerializeField] public Vector2 CornerOffsetTopRight { get; set; }
+        [field: SerializeField] public Vector2 CornerOffsetBottomRight { get; set; }
+        [field: SerializeField] public Vector2 CornerOffsetBottomLeft { get; set; }
 
         private ResourceReferences ResourceReferences => ResourceReferences.Instance;
+
+        public override Material material
+        {
+            get => !m_Material ? ResourceReferences.ProceduralImageMaterial : base.material;
+            set => base.material = value;
+        }
 
         private ModifierBase _modifierBase;
 
@@ -103,6 +112,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
         }
 
 #if UNITY_EDITOR
+
         public void Update()
         {
             if (!Application.isPlaying)
@@ -148,7 +158,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             {
                 vertexHelper.PopulateUIVertex(ref vert, i);
 
-                vert.position += ((Vector3)vert.uv0 - new Vector3(0.5f, 0.5f)) * info.FallOffDistance;
+                vert.position += (Vector3)GetCornerOffset(vert.uv0);
 
                 vert.uv1 = uv1;
                 vert.uv2 = uv2;
@@ -181,11 +191,13 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             return info;
         }
 
-        public override Material material
+        private Vector2 GetCornerOffset(Vector2 uv) => (uv.y > 0.9f, uv.x > 0.9f) switch
         {
-            get => !m_Material ? ResourceReferences.ProceduralImageMaterial : base.material;
-            set => base.material = value;
-        }
+            (true, false) => CornerOffsetTopLeft,
+            (true, true) => CornerOffsetTopRight,
+            (false, true) => CornerOffsetBottomRight,
+            (false, false) => CornerOffsetBottomLeft,
+        };
 
 #if UNITY_EDITOR
         protected override void Reset()

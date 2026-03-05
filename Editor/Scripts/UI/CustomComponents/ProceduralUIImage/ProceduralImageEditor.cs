@@ -20,7 +20,12 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
         private static List<ModifierIDAttribute> _attributes;
 
         private SerializedProperty _borderWidth;
-        private SerializedProperty _falloffDist;
+        private SerializedProperty _falloffDistance;
+        private SerializedProperty _cornerOffsetTopLeft;
+        private SerializedProperty _cornerOffsetTopRight;
+        private SerializedProperty _cornerOffsetBottomRight;
+        private SerializedProperty _cornerOffsetBottomLeft;
+
         private SerializedProperty _sprite;
 
         private int _selectedId;
@@ -40,7 +45,12 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             _attributes = ModifierUtility.GetAttributeList();
 
             _borderWidth = serializedObject.FindField(nameof(ProceduralImage.BorderWidth));
-            _falloffDist = serializedObject.FindField(nameof(ProceduralImage.FalloffDistance));
+            _falloffDistance = serializedObject.FindField(nameof(ProceduralImage.FalloffDistance));
+
+            _cornerOffsetTopLeft = serializedObject.FindField(nameof(ProceduralImage.CornerOffsetTopLeft));
+            _cornerOffsetTopRight = serializedObject.FindField(nameof(ProceduralImage.CornerOffsetTopRight));
+            _cornerOffsetBottomRight = serializedObject.FindField(nameof(ProceduralImage.CornerOffsetBottomRight));
+            _cornerOffsetBottomLeft = serializedObject.FindField(nameof(ProceduralImage.CornerOffsetBottomLeft));
 
             _proceduralImage = (ProceduralImage)target;
             _targetComponent = (Component)target;
@@ -83,7 +93,11 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             ModifierGUI();
 
             _editorStateControls.PropertyField(_borderWidth);
-            _editorStateControls.PropertyField(_falloffDist);
+            _editorStateControls.PropertyField(_falloffDistance);
+            _editorStateControls.PropertyField(_cornerOffsetTopLeft);
+            _editorStateControls.PropertyField(_cornerOffsetTopRight);
+            _editorStateControls.PropertyField(_cornerOffsetBottomRight);
+            _editorStateControls.PropertyField(_cornerOffsetBottomLeft);
 
             serializedObject.ApplyModifiedProperties();
         }
