@@ -8,20 +8,20 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
         internal float Height { get; }
         internal float FallOffDistance { get; }
         internal float NormalizedBorderWidth { get; }
-        internal float PixelSize { get; }
+        internal float NormalizedPixelSize { get; }
 
         internal ProceduralImageInfo(
             float width,
             float height,
             float fallOffDistance,
-            float pixelSize,
+            float normalizedPixelSize,
             float normalizedBorderWidth)
         {
             Width = Mathf.Abs(width);
             Height = Mathf.Abs(height);
             FallOffDistance = Mathf.Max(0, fallOffDistance);
             NormalizedBorderWidth = Mathf.Clamp01(normalizedBorderWidth);
-            PixelSize = Mathf.Max(0, pixelSize);
+            NormalizedPixelSize = Mathf.Clamp01(normalizedPixelSize);
         }
     }
 }

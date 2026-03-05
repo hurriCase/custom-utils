@@ -9,7 +9,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers.Ba
         public abstract void EncodeShaderData(
             Rect imageRect,
             float normalizedBorderWidth,
-            float pixelSize,
+            float normalizedPixelSize,
             out Vector2 uv2,
             out Vector2 uv3);
     }

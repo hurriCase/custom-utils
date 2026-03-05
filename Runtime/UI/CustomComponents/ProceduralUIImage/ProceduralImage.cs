@@ -134,7 +134,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             ModifierBase.EncodeShaderData(
                 imageRect,
                 info.NormalizedBorderWidth,
-                info.PixelSize,
+                info.NormalizedPixelSize,
                 out var uv2,
                 out var uv3);
 
@@ -155,13 +155,13 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
         {
             var minSide = Mathf.Min(imageRect.width, imageRect.height);
             var normalizedBorderWidth = BorderWidth.Value / minSide;
-            var pixelSize = 1f / Mathf.Max(0.0001f, FalloffDistance.Value);
+            var normalizedPixelSize = Mathf.Clamp01(1f / (Mathf.Max(0.0001f, FalloffDistance.Value) * MaxPixelSize));
 
             return new ProceduralImageInfo(
                 imageRect.width + FalloffDistance.Value,
                 imageRect.height + FalloffDistance.Value,
                 FalloffDistance.Value,
-                pixelSize,
+                normalizedPixelSize,
                 normalizedBorderWidth);
         }
 
