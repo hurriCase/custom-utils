@@ -110,13 +110,11 @@
 
                 float minside = min(OUT.wh.x, OUT.wh.y);
 
-                float2 skewPacked = decode2(IN.uv3.x);
-                OUT.skew = (skewPacked.x * 2.0 - 1.0) * OUT.wh.x;
+                float2 bwSkew = decode2(IN.uv3.x);
+                OUT.lineWeight = bwSkew.x * minside;
+                OUT.skew = (bwSkew.y * 2.0 - 1.0) * OUT.wh.x;
 
-                float2 bwPs = decode2(IN.uv3.y);
-
-                OUT.lineWeight = bwPs.x * minside;
-                OUT.pixelWorldScale = clamp(bwPs.y * 2048.0, 1.0 / 2048.0, 2048.0);
+                OUT.pixelWorldScale = clamp(IN.uv3.y, 1.0 / 2048.0, 2048.0);
 
                 OUT.radius = float4(decode2(IN.uv2.x), decode2(IN.uv2.y)) * minside;
 

@@ -14,7 +14,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers.Cu
         public override void EncodeShaderData(
             Rect imageRect,
             float normalizedBorderWidth,
-            float normalizedPixelSize,
+            float pixelSize,
             out Vector2 uv2,
             out Vector2 uv3)
         {
@@ -22,8 +22,8 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers.Cu
 
             uv2 = Vector2.zero;
             uv3 = new Vector2(
-                normalizedSkew.PackAs16BitWith(0f),
-                normalizedBorderWidth.PackAs16BitWith(normalizedPixelSize)
+                normalizedBorderWidth.PackAs16BitWith(normalizedSkew),
+                pixelSize
             );
         }
     }
