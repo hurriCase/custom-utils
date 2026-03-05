@@ -19,6 +19,8 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 
         [field: SerializeField] public SerializableReactiveProperty<float> FalloffDistance { get; set; } = new();
 
+        private const float MaxPixelSize = 2048f;
+
         private ResourceReferences ResourceReferences => ResourceReferences.Instance;
 
         private ModifierBase _modifierBase;
@@ -140,8 +142,10 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
                 info.NormalizedRadius.z.PackAs16BitWith(info.NormalizedRadius.w)
             );
 
-            var uv3 = new Vector2(info.NormalizedBorderWidth == 0 ? 1 : Mathf.Clamp01(info.NormalizedBorderWidth),
-                info.PixelSize);
+            var uv3 = new Vector2(
+                info.NormalizedSkew.PackAs16BitWith(0.5f),
+                info.NormalizedBorderWidth.PackAs16BitWith(info.NormalizedPixelSize)
+            );
 
             var vert = new UIVertex();
             for (var i = 0; i < vertexHelper.currentVertCount; i++)
@@ -161,7 +165,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
         private ProceduralImageInfo CalculateInfo()
         {
             var imageRect = GetPixelAdjustedRect();
-            var pixelSize = 1f / Mathf.Max(0, FalloffDistance.Value);
 
             var radius = FixRadius(ModifierBase.CalculateRadius(imageRect));
 
@@ -170,13 +173,19 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             var normalizedRadius = radius / minSide;
             var normalizedBorderWidth = BorderWidth.Value / minSide;
 
+            var normalizedPixelSize = Mathf.Clamp01(1f / (Mathf.Max(0.0001f, FalloffDistance.Value) * MaxPixelSize));
+
+            var skew = ModifierBase.CalculateSkew();
+            var normalizedSkew = Mathf.Clamp01(skew / imageRect.width * 0.5f + 0.5f);
+
             var info = new ProceduralImageInfo(
                 imageRect.width + FalloffDistance.Value,
                 imageRect.height + FalloffDistance.Value,
                 FalloffDistance.Value,
-                pixelSize,
+                normalizedPixelSize,
                 normalizedRadius,
-                normalizedBorderWidth);
+                normalizedBorderWidth,
+                normalizedSkew);
 
             return info;
         }

@@ -7,5 +7,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers.Ba
     public abstract class ModifierBase : MonoBehaviour
     {
         public abstract Vector4 CalculateRadius(Rect imageRect);
+        public virtual float CalculateSkew() => 0f;
     }
 }

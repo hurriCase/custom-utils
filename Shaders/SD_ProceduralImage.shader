@@ -75,8 +75,9 @@
                 float4 radius : TEXCOORD1;
                 float2 texcoord : TEXCOORD2;
                 float2 wh : TEXCOORD3;
-                float lineWeight : TEXCOORD4;
-                float pixelWorldScale : TEXCOORD5;
+                float skew : TEXCOORD4;
+                float lineWeight : TEXCOORD5;
+                float pixelWorldScale : TEXCOORD6;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -109,11 +110,15 @@
 
                 float minside = min(OUT.wh.x, OUT.wh.y);
 
-                OUT.lineWeight = IN.uv3.x * minside;
+                float2 skewPacked = decode2(IN.uv3.x);
+                OUT.skew = (skewPacked.x * 2.0 - 1.0) * OUT.wh.x;
+
+                float2 bwPs = decode2(IN.uv3.y);
+
+                OUT.lineWeight = bwPs.x * minside;
+                OUT.pixelWorldScale = clamp(bwPs.y * 2048.0, 1.0 / 2048.0, 2048.0);
 
                 OUT.radius = float4(decode2(IN.uv2.x), decode2(IN.uv2.y)) * minside;
-
-                OUT.pixelWorldScale = clamp(IN.uv3.y, 1 / 2048, 2048);
 
                 OUT.color = IN.color * _Color;
                 return OUT;
@@ -140,12 +145,21 @@
                 #endif
 
                 #ifdef UNITY_UI_ALPHACLIP
-                clip (color.a - 0.001);
+                clip(color.a - 0.001);
                 #endif
 
-                half v = visible(IN.texcoord * IN.wh, IN.radius, IN.wh);
-                float l = (IN.lineWeight + 1 / IN.pixelWorldScale) / 2;
-                color.a *= saturate((l - distance(v, l)) * IN.pixelWorldScale);
+                float2 pos = IN.texcoord * IN.wh;
+                float t = pos.y / IN.wh.y;
+                float leftEdge = lerp(max(IN.skew, 0.0), max(-IN.skew, 0.0), t);
+                float2 skewedPos = float2(pos.x - leftEdge, pos.y);
+
+                half v = visible(skewedPos, IN.radius, float2(IN.wh.x - abs(IN.skew), IN.wh.y));
+
+                float isBorder = step(0.001, IN.lineWeight);
+                float l = (IN.lineWeight + 1.0 / IN.pixelWorldScale) / 2.0;
+                float borderAlpha = saturate((l - distance(v, l)) * IN.pixelWorldScale);
+                float fillAlpha = saturate(v * IN.pixelWorldScale);
+                color.a *= lerp(fillAlpha, borderAlpha, isBorder);
 
                 if (color.a <= 0)
                 {
