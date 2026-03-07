@@ -68,7 +68,7 @@ namespace CustomUtils.Runtime.UI.Theme
             // We can't destroy an object during OnValidate
             EditorApplication.delayCall += () =>
             {
-                if (this)
+                if (this && _colorData != _previousColorData)
                     ApplyColorData(_colorData, ref _previousColorData);
             };
         }
