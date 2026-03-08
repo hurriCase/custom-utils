@@ -1,3 +1,4 @@
+#if MULTI_THEME
 using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime.UI.Theme
@@ -19,3 +20,4 @@ namespace CustomUtils.Runtime.UI.Theme
         Dark = 1
     }
 }
+#endif

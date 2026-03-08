@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿#if MULTI_THEME
+using JetBrains.Annotations;
 using R3;
 
 namespace CustomUtils.Runtime.UI.Theme
@@ -17,3 +18,4 @@ namespace CustomUtils.Runtime.UI.Theme
         public static ReactiveProperty<ThemeType> CurrentThemeType { get; } = new(ThemeType.Light);
     }
 }
+#endif

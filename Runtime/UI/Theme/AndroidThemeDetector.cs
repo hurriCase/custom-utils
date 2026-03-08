@@ -1,4 +1,5 @@
-﻿#if UNITY_ANDROID && !UNITY_EDITOR
+﻿#if MULTI_THEME
+#if UNITY_ANDROID && !UNITY_EDITOR
 using System;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -41,3 +42,4 @@ namespace CustomUtils.Runtime.UI.Theme
         }
     }
 }
+#endif

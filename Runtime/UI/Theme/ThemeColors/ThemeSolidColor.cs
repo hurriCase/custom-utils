@@ -1,6 +1,9 @@
 ﻿using System;
-using CustomUtils.Runtime.CustomTypes.Collections;
 using UnityEngine;
+
+#if MULTI_THEME
+using CustomUtils.Runtime.CustomTypes.Collections;
+#endif
 
 namespace CustomUtils.Runtime.UI.Theme.ThemeColors
 {
@@ -8,6 +11,10 @@ namespace CustomUtils.Runtime.UI.Theme.ThemeColors
     internal sealed class ThemeSolidColor : IThemeColor<Color>
     {
         [field: SerializeField] public string Name { get; private set; }
+#if MULTI_THEME
         [field: SerializeField] public EnumArray<ThemeType, Color> Colors { get; private set; }
+#else
+        [field: SerializeField] public Color Color { get; private set; }
+#endif
     }
 }

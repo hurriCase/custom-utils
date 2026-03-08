@@ -27,13 +27,17 @@ namespace CustomUtils.Runtime.UI.Theme.Databases.Base
             if (Colors == null || Colors.Count == 0)
                 return false;
 
-            var currentTheme = ThemeHandler.CurrentThemeType.Value;
             foreach (var colorItem in Colors)
             {
                 if (colorItem.Name != colorName)
                     continue;
 
+#if MULTI_THEME
+                var currentTheme = ThemeHandler.CurrentThemeType.Value;
                 color = colorItem.Colors[currentTheme];
+#else
+                color = colorItem.Color;
+#endif
                 return true;
             }
 

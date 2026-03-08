@@ -1,7 +1,10 @@
 ﻿using CustomUtils.Runtime.Extensions;
-using CustomUtils.Runtime.Extensions.Observables;
 using CustomUtils.Runtime.UI.Theme.Databases.Base;
 using UnityEngine;
+
+#if MULTI_THEME
+using CustomUtils.Runtime.Extensions.Observables;
+#endif
 
 namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.Base
 {
@@ -13,8 +16,10 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.Base
 
         protected virtual void Awake()
         {
+#if MULTI_THEME
             ThemeHandler.CurrentThemeType
                 .SubscribeUntilDestroy(this, static self => self.UpdateColor(self.currentColorName));
+#endif
         }
 
         internal override void UpdateColor(string colorName)
