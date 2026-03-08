@@ -1,7 +1,10 @@
-﻿using CustomUtils.Runtime.Extensions;
+﻿using System;
+using CustomUtils.Runtime.Extensions;
 using JetBrains.Annotations;
 using UnityEngine;
+using VContainer;
 using VContainer.Unity;
+using Object = UnityEngine.Object;
 
 namespace CustomUtils.Runtime.Pools.Objects
 {
@@ -9,16 +12,49 @@ namespace CustomUtils.Runtime.Pools.Objects
     public sealed class ComponentPool<TComponent> : Pool<TComponent>
         where TComponent : Component
     {
-        public ComponentPool(PoolParameters<TComponent> poolParameters) : base(poolParameters) { }
-        public ComponentPool(PoolConfig<TComponent> poolParameters) : base(poolParameters) { }
+        public ComponentPool(
+            TComponent prefab,
+            int defaultPoolSize = InitialDefaultPoolSize,
+            int maxPoolSize = InitialMaxPoolSize,
+            Transform parent = null,
+            IObjectResolver objectResolver = null,
+            Action<TComponent> onCreateCallback = null,
+            Action<TComponent> onGetCallback = null,
+            Action<TComponent> onReleaseCallback = null,
+            Action<TComponent> onDestroyCallback = null)
+            : base(
+                prefab,
+                defaultPoolSize,
+                maxPoolSize,
+                parent,
+                objectResolver,
+                onCreateCallback,
+                onGetCallback,
+                onReleaseCallback,
+                onDestroyCallback) { }
+
+        public ComponentPool(
+            PoolConfig<TComponent> poolConfig,
+            IObjectResolver objectResolver = null,
+            Action<TComponent> onCreateCallback = null,
+            Action<TComponent> onGetCallback = null,
+            Action<TComponent> onReleaseCallback = null,
+            Action<TComponent> onDestroyCallback = null)
+            : base(
+                poolConfig,
+                objectResolver,
+                onCreateCallback,
+                onGetCallback,
+                onReleaseCallback,
+                onDestroyCallback) { }
 
         protected override TComponent CreateEntity()
         {
-            var entity = poolParameters.ObjectResolver == null
-                ? Object.Instantiate(poolParameters.Prefab, poolParameters.Parent)
-                : poolParameters.ObjectResolver.Instantiate(poolParameters.Prefab, poolParameters.Parent);
+            var entity = objectResolver == null
+                ? Object.Instantiate(prefab, parent)
+                : objectResolver.Instantiate(prefab, parent);
 
-            poolParameters.OnCreateCallback?.Invoke(entity);
+            onCreateCallback?.Invoke(entity);
             SetActive(entity, false);
             return entity;
         }

@@ -1,5 +1,8 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
+using UnityEngine;
 using UnityEngine.Pool;
+using VContainer;
 using Object = UnityEngine.Object;
 
 namespace CustomUtils.Runtime.Pools.Objects
@@ -11,33 +14,73 @@ namespace CustomUtils.Runtime.Pools.Objects
     [PublicAPI]
     public abstract class Pool<TEntity> where TEntity : Object
     {
-        protected readonly PoolParameters<TEntity> poolParameters;
+        protected const int InitialDefaultPoolSize = 10;
+        protected const int InitialMaxPoolSize = 100;
+
+        protected TEntity prefab;
+        protected Transform parent;
+        protected IObjectResolver objectResolver;
+        protected Action<TEntity> onCreateCallback;
+        protected Action<TEntity> onGetCallback;
+        protected Action<TEntity> onReleaseCallback;
+        protected Action<TEntity> onDestroyCallback;
+
         private readonly IObjectPool<TEntity> _pool;
 
-        protected Pool(PoolParameters<TEntity> poolParameters)
+        protected Pool(
+            TEntity prefab,
+            int defaultPoolSize = InitialDefaultPoolSize,
+            int maxPoolSize = InitialMaxPoolSize,
+            Transform parent = null,
+            IObjectResolver objectResolver = null,
+            Action<TEntity> onCreateCallback = null,
+            Action<TEntity> onGetCallback = null,
+            Action<TEntity> onReleaseCallback = null,
+            Action<TEntity> onDestroyCallback = null)
         {
-            this.poolParameters = poolParameters;
+            this.prefab = prefab;
+            this.parent = parent;
+            this.objectResolver = objectResolver;
+            this.onCreateCallback = onCreateCallback;
+            this.onGetCallback = onGetCallback;
+            this.onReleaseCallback = onReleaseCallback;
+            this.onDestroyCallback = onDestroyCallback;
+
             _pool = new ObjectPool<TEntity>(
                 CreateEntity,
                 OnGet,
                 OnRelease,
                 OnDestroy,
                 false,
-                poolParameters.DefaultPoolSize,
-                poolParameters.MaxPoolSize);
+                defaultPoolSize,
+                maxPoolSize);
         }
 
-        protected Pool(PoolConfig<TEntity> poolParameters)
+        protected Pool(
+            PoolConfig<TEntity> poolConfig,
+            IObjectResolver objectResolver = null,
+            Action<TEntity> onCreateCallback = null,
+            Action<TEntity> onGetCallback = null,
+            Action<TEntity> onReleaseCallback = null,
+            Action<TEntity> onDestroyCallback = null)
         {
-            this.poolParameters = new PoolParameters<TEntity>(poolParameters);
+            prefab = poolConfig.Prefab;
+            parent = poolConfig.Parent;
+
+            this.objectResolver = objectResolver;
+            this.onCreateCallback = onCreateCallback;
+            this.onGetCallback = onGetCallback;
+            this.onReleaseCallback = onReleaseCallback;
+            this.onDestroyCallback = onDestroyCallback;
+
             _pool = new ObjectPool<TEntity>(
                 CreateEntity,
                 OnGet,
                 OnRelease,
                 OnDestroy,
                 false,
-                poolParameters.DefaultPoolSize,
-                poolParameters.MaxPoolSize);
+                poolConfig.DefaultPoolSize,
+                poolConfig.MaxPoolSize);
         }
 
         /// <summary>
@@ -46,8 +89,8 @@ namespace CustomUtils.Runtime.Pools.Objects
         /// <returns>New entity instance</returns>
         protected virtual TEntity CreateEntity()
         {
-            var entity = Object.Instantiate(poolParameters.Prefab, poolParameters.Parent);
-            poolParameters.OnCreateCallback?.Invoke(entity);
+            var entity = Object.Instantiate(prefab, parent);
+            onCreateCallback?.Invoke(entity);
             SetActive(entity, false);
             return entity;
         }
@@ -58,7 +101,7 @@ namespace CustomUtils.Runtime.Pools.Objects
         /// <param name="entity">Entity being retrieved</param>
         protected virtual void OnGet(TEntity entity)
         {
-            poolParameters.OnGetCallback?.Invoke(entity);
+            onGetCallback?.Invoke(entity);
             SetActive(entity, true);
         }
 
@@ -68,7 +111,7 @@ namespace CustomUtils.Runtime.Pools.Objects
         /// <param name="entity">Entity being returned</param>
         protected virtual void OnRelease(TEntity entity)
         {
-            poolParameters.OnReleaseCallback?.Invoke(entity);
+            onReleaseCallback?.Invoke(entity);
             SetActive(entity, false);
         }
 
@@ -78,7 +121,7 @@ namespace CustomUtils.Runtime.Pools.Objects
         /// <param name="entity">Entity being destroyed</param>
         protected virtual void OnDestroy(TEntity entity)
         {
-            poolParameters.OnDestroyCallback?.Invoke(entity);
+            onDestroyCallback?.Invoke(entity);
             Object.Destroy(entity);
         }
 

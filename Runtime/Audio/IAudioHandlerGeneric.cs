@@ -37,7 +37,7 @@ namespace CustomUtils.Runtime.Audio
         UniTask InitAsync(
             float defaultMusicVolume = 1f,
             float defaultSoundVolume = 1f,
-            CancellationToken cancellationToken = default);
+            CancellationToken token = default);
 
         /// <summary>
         /// Plays a sound with the specified parameters

@@ -17,13 +17,10 @@ namespace CustomUtils.Runtime.Audio
     {
         [SerializeField] private AudioDatabaseGeneric<TMusicType, TSoundType> _audioDatabaseGeneric;
 
-        [SerializeField] private AudioSource _soundSourcePrefab;
+        [SerializeField] private PoolConfig<AudioSource> _soundPoolConfig;
         [SerializeField] private AudioSource _clipSource;
         [SerializeField] private AudioSource _musicSource;
         [SerializeField] private AudioSource _oneShotSource;
-
-        [SerializeField] private int _soundPoolSize;
-        [SerializeField] private int _maxPoolSize;
 
         public PersistentReactiveProperty<float> MusicVolume { get; } = new();
         public PersistentReactiveProperty<float> SoundVolume { get; } = new();
@@ -41,14 +38,12 @@ namespace CustomUtils.Runtime.Audio
         public virtual async UniTask InitAsync(
             float defaultMusicVolume = 1f,
             float defaultSoundVolume = 1f,
-            CancellationToken cancellationToken = default)
+            CancellationToken token = default)
         {
             await MusicVolume.InitializeAsync(MusicVolumeKey, destroyCancellationToken, defaultMusicVolume);
             await SoundVolume.InitializeAsync(SoundVolumeKey, destroyCancellationToken, defaultSoundVolume);
 
-            var poolParameters =
-                new PoolParameters<AudioSource>(_soundSourcePrefab, _soundPoolSize, _maxPoolSize, parent: transform);
-            _soundPool = new ComponentPool<AudioSource>(poolParameters);
+            _soundPool = new ComponentPool<AudioSource>(_soundPoolConfig);
 
             SoundVolume.SubscribeUntilDestroy(this, static (volume, self) => self.OnSoundVolumeChanged(volume));
             MusicVolume.SubscribeUntilDestroy(this, static (volume, self) => self.OnMusicVolumeChanged(volume));
