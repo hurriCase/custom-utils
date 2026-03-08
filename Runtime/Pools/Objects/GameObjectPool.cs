@@ -7,6 +7,7 @@ namespace CustomUtils.Runtime.Pools.Objects
     public sealed class GameObjectPool : Pool<GameObject>
     {
         public GameObjectPool(PoolParameters<GameObject> poolParameters) : base(poolParameters) { }
+        public GameObjectPool(PoolConfig<GameObject> poolParameters) : base(poolParameters) { }
 
         protected override void SetActive(GameObject entity, bool active)
         {

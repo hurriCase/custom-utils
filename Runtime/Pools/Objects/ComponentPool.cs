@@ -10,6 +10,7 @@ namespace CustomUtils.Runtime.Pools.Objects
         where TComponent : Component
     {
         public ComponentPool(PoolParameters<TComponent> poolParameters) : base(poolParameters) { }
+        public ComponentPool(PoolConfig<TComponent> poolParameters) : base(poolParameters) { }
 
         protected override TComponent CreateEntity()
         {

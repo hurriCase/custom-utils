@@ -27,6 +27,19 @@ namespace CustomUtils.Runtime.Pools.Objects
                 poolParameters.MaxPoolSize);
         }
 
+        protected Pool(PoolConfig<TEntity> poolParameters)
+        {
+            this.poolParameters = new PoolParameters<TEntity>(poolParameters);
+            _pool = new ObjectPool<TEntity>(
+                CreateEntity,
+                OnGet,
+                OnRelease,
+                OnDestroy,
+                false,
+                poolParameters.DefaultPoolSize,
+                poolParameters.MaxPoolSize);
+        }
+
         /// <summary>
         /// Creates a new entity instance from the prefab
         /// </summary>
