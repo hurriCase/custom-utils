@@ -85,6 +85,7 @@
             fixed4 _TextureSampleAdd;
             float4 _ClipRect;
             float4 _MainTex_ST;
+            int _UIVertexColorAlwaysGammaSpace;
 
             float2 decode2(float value)
             {
@@ -114,6 +115,9 @@
                 OUT.radius = float4(decode2(IN.uv2.x), decode2(IN.uv2.y)) * minside;
 
                 OUT.pixelWorldScale = clamp(IN.uv3.y, 1 / 2048, 2048);
+
+                if (_UIVertexColorAlwaysGammaSpace && !IsGammaSpace())
+                    IN.color.rgb = UIGammaToLinear(IN.color.rgb);
 
                 OUT.color = IN.color * _Color;
                 return OUT;
