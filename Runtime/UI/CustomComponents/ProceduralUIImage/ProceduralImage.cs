@@ -15,6 +15,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
     [AddComponentMenu("UI/Procedural Image")]
     public class ProceduralImage : Image
     {
+        [field: SerializeField] public bool UseCustomMaterial { get; set; }
         [field: SerializeField] public SerializableReactiveProperty<float> BorderWidth { get; set; } = new();
         [field: SerializeField] public SerializableReactiveProperty<float> FalloffDistance { get; set; } = new();
         [field: SerializeField] public Vector2 CornerOffsetTopLeft { get; set; }
@@ -91,7 +92,8 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 
             m_OnDirtyVertsCallback += OnVerticesDirty;
             preserveAspect = false;
-            material = null;
+            if (!UseCustomMaterial)
+                material = null;
 
             if (!sprite)
                 sprite = ResourceReferences.EmptySprite;

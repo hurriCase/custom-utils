@@ -14,6 +14,12 @@
         _ColorMask ("Color Mask", Float) = 15
 
         [Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
+
+        [Toggle(HALFTONE_OVERLAY)] _HalftoneOverlay ("Halftone Overlay", Float) = 0
+        _HalftoneTex ("Halftone Texture", 2D) = "white" {}
+        _CropOffset ("Crop Offset", Vector) = (0, 0, 0, 0)
+        _CropScale ("Crop Scale", Vector) = (1, 1, 0, 0)
+        _HalftoneOpacity ("Halftone Opacity", Range(0, 1)) = 0.2
     }
 
     SubShader
@@ -55,6 +61,7 @@
 
             #pragma multi_compile __ UNITY_UI_CLIP_RECT
             #pragma multi_compile __ UNITY_UI_ALPHACLIP
+            #pragma multi_compile __ HALFTONE_OVERLAY
 
             struct appdata_t
             {
@@ -86,6 +93,11 @@
             float4 _ClipRect;
             float4 _MainTex_ST;
             int _UIVertexColorAlwaysGammaSpace;
+
+            sampler2D _HalftoneTex;
+            float4 _CropOffset;
+            float4 _CropScale;
+            float _HalftoneOpacity;
 
             float2 decode2(float value)
             {
@@ -155,6 +167,13 @@
                 {
                     discard;
                 }
+
+                #ifdef HALFTONE_OVERLAY
+                float2 halftoneUV = float2(1.0 - IN.texcoord.x, 1.0 - IN.texcoord.y) * _CropScale.xy + _CropOffset.xy;
+                fixed4 halftoneTex = tex2D(_HalftoneTex, halftoneUV);
+                halftoneTex.rgb = 1.0 - halftoneTex.rgb;
+                color.rgb = color.rgb * lerp(fixed3(1, 1, 1), halftoneTex.rgb, _HalftoneOpacity);
+                #endif
 
                 return color;
             }

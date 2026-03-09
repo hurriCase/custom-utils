@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using CustomUtils.Editor.Scripts.CustomEditorUtilities;
 using CustomUtils.Editor.Scripts.Extensions;
-using CustomUtils.Runtime;
 using CustomUtils.Runtime.Other;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Attributes;
@@ -19,6 +18,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
     {
         private static List<ModifierIDAttribute> _attributes;
 
+        private SerializedProperty _useCustomMaterial;
         private SerializedProperty _borderWidth;
         private SerializedProperty _falloffDistance;
         private SerializedProperty _cornerOffsetTopLeft;
@@ -43,6 +43,8 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             _editorStateControls = new EditorStateControls(target, serializedObject);
 
             _attributes = ModifierUtility.GetAttributeList();
+
+            _useCustomMaterial = serializedObject.FindField(nameof(ProceduralImage.UseCustomMaterial));
 
             _borderWidth = serializedObject.FindField(nameof(ProceduralImage.BorderWidth));
             _falloffDistance = serializedObject.FindField(nameof(ProceduralImage.FalloffDistance));
@@ -85,6 +87,10 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             ProceduralImageSpriteGUI();
 
             _editorStateControls.PropertyField(m_Color);
+            _editorStateControls.PropertyField(_useCustomMaterial);
+
+            if (_useCustomMaterial.boolValue)
+                _editorStateControls.PropertyField(m_Material);
 
             RaycastControlsGUI();
 
