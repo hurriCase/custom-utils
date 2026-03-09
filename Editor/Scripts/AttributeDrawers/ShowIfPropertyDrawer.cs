@@ -38,7 +38,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
         {
             var showIfAttribute = (ShowIfAttribute)attribute;
             if (!TryGetProperty(property, out var sourceProperty)
-                && ShouldShow(sourceProperty.boolValue, showIfAttribute.ShowType))
+                || ShouldShow(sourceProperty.boolValue, showIfAttribute.ShowType))
                 EditorGUI.PropertyField(position, property, label, true);
         }
 
@@ -55,9 +55,23 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
         private bool TryGetProperty(SerializedProperty property, out SerializedProperty serializedProperty)
         {
             var showIfAttribute = (ShowIfAttribute)attribute;
-            var serializedObject = property.serializedObject;
             var fieldName = showIfAttribute.ConditionalSourceField;
-            serializedProperty = serializedObject.FindProperty(fieldName) ?? serializedObject.FindField(fieldName);
+
+            serializedProperty = property.serializedObject.FindProperty(fieldName)
+                                 ?? property.serializedObject.FindField(fieldName);
+
+            if (serializedProperty != null)
+                return true;
+
+            var propertyPath = property.propertyPath;
+            var lastDot = propertyPath.LastIndexOf('.');
+
+            if (lastDot < 0)
+                return false;
+
+            var parentPath = propertyPath[..lastDot];
+            serializedProperty = property.serializedObject.FindProperty($"{parentPath}.{fieldName}")
+                                 ?? property.serializedObject.FindField($"{parentPath}.{fieldName}");
 
             return serializedProperty != null;
         }
