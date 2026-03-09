@@ -12,5 +12,14 @@ namespace CustomUtils.Runtime.UI.Theme.Databases
         ResourcePaths.ThemeResourcePath
     )]
     internal sealed class GradientColorDatabase :
-        ThemeColorDatabaseBase<GradientColorDatabase, ThemeGradientColor, Gradient> { }
+        ThemeColorDatabaseBase<GradientColorDatabase, ThemeGradientColor, Gradient>
+    {
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            foreach (var color in Colors)
+                color.TryBakeFromSolids();
+        }
+#endif
+    }
 }
