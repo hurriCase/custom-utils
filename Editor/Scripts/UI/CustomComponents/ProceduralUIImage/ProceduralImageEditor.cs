@@ -46,8 +46,8 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
 
             _useCustomMaterial = serializedObject.FindField(nameof(ProceduralImage.UseCustomMaterial));
 
-            _borderWidth = serializedObject.FindField(nameof(ProceduralImage.BorderWidth));
-            _falloffDistance = serializedObject.FindField(nameof(ProceduralImage.FalloffDistance));
+            _borderWidth = serializedObject.FindProperty(ProceduralImage.BorderWidthFieldName);
+            _falloffDistance = serializedObject.FindProperty(ProceduralImage.FalloffDistanceFieldName);
 
             _cornerOffsetTopLeft = serializedObject.FindField(nameof(ProceduralImage.CornerOffsetTopLeft));
             _cornerOffsetTopRight = serializedObject.FindField(nameof(ProceduralImage.CornerOffsetTopRight));
@@ -63,19 +63,6 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
                     .GetCustomAttributes(typeof(ModifierIDAttribute), false))[0]);
 
             _selectedId = Mathf.Max(_selectedId, 0);
-            EditorApplication.update -= UpdateProceduralImage;
-            EditorApplication.update += UpdateProceduralImage;
-        }
-
-        private void UpdateProceduralImage()
-        {
-            if (target)
-            {
-                _proceduralImage.Update();
-                return;
-            }
-
-            EditorApplication.update -= UpdateProceduralImage;
         }
 
         public override void OnInspectorGUI()
@@ -207,7 +194,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
         }
 
         public override string GetInfoString()
-            => $"Modifier: {_attributes[_selectedId].Name}, Line-Weight: {_proceduralImage.BorderWidth.Value}";
+            => $"Modifier: {_attributes[_selectedId].Name}, Line-Weight: {_proceduralImage.BorderWidth}";
 
         private static void MoveComponentBehind(Component reference, Component componentToMove)
         {

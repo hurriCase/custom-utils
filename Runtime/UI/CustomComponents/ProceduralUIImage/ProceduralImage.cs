@@ -16,12 +16,42 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
     public class ProceduralImage : Image
     {
         [field: SerializeField] public bool UseCustomMaterial { get; set; }
-        [field: SerializeField] public SerializableReactiveProperty<float> BorderWidth { get; set; } = new();
-        [field: SerializeField] public SerializableReactiveProperty<float> FalloffDistance { get; set; } = new();
         [field: SerializeField] public Vector2 CornerOffsetTopLeft { get; set; }
         [field: SerializeField] public Vector2 CornerOffsetTopRight { get; set; }
         [field: SerializeField] public Vector2 CornerOffsetBottomRight { get; set; }
         [field: SerializeField] public Vector2 CornerOffsetBottomLeft { get; set; }
+
+        [SerializeField, Min(0)] private float _borderWidth;
+        [SerializeField, Min(0)] private float _falloffDistance;
+
+        internal const string BorderWidthFieldName = nameof(_borderWidth);
+        internal const string FalloffDistanceFieldName = nameof(_falloffDistance);
+
+        public float BorderWidth
+        {
+            get => _borderWidth;
+            set
+            {
+                if (Mathf.Approximately(_borderWidth, value))
+                    return;
+
+                _borderWidth = Mathf.Max(0, value);
+                SetVerticesDirty();
+            }
+        }
+
+        public float FalloffDistance
+        {
+            get => _falloffDistance;
+            set
+            {
+                if (Mathf.Approximately(_falloffDistance, value))
+                    return;
+
+                _falloffDistance = Mathf.Max(0, value);
+                SetVerticesDirty();
+            }
+        }
 
         private ResourceReferences ResourceReferences => ResourceReferences.Instance;
 
@@ -73,25 +103,11 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
         {
             base.OnEnable();
 
-            BorderWidth.SubscribeUntilDestroy(this, static self => self.SetVerticesDirty());
-            FalloffDistance.SubscribeUntilDestroy(this, static self => self.SetVerticesDirty());
-
-            Initialize();
-        }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-
-            m_OnDirtyVertsCallback -= OnVerticesDirty;
-        }
-
-        private void Initialize()
-        {
             FixTexCoordsInCanvas();
 
             m_OnDirtyVertsCallback += OnVerticesDirty;
             preserveAspect = false;
+
             if (!UseCustomMaterial)
                 material = null;
 
@@ -114,8 +130,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
         }
 
 #if UNITY_EDITOR
-
-        public void Update()
+        private void Update()
         {
             if (!Application.isPlaying)
                 UpdateGeometry();
@@ -173,19 +188,18 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
         private ProceduralImageInfo CalculateInfo()
         {
             var imageRect = GetPixelAdjustedRect();
-            var pixelSize = 1f / Mathf.Max(0, FalloffDistance.Value);
+            var pixelSize = 1f / Mathf.Max(0.0001f, FalloffDistance);
 
             var radius = FixRadius(ModifierBase.CalculateRadius(imageRect));
 
             var minSide = Mathf.Min(imageRect.width, imageRect.height);
 
             var normalizedRadius = radius / minSide;
-            var normalizedBorderWidth = BorderWidth.Value / minSide;
+            var normalizedBorderWidth = BorderWidth / minSide;
 
             var info = new ProceduralImageInfo(
-                imageRect.width + FalloffDistance.Value,
-                imageRect.height + FalloffDistance.Value,
-                FalloffDistance.Value,
+                imageRect.width + FalloffDistance,
+                imageRect.height + FalloffDistance,
                 pixelSize,
                 normalizedRadius,
                 normalizedBorderWidth);
@@ -201,20 +215,19 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             (false, false) => CornerOffsetBottomLeft,
         };
 
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            m_OnDirtyVertsCallback -= OnVerticesDirty;
+        }
+
 #if UNITY_EDITOR
         protected override void Reset()
         {
             base.Reset();
 
             OnEnable();
-        }
-
-        protected override void OnValidate()
-        {
-            base.OnValidate();
-
-            FalloffDistance.Value = Mathf.Max(0, FalloffDistance.Value);
-            BorderWidth.Value = Mathf.Max(0, BorderWidth.Value);
         }
 #endif
     }
