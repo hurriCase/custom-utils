@@ -1,10 +1,9 @@
 using CustomUtils.Runtime.Extensions;
-using CustomUtils.Runtime.Extensions.Observables;
 using CustomUtils.Runtime.Other;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers.Base;
 using JetBrains.Annotations;
-using R3;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -53,13 +52,13 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             }
         }
 
-        private ResourceReferences ResourceReferences => ResourceReferences.Instance;
-
         public override Material material
         {
             get => !m_Material ? ResourceReferences.ProceduralImageMaterial : base.material;
             set => base.material = value;
         }
+
+        private ResourceReferences ResourceReferences => ResourceReferences.Instance;
 
         private ModifierBase _modifierBase;
 
@@ -128,14 +127,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
                                                    AdditionalCanvasShaderChannels.TexCoord2 |
                                                    AdditionalCanvasShaderChannels.TexCoord3;
         }
-
-#if UNITY_EDITOR
-        private void Update()
-        {
-            if (!Application.isPlaying)
-                UpdateGeometry();
-        }
-#endif
 
         private Vector4 FixRadius(Vector4 cornerRadius)
         {
