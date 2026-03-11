@@ -5,7 +5,7 @@ using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace CustomUtils.Runtime.UI.Windows
+namespace CustomUtils.Runtime.UI.Windows.Windows
 {
     [PublicAPI]
     [Serializable]

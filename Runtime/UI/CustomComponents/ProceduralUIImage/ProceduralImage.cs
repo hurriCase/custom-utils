@@ -58,7 +58,17 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             set => base.material = value;
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        private static readonly ProfilerMarker _markerEncodeVertices
+            = new(ProfilerCategory.Render, nameof(ProceduralImage) + "." + nameof(EncodeAllInfoIntoVertices));
+
+        private static readonly ProfilerMarker _markerCalculateInfo
+            = new(ProfilerCategory.Render, nameof(ProceduralImage) + "." + nameof(CalculateInfo));
+#endif
+
         private ResourceReferences ResourceReferences => ResourceReferences.Instance;
+
+        private static readonly int _rectMin = Shader.PropertyToID("_RectMin");
 
         private ModifierBase _modifierBase;
 
@@ -151,7 +161,17 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 
         private void EncodeAllInfoIntoVertices(VertexHelper vertexHelper)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            using var encodeVerticesScope = _markerEncodeVertices.Auto();
+#endif
+
             var info = CalculateInfo();
+            var imageRect = GetPixelAdjustedRect();
+
+            var mat = materialForRendering;
+            if (mat)
+                mat.SetVector(_rectMin, new Vector4(imageRect.xMin, imageRect.yMin, 0, 0));
+
             var uv1 = new Vector2(info.Width, info.Height);
             var uv2 = new Vector2(
                 info.NormalizedRadius.x.PackAs16BitWith(info.NormalizedRadius.y),
@@ -178,6 +198,10 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 
         private ProceduralImageInfo CalculateInfo()
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            using var calculateInfoScope = _markerCalculateInfo.Auto();
+#endif
+
             var imageRect = GetPixelAdjustedRect();
             var pixelSize = 1f / Mathf.Max(0.0001f, FalloffDistance);
 

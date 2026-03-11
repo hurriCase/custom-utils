@@ -6,7 +6,7 @@ using R3;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace CustomUtils.Runtime.UI.Windows
+namespace CustomUtils.Runtime.UI.Windows.Windows
 {
     [PublicAPI]
     public abstract class PopupBase : WindowBase
