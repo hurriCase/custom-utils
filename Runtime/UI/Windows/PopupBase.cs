@@ -23,7 +23,7 @@ namespace CustomUtils.Runtime.UI.Windows
         public Observable<Unit> OnHidden => _hidden;
         private readonly Subject<Unit> _hidden = new();
 
-        internal override void BaseInitialize()
+        public override void BaseInitialize()
         {
             closeButton.AsNullable()?.OnClickAsObservable()
                 .SubscribeUntilDestroy(this, static self => self.HideAsync().Forget());

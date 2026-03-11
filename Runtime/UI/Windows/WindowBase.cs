@@ -14,7 +14,7 @@ namespace CustomUtils.Runtime.UI.Windows
     {
         [SerializeField, Self] protected CanvasGroup canvasGroup;
 
-        internal virtual void BaseInitialize() { }
+        public virtual void BaseInitialize() { }
 
         public virtual void Initialize() { }
 
