@@ -18,7 +18,7 @@ using VContainer;
 namespace CustomUtils.Runtime.UI.Windows
 {
     [PublicAPI]
-    public sealed class WindowsController : MonoBehaviour
+    public sealed class WindowsController : MonoBehaviour, IWindowsController
     {
         [SerializeField] private List<AssetReferenceT<GameObject>> _screenReferences;
         [SerializeField] private List<AssetReferenceT<GameObject>> _popupReferences;
@@ -100,11 +100,6 @@ namespace CustomUtils.Runtime.UI.Windows
             component.OnPointerClickAsObservable()
                 .Subscribe(this, static (_, self) => self.OpenPopup<TPopup>())
                 .RegisterTo(component.destroyCancellationToken);
-        }
-
-        internal void HandlePopupHide()
-        {
-            _popupRegistry.HandlePopupHide();
         }
     }
 }

@@ -66,7 +66,7 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             _previousOpenedPopups.Clear();
         }
 
-        internal void HandlePopupHide()
+        private void HandlePopupHide()
         {
             CurrentPopupType = null;
 
