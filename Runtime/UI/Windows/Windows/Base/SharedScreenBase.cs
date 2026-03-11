@@ -1,12 +1,14 @@
-﻿using CustomUtils.Runtime.Extensions;
+﻿using System.ComponentModel;
+using CustomUtils.Runtime.Extensions;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace CustomUtils.Runtime.UI.Windows.Windows
+namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 {
     [PublicAPI]
-    public abstract class ScreenBase : WindowBase
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public abstract class SharedScreenBase : WindowBase
     {
         [field: SerializeField] internal bool InitialWindow { get; private set; }
 

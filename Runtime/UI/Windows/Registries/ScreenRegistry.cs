@@ -1,6 +1,6 @@
 ﻿using System;
 using CustomUtils.Runtime.AddressableSystem;
-using CustomUtils.Runtime.UI.Windows.Windows;
+using CustomUtils.Runtime.UI.Windows.Windows.Base;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using R3;
@@ -10,7 +10,7 @@ using VContainer;
 namespace CustomUtils.Runtime.UI.Windows.Registries
 {
     [PublicAPI]
-    internal sealed class ScreenRegistry : WindowRegistry<ScreenBase>
+    internal sealed class ScreenRegistry : WindowRegistry<SharedScreenBase>
     {
         private readonly ReactiveProperty<Type> _currentScreenType;
 
@@ -24,25 +24,25 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             _currentScreenType = currentScreenType;
         }
 
-        protected override void OnRegistered(ScreenBase screenBase)
+        protected override void OnRegistered(SharedScreenBase sharedScreenBase)
         {
-            if (screenBase.InitialWindow)
+            if (sharedScreenBase.InitialWindow)
             {
-                _currentScreenType.Value = screenBase.GetType();
+                _currentScreenType.Value = sharedScreenBase.GetType();
                 return;
             }
 
-            screenBase.HideImmediately();
+            sharedScreenBase.HideImmediately();
         }
 
-        protected override UniTaskVoid OpenWindow(ScreenBase screenBase)
+        protected override UniTaskVoid OpenWindow(SharedScreenBase sharedScreenBase)
         {
             if (currentWindow)
                 currentWindow.HideAsync();
 
-            currentWindow = screenBase;
-            _currentScreenType.Value = screenBase.GetType();
-            screenBase.ShowAsync();
+            currentWindow = sharedScreenBase;
+            _currentScreenType.Value = sharedScreenBase.GetType();
+            sharedScreenBase.ShowAsync();
             return default;
         }
     }

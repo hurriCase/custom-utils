@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using CustomUtils.Runtime.AddressableSystem;
-using CustomUtils.Runtime.UI.Windows.Windows;
+using CustomUtils.Runtime.UI.Windows.Windows.Base;
 using CustomUtils.Runtime.UI.Windows.Windows.Parameterized;
 using Cysharp.Threading.Tasks;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using VContainer;
@@ -13,7 +12,6 @@ using VContainer.Unity;
 
 namespace CustomUtils.Runtime.UI.Windows.Registries
 {
-    [PublicAPI]
     internal abstract class WindowRegistry<TWindow> where TWindow : WindowBase
     {
         protected TWindow currentWindow;
@@ -83,7 +81,10 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             currentWindow = null;
         }
 
-        internal bool TryGet<TConcreteWindow>(out TWindow window) where TConcreteWindow : TWindow
+        protected abstract void OnRegistered(TWindow window);
+        protected abstract UniTaskVoid OpenWindow(TWindow window);
+
+        private bool TryGet<TConcreteWindow>(out TWindow window) where TConcreteWindow : TWindow
         {
             if (_windows.TryGetValue(typeof(TConcreteWindow), out window))
                 return true;
@@ -91,8 +92,5 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             Debug.LogError($"[WindowRegistry] No window registered for type: {typeof(TConcreteWindow)}");
             return false;
         }
-
-        protected abstract void OnRegistered(TWindow window);
-        protected abstract UniTaskVoid OpenWindow(TWindow window);
     }
 }

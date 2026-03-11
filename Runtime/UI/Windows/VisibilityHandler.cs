@@ -3,12 +3,15 @@ using CustomUtils.Runtime.Animations.Base;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CustomUtils.Runtime.UI.Windows
 {
     [PublicAPI]
     public class VisibilityHandler : MonoBehaviour
     {
+        [field: SerializeField] internal Button CloseButton { get; private set; }
+
         [SerializeReference, SerializeReferenceDropdown] private List<IAnimation<VisibilityState>> _visibilityAnimations;
 
         private List<UniTask> _cachedTasks = new();

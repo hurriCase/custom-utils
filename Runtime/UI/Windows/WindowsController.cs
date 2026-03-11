@@ -4,8 +4,8 @@ using System.Threading;
 using CustomUtils.Runtime.AddressableSystem;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.UI.Windows.Registries;
-using CustomUtils.Runtime.UI.Windows.Windows;
 using CustomUtils.Runtime.UI.Windows.Windows.Parameterized;
+using CustomUtils.Runtime.UI.Windows.Windows.Plain;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using R3;
@@ -27,9 +27,9 @@ namespace CustomUtils.Runtime.UI.Windows
         [SerializeField] private Transform _popupsContainer;
 
         public ReadOnlyReactiveProperty<Type> CurrentScreenType => _currentScreenType;
-        private readonly ReactiveProperty<Type> _currentScreenType = new();
-
         public Type CurrentPopupType => _popupRegistry.CurrentPopupType;
+
+        private readonly ReactiveProperty<Type> _currentScreenType = new();
 
         private ScreenRegistry _screenRegistry;
         private PopupRegistry _popupRegistry;
@@ -71,7 +71,7 @@ namespace CustomUtils.Runtime.UI.Windows
         }
 
         public void OpenScreen<TParameterizedScreen, TParameters>(TParameters parameters)
-            where TParameterizedScreen : ScreenBase, IParameterizedWindow<TParameters>
+            where TParameterizedScreen : ParameterizedScreenBase<TParameters>
         {
             _popupRegistry.HideAll();
             _screenRegistry.Open<TParameterizedScreen, TParameters>(parameters);
@@ -83,22 +83,22 @@ namespace CustomUtils.Runtime.UI.Windows
         }
 
         public void OpenPopup<TParameterizedPopup, TParameters>(TParameters parameters)
-            where TParameterizedPopup : PopupBase, IParameterizedWindow<TParameters>
+            where TParameterizedPopup : ParameterizedPopupBase<TParameters>
         {
             _popupRegistry.Open<TParameterizedPopup, TParameters>(parameters);
-        }
-
-        public void BindPopupOpen<TPopup>(UIBehaviour component) where TPopup : PopupBase
-        {
-            component.OnPointerClickAsObservable()
-                .Subscribe(this, static (_, self) => self.OpenPopup<TPopup>())
-                .RegisterTo(component.destroyCancellationToken);
         }
 
         public void BindScreenOpen<TScreen>(UIBehaviour component) where TScreen : ScreenBase
         {
             component.OnPointerClickAsObservable()
                 .Subscribe(this, static (_, self) => self.OpenScreen<TScreen>())
+                .RegisterTo(component.destroyCancellationToken);
+        }
+
+        public void BindPopupOpen<TPopup>(UIBehaviour component) where TPopup : PopupBase
+        {
+            component.OnPointerClickAsObservable()
+                .Subscribe(this, static (_, self) => self.OpenPopup<TPopup>())
                 .RegisterTo(component.destroyCancellationToken);
         }
 

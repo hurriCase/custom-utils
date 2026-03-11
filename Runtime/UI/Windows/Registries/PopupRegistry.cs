@@ -4,7 +4,7 @@ using System.Threading;
 using CustomUtils.Runtime.AddressableSystem;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Extensions.Observables;
-using CustomUtils.Runtime.UI.Windows.Windows;
+using CustomUtils.Runtime.UI.Windows.Windows.Base;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using R3;
@@ -14,11 +14,11 @@ using VContainer;
 namespace CustomUtils.Runtime.UI.Windows.Registries
 {
     [PublicAPI]
-    internal sealed class PopupRegistry : WindowRegistry<PopupBase>
+    internal sealed class PopupRegistry : WindowRegistry<SharedPopupBase>
     {
         public Type CurrentPopupType { get; private set; }
 
-        private readonly Stack<PopupBase> _previousOpenedPopups = new();
+        private readonly Stack<SharedPopupBase> _previousOpenedPopups = new();
 
         private CancellationToken _token;
 
@@ -32,31 +32,31 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             _token = token;
         }
 
-        protected override void OnRegistered(PopupBase popupBase)
+        protected override void OnRegistered(SharedPopupBase sharedPopupBase)
         {
-            popupBase.HideImmediately();
-            popupBase.OnHidden
+            sharedPopupBase.HideImmediately();
+            sharedPopupBase.OnHidden
                 .SubscribeSelf(this, static self => self.HandlePopupHide())
                 .RegisterTo(_token);
         }
 
-        protected override async UniTaskVoid OpenWindow(PopupBase popupBase)
+        protected override async UniTaskVoid OpenWindow(SharedPopupBase sharedPopupBase)
         {
-            if (currentWindow && !popupBase.IsInFrontOf(currentWindow))
-                popupBase.transform.SetAsLastSibling();
+            if (currentWindow && !sharedPopupBase.IsInFrontOf(currentWindow))
+                sharedPopupBase.transform.SetAsLastSibling();
 
-            await popupBase.ShowAsync();
+            await sharedPopupBase.ShowAsync();
 
             if (currentWindow)
             {
                 _previousOpenedPopups.Push(currentWindow);
 
-                if (popupBase.IsSingle)
+                if (sharedPopupBase.IsSingle)
                     currentWindow.HideImmediately();
             }
 
-            currentWindow = popupBase;
-            CurrentPopupType = popupBase.GetType();
+            currentWindow = sharedPopupBase;
+            CurrentPopupType = sharedPopupBase.GetType();
         }
 
         internal void HideAll()

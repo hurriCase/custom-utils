@@ -1,4 +1,6 @@
-﻿using CustomUtils.Runtime.Extensions;
+﻿using System.ComponentModel;
+using CustomUtils.Runtime.Attributes;
+using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Extensions.Observables;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
@@ -6,16 +8,18 @@ using R3;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace CustomUtils.Runtime.UI.Windows.Windows
+namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 {
     [PublicAPI]
-    public abstract class PopupBase : WindowBase
+    [RequireComponent(typeof(VisibilityHandler))]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public abstract class SharedPopupBase : WindowBase
     {
         [field: SerializeField] internal bool IsSingle { get; private set; } = true;
 
-        [SerializeField] private VisibilityHandler _visibilityHandler;
+        [SerializeField, Self] private VisibilityHandler _visibilityHandler;
 
-        [SerializeField] protected Button closeButton;
+        protected Button CloseButton => _visibilityHandler.CloseButton;
 
         public Observable<Unit> OnShown => _shown;
         private readonly Subject<Unit> _shown = new();
@@ -25,7 +29,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows
 
         public override void BaseInitialize()
         {
-            closeButton.AsNullable()?.OnClickAsObservable()
+            CloseButton.AsNullable()?.OnClickAsObservable()
                 .SubscribeUntilDestroy(this, static self => self.HideAsync().Forget());
         }
 
