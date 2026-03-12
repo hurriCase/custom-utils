@@ -8,6 +8,9 @@ namespace CustomUtils.Runtime.Animations.Base
 {
     [Serializable]
     public abstract class AnimationBase<TState, TValue, TAnimationSettings> : IAnimation<TState>
+#if UNITY_EDITOR
+        , IAnimationPreview
+#endif
         where TState : unmanaged, Enum
         where TAnimationSettings : AnimationSettings<TValue>
         where TValue : struct
@@ -49,5 +52,12 @@ namespace CustomUtils.Runtime.Animations.Base
 
         protected abstract void SetValueInstant(TValue value);
         protected abstract Tween CreateTween(TAnimationSettings animationSettings);
+
+#if UNITY_EDITOR
+        public void PreviewAnimation(Enum state)
+        {
+            PlayAnimation((TState)state);
+        }
+#endif
     }
 }
