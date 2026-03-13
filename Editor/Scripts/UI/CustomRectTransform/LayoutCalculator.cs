@@ -59,10 +59,10 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
             var horizontalMargins = CalculateHorizontalMargins(rectTransform, parentSize.x);
             var verticalMargins = CalculateVerticalMargins(rectTransform, parentSize.y);
 
-            layoutData.LeftMargin = Mathf.Max(0, horizontalMargins.left);
-            layoutData.RightMargin = Mathf.Max(0, horizontalMargins.right);
-            layoutData.TopMargin = Mathf.Max(0, verticalMargins.top);
-            layoutData.BottomMargin = Mathf.Max(0, verticalMargins.bottom);
+            layoutData.LeftMargin = horizontalMargins.left;
+            layoutData.RightMargin = horizontalMargins.right;
+            layoutData.TopMargin = verticalMargins.top;
+            layoutData.BottomMargin = verticalMargins.bottom;
         }
 
         private (float left, float right) CalculateHorizontalMargins(RectTransform rectTransform, float parentWidth)
@@ -83,8 +83,8 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
             }
             else
             {
-                var left = anchorMin.x * parentWidth;
-                var right = (1 - anchorMax.x) * parentWidth;
+                var left = anchorMin.x * parentWidth + rectTransform.offsetMin.x;
+                var right = (1 - anchorMax.x) * parentWidth - rectTransform.offsetMax.x;
                 return (left, right);
             }
         }
@@ -107,8 +107,8 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
             }
             else
             {
-                var bottom = anchorMin.y * parentHeight;
-                var top = (1 - anchorMax.y) * parentHeight;
+                var bottom = anchorMin.y * parentHeight - rectTransform.offsetMin.y;
+                var top = (1 - anchorMax.y) * parentHeight + rectTransform.offsetMax.y;
                 return (top, bottom);
             }
         }
