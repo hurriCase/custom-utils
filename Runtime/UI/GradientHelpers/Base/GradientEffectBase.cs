@@ -4,7 +4,7 @@ using UnityEngine;
 namespace CustomUtils.Runtime.UI.GradientHelpers.Base
 {
     [PublicAPI]
-    public abstract class GradientEffectBase<TComponent> : IGradientEffect<TComponent> where TComponent : Component
+    public abstract class GradientEffectBase<TComponent> where TComponent : Component
     {
         /// <summary>
         /// Applies a gradient effect to the specified component using the provided gradient and direction.

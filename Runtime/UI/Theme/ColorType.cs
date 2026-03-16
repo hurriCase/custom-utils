@@ -26,6 +26,10 @@ namespace CustomUtils.Runtime.UI.Theme
         /// <summary>
         /// Gradient color specifically designed for text UI elements using TextMeshPro.
         /// </summary>
-        TextGradient = 3
+        TextGradient = 3,
+
+        GraphicMultiGradient = 4,
+
+        DiamondGradient = 5
     }
 }

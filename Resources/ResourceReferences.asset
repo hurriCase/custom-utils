@@ -15,3 +15,5 @@ MonoBehaviour:
   <SquareSprite>k__BackingField: {fileID: 21300000, guid: 23411728a01d09c4589823aa6a5e74ce, type: 3}
   <EmptySprite>k__BackingField: {fileID: 21300000, guid: 3f91331724a9da84197e9b6d94f0483c, type: 3}
   <ProceduralImageMaterial>k__BackingField: {fileID: 2100000, guid: ce2ab5b3a5815d34e8b74341ebb644cf, type: 2}
+  <MultiGradientShader>k__BackingField: {fileID: 4800000, guid: 9f793c89882149549216290271cfee0b, type: 3}
+  <DiamondGradientShader>k__BackingField: {fileID: 4800000, guid: 08a84dbc616c4bf4815dad83b8844a93, type: 3}

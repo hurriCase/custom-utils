@@ -56,5 +56,22 @@ namespace CustomUtils.Runtime.Extensions
                 EditorSceneManager.MarkSceneDirty(scene);
 #endif
         }
+
+        /// <summary>
+        /// Destroys the specified object instance.
+        /// Uses immediate destruction if the application is not in play mode;
+        /// otherwise, schedules the destruction at the end of the frame.
+        /// </summary>
+        /// <param name="target">The object instance to destroy.</param>
+        public static void Destroy(this Object target)
+        {
+            if (Application.isPlaying)
+            {
+                Object.Destroy(target);
+                return;
+            }
+
+            Object.DestroyImmediate(target);
+        }
     }
 }
