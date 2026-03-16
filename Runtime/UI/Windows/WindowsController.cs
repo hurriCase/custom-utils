@@ -18,7 +18,7 @@ using VContainer;
 namespace CustomUtils.Runtime.UI.Windows
 {
     [PublicAPI]
-    public sealed class WindowsController : MonoBehaviour, IWindowsController
+    public class WindowsController : MonoBehaviour
     {
         [SerializeField] private List<AssetReferenceT<GameObject>> _screenReferences;
         [SerializeField] private List<AssetReferenceT<GameObject>> _popupReferences;
