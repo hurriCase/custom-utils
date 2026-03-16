@@ -10,7 +10,7 @@ using UnityEngine;
 namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.Base
 {
     internal abstract class GradientModifierBase<TGradientEffect, TComponent> : GenericColorModifierBase<Gradient>
-        where TGradientEffect : IGradientEffect<TComponent>, new()
+        where TGradientEffect : GradientEffectBase<TComponent>, new()
         where TComponent : Component
     {
         [field: SerializeField]

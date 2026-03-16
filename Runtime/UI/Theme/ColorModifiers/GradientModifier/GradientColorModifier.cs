@@ -1,4 +1,4 @@
-﻿using CustomUtils.Runtime.UI.GradientHelpers.GraphicGradient.TwoColors;
+﻿using CustomUtils.Runtime.UI.GradientHelpers.GraphicGradient;
 using CustomUtils.Runtime.UI.Theme.ColorModifiers.Base;
 using UnityEngine;
 using UnityEngine.UI;
