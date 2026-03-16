@@ -42,26 +42,33 @@ namespace CustomUtils.Runtime.UI.Windows
         {
             _objectResolver = objectResolver;
             _addressablesLoader = addressablesLoader;
-
-            _screenRegistry = new ScreenRegistry(
-                _currentScreenType,
-                _screensContainer,
-                objectResolver,
-                addressablesLoader);
-
-            _popupRegistry = new PopupRegistry(
-                _popupsContainer,
-                objectResolver,
-                addressablesLoader,
-                destroyCancellationToken);
         }
 
         public async UniTask InitializeAsync(CancellationToken cancellationToken)
         {
             var sourceWithDestroy = cancellationToken.CreateLinkedTokenSourceWithDestroy(this);
 
-            await _screenRegistry.LoadAsync(_screenReferences, sourceWithDestroy.Token);
-            await _popupRegistry.LoadAsync(_popupReferences, sourceWithDestroy.Token);
+            if (_screenReferences.Count > 0)
+            {
+                _screenRegistry = new ScreenRegistry(
+                    _currentScreenType,
+                    _screensContainer,
+                    _objectResolver,
+                    _addressablesLoader);
+
+                await _screenRegistry.LoadAsync(_screenReferences, sourceWithDestroy.Token);
+            }
+
+            if (_popupReferences.Count > 0)
+            {
+                _popupRegistry = new PopupRegistry(
+                    _popupsContainer,
+                    _objectResolver,
+                    _addressablesLoader,
+                    destroyCancellationToken);
+
+                await _popupRegistry.LoadAsync(_popupReferences, sourceWithDestroy.Token);
+            }
         }
 
         public void OpenScreen<TScreen>() where TScreen : ScreenBase
