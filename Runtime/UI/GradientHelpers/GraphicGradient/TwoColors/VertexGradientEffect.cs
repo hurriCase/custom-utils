@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace CustomUtils.Runtime.UI.GradientHelpers.GraphicGradient
+namespace CustomUtils.Runtime.UI.GradientHelpers.GraphicGradient.TwoColors
 {
     /// <summary>
     /// A BaseMeshEffect implementation that applies gradient colors to UI element vertices.
