@@ -4,7 +4,7 @@ using UnityEngine;
 namespace CustomUtils.Runtime.UI.GradientHelpers.Base
 {
     [PublicAPI]
-    public abstract class GradientEffectBase<TComponent> where TComponent : Component
+    public abstract class GradientEffectBase<TComponent> : IGradientEffect<TComponent> where TComponent : Component
     {
         /// <summary>
         /// Applies a gradient effect to the specified component using the provided gradient and direction.
@@ -30,6 +30,9 @@ namespace CustomUtils.Runtime.UI.GradientHelpers.Base
 
             var startColor = gradient.colorKeys[0].color;
             var endColor = gradient.colorKeys[^1].color;
+
+            startColor.a = gradient.alphaKeys[0].alpha;
+            endColor.a = gradient.alphaKeys[^1].alpha;
 
             ApplyGradient(component, startColor, endColor, direction);
         }
