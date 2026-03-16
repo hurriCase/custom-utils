@@ -30,10 +30,10 @@ namespace CustomUtils.Runtime.Other
         {
             try
             {
-                var isSuccess = await ExecuteInternalAsync(token);
-
                 var loadingText = await _loadingKey.GetLocalizationAsync(token);
                 _stepCompletedSubject.OnNext(loadingText);
+
+                var isSuccess = await ExecuteInternalAsync(token);
 
                 LogStep(isSuccess);
                 return isSuccess;
