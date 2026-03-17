@@ -325,6 +325,26 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
             return options[newIndex];
         }
 
+        public (string name, string value) Dropdown(
+            SerializedProperty property,
+            List<string> displayNames,
+            List<string> values,
+            Rect rect = default)
+        {
+            var selectedIndex = values.IndexOf(property.stringValue);
+            if (selectedIndex == -1)
+                selectedIndex = 0;
+
+            var newIndex = DrawDropdown(property.displayName, selectedIndex, displayNames.ToArray(), rect);
+
+            if (newIndex < 0 || newIndex >= values.Count)
+                return default;
+
+            property.stringValue = values[newIndex];
+            property.serializedObject.ApplyModifiedProperties();
+            return (displayNames[newIndex], values[newIndex]);
+        }
+
         /// <summary>
         /// Creates a dropdown with undo support using int value selection from an array of options.
         /// </summary>

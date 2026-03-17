@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using CustomUtils.Editor.Scripts.CustomEditorUtilities;
 using CustomUtils.Editor.Scripts.Extensions;
+using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Formatter;
 using CustomUtils.Runtime.UI.Theme;
 using CustomUtils.Runtime.UI.Theme.Databases;
@@ -33,14 +34,14 @@ namespace CustomUtils.Editor.Scripts.UI.Theme
             if (colorType == ColorType.None)
                 return;
 
-            if (!TryGetColorNamesForType(colorType, out var colorNames))
+            if (!TryGetColorNamesForType(colorType, out var colorNames, out var colorGuids))
             {
                 var message = StringFormatter.Format("No {0} colors found in database.", colorType);
                 EditorVisualControls.WarningBox(position, message);
                 return;
             }
 
-            var colorName = _editorStateControls.Dropdown(property, colorNames, position);
+            var (colorName, _) = _editorStateControls.Dropdown(property, colorNames, colorGuids, position);
 
             DrawColorPreview(colorName, colorType, position);
         }
@@ -71,19 +72,26 @@ namespace CustomUtils.Editor.Scripts.UI.Theme
             }
         }
 
-        private bool TryGetColorNamesForType(ColorType colorType, out List<string> colorNames)
+        private bool TryGetColorNamesForType(
+            ColorType colorType,
+            out List<string> colorNames,
+            out List<string> colorGuids)
         {
-            colorNames = colorType switch
+            (colorNames, colorGuids) = colorType switch
             {
-                ColorType.Solid => SolidColorDatabase.Instance.GetColorNames(),
+                ColorType.Solid => (
+                    SolidColorDatabase.Instance.GetColorNames(),
+                    SolidColorDatabase.Instance.GetColorGuids()),
                 ColorType.GraphicGradient
                     or ColorType.TextGradient
                     or ColorType.GraphicMultiGradient
-                    or ColorType.DiamondGradient => GradientColorDatabase.Instance.GetColorNames(),
-                _ => null
+                    or ColorType.DiamondGradient => (
+                        GradientColorDatabase.Instance.GetColorNames(),
+                        GradientColorDatabase.Instance.GetColorGuids()),
+                _ => (null, null)
             };
 
-            return colorNames != null && colorNames.Count != 0;
+            return !colorNames.IsNullOrEmpty() && !colorGuids.IsNullOrEmpty();
         }
     }
 }

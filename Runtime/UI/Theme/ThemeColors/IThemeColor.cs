@@ -8,10 +8,15 @@ namespace CustomUtils.Runtime.UI.Theme.ThemeColors
     internal interface IThemeColor<TColor>
     {
         string Name { get; }
+        string Guid { get; }
 #if MULTI_THEME
         EnumArray<ThemeType, TColor> Colors { get; }
 #else
         TColor Color { get; }
+#endif
+
+#if UNITY_EDITOR
+        void EnsureGuid();
 #endif
     }
 }

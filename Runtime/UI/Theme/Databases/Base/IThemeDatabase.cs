@@ -2,6 +2,6 @@
 {
     internal interface IThemeDatabase<TColor>
     {
-        bool TryGetColorByName(string colorName, out TColor color);
+        bool TryGetColorByGuid(string guid, out TColor color);
     }
 }

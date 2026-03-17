@@ -22,13 +22,13 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.Base
 #endif
         }
 
-        internal override void UpdateColor(string colorName)
+        internal override void UpdateColor(string guid)
         {
-            if (!ThemeDatabase.TryGetColorByName(colorName, out var color))
+            if (!ThemeDatabase.TryGetColorByGuid(guid, out var color))
                 return;
 
             OnUpdateColor(color);
-            currentColorName = colorName;
+            currentColorName = guid;
             this.MarkAsDirty();
         }
 

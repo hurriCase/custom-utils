@@ -15,7 +15,7 @@ namespace CustomUtils.Runtime.UI.Theme.Databases
         ThemeColorDatabaseBase<GradientColorDatabase, ThemeGradientColor, Gradient>
     {
 #if UNITY_EDITOR
-        private void OnValidate()
+        protected override void OnValidate()
         {
             foreach (var color in Colors)
                 color.TryBakeFromSolids();

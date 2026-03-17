@@ -1,4 +1,5 @@
 ﻿using System;
+using CustomUtils.Runtime.Attributes;
 using CustomUtils.Runtime.Attributes.ShowIf;
 using CustomUtils.Runtime.UI.Theme.Databases;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace CustomUtils.Runtime.UI.Theme.ThemeColors
     internal sealed class ThemeGradientColor : IThemeColor<Gradient>
     {
         [field: SerializeField] public string Name { get; private set; }
+        [field: SerializeField, InspectorReadOnly] public string Guid { get; private set; }
 #if MULTI_THEME
         [field: SerializeField] public EnumArray<ThemeType, Gradient> Colors { get; private set; }
 #else
@@ -32,10 +34,10 @@ namespace CustomUtils.Runtime.UI.Theme.ThemeColors
             if (!_constructFromSolids)
                 return;
 
-            if (!SolidColorDatabase.Instance.TryGetColorByName(_startSolidName.ColorName, out var startColor))
+            if (!SolidColorDatabase.Instance.TryGetColorByName(_startSolidName.Guid, out var startColor))
                 return;
 
-            if (!SolidColorDatabase.Instance.TryGetColorByName(_endSolidName.ColorName, out var endColor))
+            if (!SolidColorDatabase.Instance.TryGetColorByName(_endSolidName.Guid, out var endColor))
                 return;
 
             var existingKeys = Color?.colorKeys;
@@ -49,6 +51,14 @@ namespace CustomUtils.Runtime.UI.Theme.ThemeColors
             gradient.SetKeys(color, alpha);
 
             Color = gradient;
+        }
+#endif
+
+#if UNITY_EDITOR
+        public void EnsureGuid()
+        {
+            if (string.IsNullOrEmpty(Guid))
+                Guid = System.Guid.NewGuid().ToString();
         }
 #endif
     }

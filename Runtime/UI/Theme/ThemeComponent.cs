@@ -45,7 +45,7 @@ namespace CustomUtils.Runtime.UI.Theme
             if (!_currentColorModifier || currentColorData.ColorType != newColorData.ColorType)
                 CreateModifier(newColorData.ColorType);
 
-            _currentColorModifier.AsNullable()?.UpdateColor(newColorData.ColorName);
+            _currentColorModifier.AsNullable()?.UpdateColor(newColorData.Guid);
 
             currentColorData = newColorData;
             this.MarkAsDirty();
