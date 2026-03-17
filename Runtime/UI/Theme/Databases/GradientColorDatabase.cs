@@ -17,6 +17,8 @@ namespace CustomUtils.Runtime.UI.Theme.Databases
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
+            base.OnValidate();
+
             foreach (var color in Colors)
                 color.TryBakeFromSolids();
         }
