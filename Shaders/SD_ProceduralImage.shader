@@ -2,7 +2,6 @@
 {
     Properties
     {
-        [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
         _Color ("Tint", Color) = (1,1,1,1)
 
         _StencilComp ("Stencil Comparison", Float) = 8
@@ -81,22 +80,19 @@
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
-            sampler2D _MainTex;
             fixed4 _Color;
-            fixed4 _TextureSampleAdd;
             float4 _ClipRect;
-            float4 _MainTex_ST;
             int _UIVertexColorAlwaysGammaSpace;
 
             static const float Max16BitValue = 65535.0f;
             static const float MaxPixelWorldScale = 2048.0f;
-            static const float MinPixelWorldScale = 1 / MaxPixelWorldScale;
+            static const float MinPixelWorldScale = 1.0f / MaxPixelWorldScale;
 
             float2 decode2(float value)
             {
-                float2 encodeMultiplier = float2(1, Max16BitValue);
-                float encodeBit = 1 / Max16BitValue;
-                float2 enc = encodeMultiplier * value;
+                float2 encodeMul = float2(1.0f, Max16BitValue);
+                float encodeBit = 1.0f / Max16BitValue;
+                float2 enc = encodeMul * value;
                 enc = frac(enc);
                 enc.x -= enc.y * encodeBit;
                 return enc;
@@ -105,15 +101,13 @@
             v2f vert(appdata_t input)
             {
                 v2f OUT;
-
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
-
                 OUT.worldPosition = input.vertex;
                 OUT.vertex = UnityObjectToClipPos(OUT.worldPosition);
 
                 OUT.size = input.uv1;
-                OUT.texcoord = TRANSFORM_TEX(input.uv0, _MainTex);
+                OUT.texcoord = input.uv0;
 
                 float minside = min(OUT.size.x, OUT.size.y);
 
@@ -131,8 +125,8 @@
             float visible(float2 position, float2 halfSize, float4 radii)
             {
                 float cornerRadius = position.x > 0.0f
-                                         ? position.y > 0.0f ? radii.y : radii.z
-                                         : position.y > 0.0f ? radii.x : radii.w;
+                    ? position.y > 0.0f ? radii.y : radii.z
+                    : position.y > 0.0f ? radii.x : radii.w;
 
                 float2 distanceToCornerCenter = abs(position) - halfSize + cornerRadius;
                 float distanceToRoundedCorner = length(max(distanceToCornerCenter, 0.0f));
@@ -140,23 +134,23 @@
                 return cornerRadius - distanceToRoundedCorner - distanceToStraightEdge;
             }
 
-            fixed4 frag(v2f input) : SV_Target
+            fixed4 frag(v2f IN) : SV_Target
             {
-                half4 color = (tex2D(_MainTex, input.texcoord) + _TextureSampleAdd) * input.color;
+                half4 color = IN.color;
 
                 #ifdef UNITY_UI_CLIP_RECT
-                color.a *= UnityGet2DClipping(input.worldPosition.xy, _ClipRect);
+                color.a *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
                 #endif
 
                 #ifdef UNITY_UI_ALPHACLIP
                 clip(color.a - 0.001f);
                 #endif
 
-                float2 halfSize = input.size * 0.5f;
-                float2 centeredPosition = input.texcoord * input.size - halfSize;
-                float sdf = visible(centeredPosition, halfSize, input.radius);
-                float borderCenter = (input.lineWeight + 1 / input.pixelWorldScale) * 0.5f;
-                color.a *= saturate((borderCenter - distance(sdf, borderCenter)) * input.pixelWorldScale);
+                float2 halfSize = IN.size * 0.5f;
+                float2 centeredPosition = IN.texcoord * IN.size - halfSize;
+                float sdf = visible(centeredPosition, halfSize, IN.radius);
+                float borderCenter = (IN.lineWeight + 1.0f / IN.pixelWorldScale) * 0.5f;
+                color.a *= saturate((borderCenter - abs(sdf - borderCenter)) * IN.pixelWorldScale);
 
                 if (color.a <= 0)
                     discard;

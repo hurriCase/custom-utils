@@ -12,7 +12,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
     [PublicAPI]
     [ExecuteAlways]
     [AddComponentMenu("UI/Procedural Image")]
-    public class ProceduralImage : Image
+    public class ProceduralImage : MaskableGraphic
     {
         [field: SerializeField] public bool UseCustomMaterial { get; set; }
         [field: SerializeField] public Vector2 CornerOffsetTopLeft { get; set; }
@@ -54,7 +54,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 
         public override Material material
         {
-            get => !m_Material ? ResourceReferences.ProceduralImageMaterial : base.material;
+            get => !m_Material ? ResourceReferences.Instance.ProceduralImageMaterial : base.material;
             set => base.material = value;
         }
 
@@ -65,8 +65,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
         private static readonly ProfilerMarker _markerCalculateInfo
             = new(ProfilerCategory.Render, nameof(ProceduralImage) + "." + nameof(CalculateInfo));
 #endif
-
-        private ResourceReferences ResourceReferences => ResourceReferences.Instance;
 
         private ModifierBase _modifierBase;
 
@@ -112,20 +110,8 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 
             FixTexCoordsInCanvas();
 
-            m_OnDirtyVertsCallback += OnVerticesDirty;
-            preserveAspect = false;
-
             if (!UseCustomMaterial)
                 material = null;
-
-            if (!sprite)
-                sprite = ResourceReferences.EmptySprite;
-        }
-
-        private void OnVerticesDirty()
-        {
-            if (!sprite)
-                sprite = ResourceReferences.EmptySprite;
         }
 
         private void FixTexCoordsInCanvas()
@@ -227,13 +213,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             (false, true) => CornerOffsetBottomRight,
             (false, false) => CornerOffsetBottomLeft,
         };
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-
-            m_OnDirtyVertsCallback -= OnVerticesDirty;
-        }
 
 #if UNITY_EDITOR
         protected override void Reset()
