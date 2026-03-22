@@ -16,7 +16,7 @@ float4 _DotColor;
 float  _PatternRotation;
 CBUFFER_END
 
-include "Packages/com.firsttry.customutils/Shaders/Halftone/HalftoneUtils.hlsl"
+#include "Packages/com.firsttry.customutils/Shaders/Halftone/HalftoneUtils.hlsl"
 
 int _UIVertexColorAlwaysGammaSpace;
 

@@ -77,6 +77,10 @@ half4 Fragment(Varyings input) : SV_Target
     float borderCenter = (input.lineWeight + 1.0f / input.pixelWorldScale) * 0.5f;
     color.a *= saturate((borderCenter - abs(sdf - borderCenter)) * input.pixelWorldScale);
 
+    #ifdef HALFTONE_ON
+    color = ApplyHalftone(color, input.uv);
+    #endif
+
     if (color.a <= 0)
         discard;
 

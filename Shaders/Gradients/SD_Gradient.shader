@@ -8,6 +8,7 @@
         _Rotation ("Rotation", Range(0, 360)) = 0
         _Color ("Tint", Color) = (1,1,1,1)
 
+        // Halftone properties
         _HalftoneTex ("Halftone Texture", 2D) = "white" {}
         _PatternOffset ("Pattern Offset", Vector) = (0,0,0,0)
         _PatternScale ("Pattern Scale", Vector) = (1,1,0,0)

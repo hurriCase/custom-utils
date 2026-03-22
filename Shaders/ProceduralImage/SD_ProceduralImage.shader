@@ -4,6 +4,14 @@
     {
         _Color ("Tint", Color) = (1,1,1,1)
 
+        // Halftone properties
+        _HalftoneTex ("Halftone Texture", 2D) = "white" {}
+        _PatternOffset ("Pattern Offset", Vector) = (0,0,0,0)
+        _PatternScale ("Pattern Scale", Vector) = (1,1,0,0)
+        _PatternOpacity ("Pattern Opacity", Range(0,1)) = 0.2
+        _DotColor ("Dot Color", Color) = (0,0,0,1)
+        _PatternRotation ("Pattern Rotation", Range(0, 360)) = 0
+
         // Mask component required properties
         [HideInInspector] _Stencil ("Stencil ID", Float) = 0
         [HideInInspector] _StencilComp ("Stencil Comparison", Float) = 8
@@ -48,6 +56,7 @@
             #pragma fragment Fragment
             #pragma target 2.0
 
+            #pragma multi_compile_local _ HALFTONE_ON
             #pragma multi_compile_local _ UNITY_UI_CLIP_RECT
             #pragma multi_compile_local _ UNITY_UI_ALPHACLIP
 

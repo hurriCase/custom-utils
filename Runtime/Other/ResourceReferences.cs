@@ -10,5 +10,6 @@ namespace CustomUtils.Runtime.Other
         [field: SerializeField] internal Sprite SquareSprite { get; private set; }
         [field: SerializeField] internal Material ProceduralImageMaterial { get; private set; }
         [field: SerializeField] internal Material GradientMaterial { get; private set; }
+        [field: SerializeField] internal Material HalftoneMaterial { get; private set; }
     }
 }

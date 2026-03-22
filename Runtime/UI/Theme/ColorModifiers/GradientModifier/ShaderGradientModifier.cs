@@ -3,6 +3,7 @@ using CustomUtils.Runtime.Attributes;
 using CustomUtils.Runtime.Attributes.ShowIf;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Other;
+using CustomUtils.Runtime.UI.Halftone;
 using CustomUtils.Runtime.UI.Theme.ColorModifiers.Base;
 using CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier.ShaderGradient;
 using CustomUtils.Runtime.UI.Theme.Databases;
@@ -20,6 +21,9 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
     {
         [SerializeField] private GradientType _gradientType;
 
+        [SerializeField] private bool _useHalftone;
+        [SerializeField, ShowIf(nameof(_useHalftone))] private HalftoneProperties _halftoneProperties;
+
         [SerializeField, ShowIf(nameof(_gradientType), GradientType.Diamond)]
         private DiamondGradientDirection _gradientDirection;
 
@@ -27,9 +31,11 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
          ShowIf(nameof(_gradientType), GradientType.Linear, GradientType.Angular)]
         private float _gradientRotation;
 
-        [SerializeField, Self] private Graphic _graphic;
+        [SerializeField, InspectorReadOnly] private Graphic _graphic;
 
         protected override IThemeDatabase<Gradient> ThemeDatabase => GradientColorDatabase.Instance;
+
+        private const string HalftoneKeywordName = "HALFTONE_ON";
 
         private static readonly int _gradientTextureId = Shader.PropertyToID("_GradientTex");
         private static readonly int _directionId = Shader.PropertyToID("_Direction");
@@ -43,6 +49,8 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
         protected override void Awake()
         {
             base.Awake();
+
+            _graphic = _graphic.AsNullable() ?? GetComponent<Graphic>();
 
             _gradientTexture = new Texture2D(GradientTextureResolution, 1, TextureFormat.RGBA32, false)
             {
@@ -66,6 +74,12 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
             _material.EnableKeyword(gradientKeyword);
             _material.SetInt(_directionId, (int)_gradientDirection);
             _material.SetFloat(_rotationId, _gradientRotation);
+
+            if (!_useHalftone)
+                return;
+
+            _material.EnableKeyword(HalftoneKeywordName);
+            _halftoneProperties.ApplyProperties(_material);
         }
 
         private void BakeGradient(Gradient gradient)

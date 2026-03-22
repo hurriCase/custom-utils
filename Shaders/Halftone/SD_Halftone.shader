@@ -2,6 +2,15 @@
 {
     Properties
     {
+        _Color ("Tint", Color) = (1,1,1,1)
+
+        _HalftoneTex ("Halftone Texture", 2D) = "white" {}
+        _PatternOffset ("Pattern Offset", Vector) = (0,0,0,0)
+        _PatternScale ("Pattern Scale", Vector) = (1,1,0,0)
+        _PatternOpacity ("Pattern Opacity", Range(0,1)) = 0.2
+        _DotColor ("Dot Color", Color) = (0,0,0,1)
+        _PatternRotation ("Pattern Rotation", Range(0, 360)) = 0
+
         // Mask component required properties
         [HideInInspector] _Stencil ("Stencil ID", Float) = 0
         [HideInInspector] _StencilComp ("Stencil Comparison", Float) = 8
