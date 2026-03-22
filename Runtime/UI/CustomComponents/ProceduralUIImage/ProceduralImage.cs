@@ -151,30 +151,30 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 
             var info = CalculateInfo();
 
-            var uv1 = new Vector2(info.Width, info.Height);
-
             var normalizedRadius = info.NormalizedRadius;
-            var uv2 = new Vector2(
-                normalizedRadius.x.PackAs16BitWith(normalizedRadius.y),
-                normalizedRadius.z.PackAs16BitWith(normalizedRadius.w)
-            );
 
             var normalizedBorderWidth = info.NormalizedBorderWidth == 0
                 ? 1
                 : Mathf.Clamp01(info.NormalizedBorderWidth);
 
-            var uv3 = new Vector2(normalizedBorderWidth, info.PixelSize);
+            var uv1 = new Vector4(info.Width, info.Height, CornerOffsetTopLeft.x, CornerOffsetTopLeft.y);
+            var uv2 = new Vector4(
+                normalizedRadius.x.PackAs16BitWith(normalizedRadius.y),
+                normalizedRadius.z.PackAs16BitWith(normalizedRadius.w),
+                CornerOffsetTopRight.x, CornerOffsetTopRight.y
+            );
+            var uv3 = new Vector4(normalizedBorderWidth, info.PixelSize, CornerOffsetBottomRight.x, CornerOffsetBottomRight.y);
+            var tangent = new Vector4(CornerOffsetBottomLeft.x, CornerOffsetBottomLeft.y, 0, 0);
 
             var vert = new UIVertex();
             for (var i = 0; i < vertexHelper.currentVertCount; i++)
             {
                 vertexHelper.PopulateUIVertex(ref vert, i);
 
-                vert.position += (Vector3)GetCornerOffset(vert.uv0);
-
                 vert.uv1 = uv1;
                 vert.uv2 = uv2;
                 vert.uv3 = uv3;
+                vert.tangent = tangent;
 
                 vertexHelper.SetUIVertex(vert, i);
             }

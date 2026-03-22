@@ -17,9 +17,10 @@ struct Attributes
     float4 positionOS : POSITION;
     float4 color : COLOR;
     float2 uv0 : TEXCOORD0;
-    float2 uv1 : TEXCOORD1;
-    float2 uv2 : TEXCOORD2;
-    float2 uv3 : TEXCOORD3;
+    float4 uv1 : TEXCOORD1;
+    float4 uv2 : TEXCOORD2;
+    float4 uv3 : TEXCOORD3;
+    float4 tangent : TANGENT;
 };
 
 struct Varyings
@@ -32,31 +33,41 @@ struct Varyings
     float2 size : TEXCOORD3;
     float lineWeight : TEXCOORD4;
     float pixelWorldScale : TEXCOORD5;
+    float2 cornerOffsetTopLeft : TEXCOORD6;
+    float2 cornerOffsetTopRight : TEXCOORD7;
+    float2 cornerOffsetBottomRight : TEXCOORD8;
+    float2 cornerOffsetBottomLeft : TEXCOORD9;
 };
 
 Varyings Vertex(Attributes input)
 {
-    Varyings OUT;
+    Varyings output;
 
-    OUT.worldPosition = input.positionOS;
-    OUT.positionHCS = TransformObjectToHClip(OUT.worldPosition.xyz);
+    output.worldPosition = input.positionOS;
+    output.positionHCS = TransformObjectToHClip(output.worldPosition.xyz);
 
-    OUT.size = input.uv1;
-    OUT.texcoord = input.uv0;
+    output.size = input.uv1;
+    output.texcoord = input.uv0;
 
-    float minSide = min(OUT.size.x, OUT.size.y);
+    float minSide = min(output.size.x, output.size.y);
 
-    OUT.lineWeight = input.uv3.x * minSide;
-    OUT.radius = float4(Decode2(input.uv2.x), Decode2(input.uv2.y)) * minSide;
-    OUT.pixelWorldScale = clamp(input.uv3.y, MIN_PIXEL_WORLD_SCALE, MAX_PIXEL_WORLD_SCALE);
+    output.lineWeight = input.uv3.x * minSide;
+    output.radius = float4(Decode2(input.uv2.x), Decode2(input.uv2.y)) * minSide;
+    output.pixelWorldScale = clamp(input.uv3.y, MIN_PIXEL_WORLD_SCALE, MAX_PIXEL_WORLD_SCALE);
 
     #ifndef UNITY_COLORSPACE_GAMMA
     if (_UIVertexColorAlwaysGammaSpace)
         input.color.rgb = SRGBToLinear(input.color.rgb);
     #endif
 
-    OUT.color = input.color * _Color;
-    return OUT;
+    output.size = input.uv1.xy;
+    output.cornerOffsetTopLeft = input.uv1.zw;
+    output.cornerOffsetTopRight = input.uv2.zw;
+    output.cornerOffsetBottomRight = input.uv3.zw;
+    output.cornerOffsetBottomLeft = input.tangent.xy;
+
+    output.color = input.color * _Color;
+    return output;
 }
 
 half4 Fragment(Varyings input) : SV_Target
