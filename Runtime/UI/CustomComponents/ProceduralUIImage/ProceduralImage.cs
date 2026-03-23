@@ -206,14 +206,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             return info;
         }
 
-        private Vector2 GetCornerOffset(Vector2 uv) => (uv.y > 0.9f, uv.x > 0.9f) switch
-        {
-            (true, false) => CornerOffsetTopLeft,
-            (true, true) => CornerOffsetTopRight,
-            (false, true) => CornerOffsetBottomRight,
-            (false, false) => CornerOffsetBottomLeft,
-        };
-
 #if UNITY_EDITOR
         protected override void Reset()
         {

@@ -3,7 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-#include "Packages/com.firsttry.customutils/Shaders/Common.hlsl"
+#include "Packages/com.firsttry.customutils/Shaders/Shared/Common.hlsl"
 
 TEXTURE2D(_MainTex);
 SAMPLER(sampler_MainTex);

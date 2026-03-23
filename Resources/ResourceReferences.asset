@@ -15,3 +15,4 @@ MonoBehaviour:
   <SquareSprite>k__BackingField: {fileID: 21300000, guid: 23411728a01d09c4589823aa6a5e74ce, type: 3}
   <ProceduralImageMaterial>k__BackingField: {fileID: 2100000, guid: ce2ab5b3a5815d34e8b74341ebb644cf, type: 2}
   <GradientMaterial>k__BackingField: {fileID: 2100000, guid: 07b53358eca78b24985770ec19fc2898, type: 2}
+  <HalftoneMaterial>k__BackingField: {fileID: 2100000, guid: 5ecd29b9df9be004ba734d97d51e2ea2, type: 2}

@@ -3,7 +3,8 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-#include "Packages/com.firsttry.customutils/Shaders/Common.hlsl"
+#include "Packages/com.firsttry.customutils/Shaders/Shared/SDF.hlsl"
+#include "Packages/com.firsttry.customutils/Shaders/Shared/Common.hlsl"
 
 CBUFFER_START(UnityPerMaterial)
 half4 _Color;
@@ -84,7 +85,19 @@ half4 Fragment(Varyings input) : SV_Target
 
     float2 halfSize = input.size * 0.5f;
     float2 centeredPosition = input.texcoord * input.size - halfSize;
-    float sdf = SdfRoundedRect(centeredPosition, halfSize, input.radius);
+    float2 cornerBottomLeft = float2(-halfSize.x, -halfSize.y) + input.cornerOffsetBottomLeft;
+    float2 cornerBottomRight = float2( halfSize.x, -halfSize.y) + input.cornerOffsetBottomRight;
+    float2 cornerTopRight = float2( halfSize.x,  halfSize.y) + input.cornerOffsetTopRight;
+    float2 cornerTopLeft = float2(-halfSize.x,  halfSize.y) + input.cornerOffsetTopLeft;
+
+    float sdf = -SdfQuad(
+        centeredPosition,
+        cornerBottomLeft,
+        cornerTopLeft,
+        cornerTopRight,
+        cornerBottomRight,
+        input.radius.x);
+
     float borderCenter = (input.lineWeight + 1.0f / input.pixelWorldScale) * 0.5f;
     color.a *= saturate((borderCenter - abs(sdf - borderCenter)) * input.pixelWorldScale);
 
