@@ -37,7 +37,7 @@ namespace CustomUtils.Runtime.Extensions
         /// </summary>
         /// <typeparam name="TValueType">The type of the value of the field.</typeparam>
         /// <param name="field">The field to add styling classes to.</param>
-        public static void AddUnityFileStyles<TValueType>(this BaseField<TValueType> field)
+        public static void AddUnityFieldStyles<TValueType>(this BaseField<TValueType> field)
         {
             field.AddToClassList(BaseField<TValueType>.alignedFieldUssClassName);
             field.AddToClassList(UnityInspectorFieldUssClassName);

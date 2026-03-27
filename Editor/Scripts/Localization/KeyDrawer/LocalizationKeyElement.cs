@@ -106,7 +106,7 @@ namespace CustomUtils.Editor.Scripts.Localization.KeyDrawer
                 style = { marginLeft = 0 }
             };
 
-            dropdown.AddUnityFileStyles();
+            dropdown.AddUnityFieldStyles();
             dropdown.RegisterInputClick(this, static self => self.ShowKeySelectionWindow());
 
             SetupDropdownLabel(dropdown);
