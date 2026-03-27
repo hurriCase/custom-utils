@@ -1,5 +1,5 @@
 ﻿using System;
-using CustomUtils.Runtime.CustomTypes.Collections;
+using CustomUtils.Runtime.Animations.Base.Settings;
 using PrimeTween;
 using UnityEngine;
 
@@ -9,8 +9,7 @@ namespace CustomUtils.Runtime.Animations.Base
         where TState : unmanaged, Enum
     {
         [SerializeField] protected TTarget target;
-        [SerializeField] private float _delay;
-        [SerializeField] private EnumArray<TState, TContent> _states;
+        [SerializeField] private DelayedAnimationSettingsBase<TState, TContent> _animationSettings;
 
         private Tween _currentAnimation;
 
@@ -18,7 +17,7 @@ namespace CustomUtils.Runtime.Animations.Base
 
         public Tween PlayAnimation(TState state, bool isInstant)
         {
-            targetSource = _states[state];
+            targetSource = _animationSettings.States[state];
 
             if (isInstant)
             {
@@ -29,7 +28,10 @@ namespace CustomUtils.Runtime.Animations.Base
             if (_currentAnimation.isAlive)
                 _currentAnimation.Stop();
 
-            return _currentAnimation = Tween.Delay(this, _delay, static self => self.UpdateState());
+            return _currentAnimation = Tween.Delay(
+                this,
+                _animationSettings.Delay,
+                static self => self.UpdateState());
         }
 
         protected abstract void UpdateState();

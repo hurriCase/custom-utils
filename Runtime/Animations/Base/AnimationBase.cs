@@ -1,4 +1,5 @@
 ﻿using System;
+using CustomUtils.Runtime.Animations.Base.Settings;
 using CustomUtils.Runtime.Attributes;
 using CustomUtils.Runtime.CustomTypes.Collections;
 using PrimeTween;
@@ -12,7 +13,7 @@ namespace CustomUtils.Runtime.Animations.Base
         , IAnimationPreview
 #endif
         where TState : unmanaged, Enum
-        where TAnimationSettings : AnimationSettings<TValue>
+        where TAnimationSettings : TweenAnimationSettingsBase<TValue>
         where TValue : struct
     {
         [SerializeField] protected EnumArray<TState, TAnimationSettings> states;

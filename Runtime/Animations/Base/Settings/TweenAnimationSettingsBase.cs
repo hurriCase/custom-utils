@@ -2,7 +2,7 @@
 using PrimeTween;
 using UnityEngine;
 
-namespace CustomUtils.Runtime.Animations.Base
+namespace CustomUtils.Runtime.Animations.Base.Settings
 {
     /// <inheritdoc />
     /// <summary>
@@ -10,11 +10,9 @@ namespace CustomUtils.Runtime.Animations.Base
     /// </summary>
     /// <typeparam name="TValue">The type of value being animated.</typeparam>
     [PublicAPI]
-    public abstract class AnimationSettings<TValue> : ScriptableObject
+    public abstract class TweenAnimationSettingsBase<TValue> : AnimationSettingsBase
         where TValue : struct
     {
         [field: SerializeField] public TweenSettings<TValue> TweenSettings { get; private set; }
-
-        protected const string AnimationSettingsPath = "Animation Settings/";
     }
 }

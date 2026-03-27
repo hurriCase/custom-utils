@@ -1,4 +1,4 @@
-﻿using CustomUtils.Runtime.Animations.Base;
+﻿using CustomUtils.Runtime.Animations.Base.Settings;
 using UnityEngine;
 
 namespace CustomUtils.Runtime.Animations.Settings
@@ -7,5 +7,5 @@ namespace CustomUtils.Runtime.Animations.Settings
         fileName = nameof(ColorAnimationSettings),
         menuName = AnimationSettingsPath + nameof(ColorAnimationSettings)
     )]
-    public sealed class ColorAnimationSettings : AnimationSettings<Color> { }
+    public sealed class ColorAnimationSettings : TweenAnimationSettingsBase<Color> { }
 }

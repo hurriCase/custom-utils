@@ -1,4 +1,4 @@
-using CustomUtils.Runtime.Animations.Base;
+using CustomUtils.Runtime.Animations.Base.Settings;
 using UnityEngine;
 
 namespace CustomUtils.Runtime.Animations.Settings
@@ -7,5 +7,5 @@ namespace CustomUtils.Runtime.Animations.Settings
         fileName = nameof(Vector2AnimationSettings),
         menuName = AnimationSettingsPath + nameof(Vector2AnimationSettings)
     )]
-    public sealed class Vector2AnimationSettings : AnimationSettings<Vector2> { }
+    public sealed class Vector2AnimationSettings : TweenAnimationSettingsBase<Vector2> { }
 }
