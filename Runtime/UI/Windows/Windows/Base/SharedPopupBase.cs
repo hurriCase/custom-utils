@@ -60,7 +60,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
             _hidden.OnNext(Unit.Default);
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             _shown.Dispose();
             _hidden.Dispose();
