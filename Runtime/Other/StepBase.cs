@@ -38,10 +38,10 @@ namespace CustomUtils.Runtime.Other
                 LogStep(isSuccess);
                 return isSuccess;
             }
-            catch (Exception ex)
+            catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                LogStep(false, ex.Message);
-                Debug.LogException(ex);
+                LogStep(false, exception.Message);
+                Debug.LogException(exception);
                 return false;
             }
         }
