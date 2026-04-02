@@ -16,7 +16,7 @@ namespace CustomUtils.Runtime.Audio
     {
         [SerializeField] private AudioDatabaseGeneric<TMusicType, TSfxType> _audioDatabaseGeneric;
 
-        [SerializeField] private PoolConfig<AudioSource> _soundPoolConfig;
+        [SerializeField] private PoolConfig<AudioSource> _sfxPoolConfig;
         [SerializeField] private AudioSource _clipSource;
         [SerializeField] private AudioSource _musicSource;
         [SerializeField] private AudioSource _oneShotSource;
@@ -25,40 +25,40 @@ namespace CustomUtils.Runtime.Audio
         private readonly List<AliveAudioData<TSfxType>> _aliveAudios = new();
         private readonly List<AliveAudioData<TSfxType>> _audiosToRemove = new();
 
-        private Pool<AudioSource> _soundPool;
+        private Pool<AudioSource> _sfxPool;
 
         public virtual void Initialize()
         {
-            _soundPool = new ComponentPool<AudioSource>(_soundPoolConfig);
+            _sfxPool = new ComponentPool<AudioSource>(_sfxPoolConfig);
         }
 
-        public virtual AudioSource PlaySfx(TSfxType soundType, float volumeModifier = 1, float pitchModifier = 1)
+        public virtual AudioSource PlaySfx(TSfxType sfxType, float volumeModifier = 1, float pitchModifier = 1)
         {
-            var soundData = _audioDatabaseGeneric.SoundContainers[soundType];
-            if (!ShouldPlaySound(soundType, soundData))
+            var soundData = _audioDatabaseGeneric.SoundContainers[sfxType];
+            if (!ShouldPlaySfx(sfxType, soundData))
                 return null;
 
-            var soundTypeValue = UnsafeEnumConverter<TSfxType>.ToInt32(soundType);
+            var soundTypeValue = UnsafeEnumConverter<TSfxType>.ToInt32(sfxType);
             _lastPlayedTimes[soundTypeValue] = Time.unscaledTime;
 
-            var soundSource = _soundPool.Get();
+            var soundSource = _sfxPool.Get();
             soundSource.clip = soundData.AudioData.AudioClip;
             soundSource.pitch = pitchModifier * soundData.AudioData.RandomPitch.Value;
             soundSource.volume = volumeModifier * soundData.AudioData.RandomVolume.Value;
 
             soundSource.Play();
 
-            var aliveData = new AliveAudioData<TSfxType>(soundType, soundSource);
+            var aliveData = new AliveAudioData<TSfxType>(sfxType, soundSource);
             _aliveAudios.Add(aliveData);
 
-            PlaySoundInternal(aliveData).Forget();
+            PlaySfxInternal(aliveData).Forget();
 
             return soundSource;
         }
 
-        public virtual AudioSource PlayClip(AudioClip soundType, float volumeModifier = 1, float pitchModifier = 1)
+        public virtual AudioSource PlayClip(AudioClip sfxType, float volumeModifier = 1, float pitchModifier = 1)
         {
-            _clipSource.clip = soundType;
+            _clipSource.clip = sfxType;
             _clipSource.pitch = pitchModifier;
             _clipSource.volume = volumeModifier;
 
@@ -72,9 +72,9 @@ namespace CustomUtils.Runtime.Audio
             _clipSource.Stop();
         }
 
-        public virtual void PlayOneShotSfx(TSfxType soundType, float volumeModifier = 1, float pitchModifier = 1)
+        public virtual void PlayOneShotSfx(TSfxType sfxType, float volumeModifier = 1, float pitchModifier = 1)
         {
-            var soundData = _audioDatabaseGeneric.SoundContainers[soundType];
+            var soundData = _audioDatabaseGeneric.SoundContainers[sfxType];
 
             if (soundData?.AudioData == null || !soundData.AudioData?.AudioClip)
                 return;
@@ -108,7 +108,7 @@ namespace CustomUtils.Runtime.Audio
             _musicSource.Stop();
         }
 
-        public virtual void StopSound(TSfxType soundType)
+        public virtual void StopSfx(TSfxType soundType)
         {
             var soundTypeValueToRemove = UnsafeEnumConverter<TSfxType>.ToInt32(soundType);
 
@@ -121,7 +121,7 @@ namespace CustomUtils.Runtime.Audio
                     continue;
 
                 audioData.AudioSource.Stop();
-                _soundPool.Release(audioData.AudioSource);
+                _sfxPool.Release(audioData.AudioSource);
                 _audiosToRemove.Add(audioData);
             }
 
@@ -129,22 +129,22 @@ namespace CustomUtils.Runtime.Audio
                 _aliveAudios.Remove(audioData);
         }
 
-        private bool ShouldPlaySound(TSfxType soundType, SoundContainer soundData)
+        private bool ShouldPlaySfx(TSfxType sfxType, SoundContainer soundData)
         {
             if (soundData?.AudioData == null || !soundData.AudioData?.AudioClip)
                 return false;
 
-            var soundValue = UnsafeEnumConverter<TSfxType>.ToInt32(soundType);
+            var sfxValue = UnsafeEnumConverter<TSfxType>.ToInt32(sfxType);
             return soundData.Cooldown == 0 ||
-                   !_lastPlayedTimes.TryGetValue(soundValue, out var lastTime) ||
+                   !_lastPlayedTimes.TryGetValue(sfxValue, out var lastTime) ||
                    !(Time.unscaledTime < lastTime + soundData.Cooldown);
         }
 
-        private async UniTask PlaySoundInternal(AliveAudioData<TSfxType> aliveData)
+        private async UniTask PlaySfxInternal(AliveAudioData<TSfxType> aliveData)
         {
             await UniTask.WaitForSeconds(aliveData.AudioSource.clip.length);
 
-            _soundPool.Release(aliveData.AudioSource);
+            _sfxPool.Release(aliveData.AudioSource);
             _aliveAudios.Remove(aliveData);
         }
     }
