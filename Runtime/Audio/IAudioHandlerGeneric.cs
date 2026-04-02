@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using CustomUtils.Runtime.AddressableSystem;
 using CustomUtils.Runtime.Storage;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
@@ -29,15 +30,22 @@ namespace CustomUtils.Runtime.Audio
         /// Value range is typically 0.0 to 1.0, where 0 is muted and 1 is full volume.
         /// Changes to this property will automatically persist to storage and update all active sound sources.
         /// </summary>
-        PersistentReactiveProperty<float> SoundVolume { get; }
+        PersistentReactiveProperty<float> SfxVolume { get; }
+
+        /// <summary>
+        /// Returns true if SFX volume is greater than zero.
+        /// </summary>
+        bool SfxEnabled { get; }
+
+        /// <summary>
+        /// Returns true if music volume is greater than zero.
+        /// </summary>
+        bool MusicEnabled { get; }
 
         /// <summary>
         /// Initializes the audio handler with pooled audio sources and volume subscriptions
         /// </summary>
-        UniTask InitAsync(
-            float defaultMusicVolume = 1f,
-            float defaultSoundVolume = 1f,
-            CancellationToken token = default);
+        UniTask InitAsync(IAddressablesLoader addressablesLoader, CancellationToken token);
 
         /// <summary>
         /// Plays a sound with the specified parameters
@@ -72,7 +80,8 @@ namespace CustomUtils.Runtime.Audio
         void StopSound(TSoundType soundType);
 
         /// <summary>
-        /// Stop music
+        /// Stops the currently playing music track.
+        /// Has no effect if no music is currently playing.
         /// </summary>
         void StopMusic();
 

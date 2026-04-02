@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using CustomUtils.Runtime.AddressableSystem;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Pools.Objects;
 using CustomUtils.Runtime.Storage;
 using CustomUtils.Unsafe;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace CustomUtils.Runtime.Audio
 {
@@ -17,35 +19,42 @@ namespace CustomUtils.Runtime.Audio
     {
         [SerializeField] private AudioDatabaseGeneric<TMusicType, TSoundType> _audioDatabaseGeneric;
 
+        [SerializeField] private AudioConfig _audioConfig;
         [SerializeField] private PoolConfig<AudioSource> _soundPoolConfig;
         [SerializeField] private AudioSource _clipSource;
         [SerializeField] private AudioSource _musicSource;
         [SerializeField] private AudioSource _oneShotSource;
 
         public PersistentReactiveProperty<float> MusicVolume { get; } = new();
-        public PersistentReactiveProperty<float> SoundVolume { get; } = new();
+        public PersistentReactiveProperty<float> SfxVolume { get; } = new();
+
+        public bool SfxEnabled => SfxVolume.Value > 0;
+        public bool MusicEnabled => MusicVolume.Value > 0;
+
+        private const string MusicVolumeKey = "music_volume";
+        private const string SfxVolumeKey = "sfx_volume";
+
+        private const float SilenceDb = -80f;
+        private const float DbConversionFactor = 20f;
 
         private readonly Dictionary<int, float> _lastPlayedTimes = new();
         private readonly List<AliveAudioData<TSoundType>> _aliveAudios = new();
         private readonly List<AliveAudioData<TSoundType>> _audiosToRemove = new();
 
         private Pool<AudioSource> _soundPool;
-        private AudioData _currentMusicData;
 
-        private const string MusicVolumeKey = "MusicVolumeKey";
-        private const string SoundVolumeKey = "SoundVolumeKey";
+        private AudioMixer _audioMixer;
 
-        public virtual async UniTask InitAsync(
-            float defaultMusicVolume = 1f,
-            float defaultSoundVolume = 1f,
-            CancellationToken token = default)
+        public virtual async UniTask InitAsync(IAddressablesLoader addressablesLoader, CancellationToken token)
         {
-            await MusicVolume.InitializeAsync(MusicVolumeKey, destroyCancellationToken, defaultMusicVolume);
-            await SoundVolume.InitializeAsync(SoundVolumeKey, destroyCancellationToken, defaultSoundVolume);
+            _audioMixer = await addressablesLoader.LoadAsync<AudioMixer>(_audioConfig.AudioMixerReference, token);
+
+            await MusicVolume.InitializeAsync(MusicVolumeKey, token, _audioConfig.DefaultMusicVolume);
+            await SfxVolume.InitializeAsync(SfxVolumeKey, token, _audioConfig.DefaultSFXVolume);
 
             _soundPool = new ComponentPool<AudioSource>(_soundPoolConfig);
 
-            SoundVolume.SubscribeUntilDestroy(this, static (volume, self) => self.OnSoundVolumeChanged(volume));
+            SfxVolume.SubscribeUntilDestroy(this, static (volume, self) => self.OnSoundVolumeChanged(volume));
             MusicVolume.SubscribeUntilDestroy(this, static (volume, self) => self.OnMusicVolumeChanged(volume));
         }
 
@@ -61,7 +70,7 @@ namespace CustomUtils.Runtime.Audio
             var soundSource = _soundPool.Get();
             soundSource.clip = soundData.AudioData.AudioClip;
             soundSource.pitch = pitchModifier * soundData.AudioData.RandomPitch.Value;
-            soundSource.volume = SoundVolume.Value * volumeModifier * soundData.AudioData.RandomVolume.Value;
+            soundSource.volume = volumeModifier * soundData.AudioData.RandomVolume.Value;
 
             soundSource.Play();
 
@@ -77,7 +86,7 @@ namespace CustomUtils.Runtime.Audio
         {
             _clipSource.clip = soundType;
             _clipSource.pitch = pitchModifier;
-            _clipSource.volume = SoundVolume.Value * volumeModifier;
+            _clipSource.volume = volumeModifier;
 
             _clipSource.Play();
 
@@ -97,7 +106,7 @@ namespace CustomUtils.Runtime.Audio
                 return;
 
             _oneShotSource.pitch = pitchModifier * soundData.AudioData.RandomPitch.Value;
-            _oneShotSource.volume = SoundVolume.Value * volumeModifier * soundData.AudioData.RandomVolume.Value;
+            _oneShotSource.volume = volumeModifier * soundData.AudioData.RandomVolume.Value;
             _oneShotSource.PlayOneShot(soundData.AudioData.AudioClip);
         }
 
@@ -114,10 +123,8 @@ namespace CustomUtils.Runtime.Audio
 
             _musicSource.clip = data.AudioClip;
             _musicSource.pitch = data.RandomPitch.Value;
-            _musicSource.volume = MusicVolume.Value * data.RandomVolume.Value;
+            _musicSource.volume = data.RandomVolume.Value;
             _musicSource.Play();
-
-            _currentMusicData = data;
 
             return _musicSource;
         }
@@ -151,20 +158,19 @@ namespace CustomUtils.Runtime.Audio
         /// <summary>
         /// Called when sound volume changes to update all active sound sources
         /// </summary>
-        /// <param name="soundVolume">New sound volume level</param>
-        protected virtual void OnSoundVolumeChanged(float soundVolume)
+        /// <param name="normalizedVolume">New sound volume level</param>
+        protected virtual void OnSoundVolumeChanged(float normalizedVolume)
         {
-            foreach (var aliveAudioData in _aliveAudios)
-                aliveAudioData.AudioSource.volume = soundVolume;
+            _audioMixer.SetFloat(_audioConfig.SFXMixerKey, NormalizedToDb(normalizedVolume));
         }
 
         /// <summary>
         /// Called when music volume changes to update the music source
         /// </summary>
-        /// <param name="musicVolume">New music volume level</param>
-        protected virtual void OnMusicVolumeChanged(float musicVolume)
+        /// <param name="normalizedVolume">New music volume level</param>
+        protected virtual void OnMusicVolumeChanged(float normalizedVolume)
         {
-            _musicSource.volume = (_currentMusicData?.RandomVolume.Value ?? 0) * musicVolume;
+            _audioMixer.SetFloat(_audioConfig.MusicMixerKey, NormalizedToDb(normalizedVolume));
         }
 
         private bool ShouldPlaySound(TSoundType soundType, SoundContainer soundData)
@@ -186,10 +192,15 @@ namespace CustomUtils.Runtime.Audio
             _aliveAudios.Remove(aliveData);
         }
 
+        private static float NormalizedToDb(float normalizedVolume)
+            => Mathf.Approximately(normalizedVolume, 0f)
+                ? SilenceDb
+                : Mathf.Log10(normalizedVolume) * DbConversionFactor;
+
         protected virtual void OnDestroy()
         {
             MusicVolume.Dispose();
-            SoundVolume.Dispose();
+            SfxVolume.Dispose();
         }
     }
 }
