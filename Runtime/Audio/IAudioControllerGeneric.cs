@@ -14,7 +14,7 @@ namespace CustomUtils.Runtime.Audio
     /// <typeparam name="TMusicType">Enum type for music categories</typeparam>
     /// <typeparam name="TSoundType">Enum type for sound effect categories</typeparam>
     [PublicAPI]
-    public interface IAudioHandlerGeneric<in TMusicType, in TSoundType>
+    public interface IAudioControllerGeneric<in TMusicType, in TSoundType>
         where TMusicType : unmanaged, Enum
         where TSoundType : unmanaged, Enum
     {

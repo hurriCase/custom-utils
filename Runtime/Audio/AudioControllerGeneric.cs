@@ -12,8 +12,8 @@ using UnityEngine.Audio;
 
 namespace CustomUtils.Runtime.Audio
 {
-    public abstract class AudioHandlerGeneric<TMusicType, TSoundType> : MonoBehaviour,
-        IAudioHandlerGeneric<TMusicType, TSoundType>
+    public abstract class AudioControllerGeneric<TMusicType, TSoundType> : MonoBehaviour,
+        IAudioControllerGeneric<TMusicType, TSoundType>
         where TMusicType : unmanaged, Enum
         where TSoundType : unmanaged, Enum
     {
