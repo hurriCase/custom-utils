@@ -78,7 +78,8 @@ namespace CustomUtils.Runtime.Storage
         /// </summary>
         /// <param name="key">Unique storage key for this dictionary</param>
         /// <param name="token">Cancellation token</param>
-        public async UniTask InitializeAsync(string key, CancellationToken token)
+        /// <param name="defaultValues">Initial values to populate the dictionary when no saved data exists for the given key</param>
+        public async UniTask InitializeAsync(string key, CancellationToken token, Dictionary<TKey, TValue>? defaultValues = null)
         {
             _key = key;
             _provider = StorageProvider.Provider;
@@ -90,10 +91,17 @@ namespace CustomUtils.Runtime.Storage
 
             try
             {
-                var loaded = await _provider.LoadAsync<Dictionary<TKey, TValue>>(_key, token);
-                if (loaded != null)
-                    foreach (var (loadedKey, loadedValue) in loaded)
-                        Dictionary[loadedKey] = loadedValue;
+                var hasKey = await _provider.HasKeyAsync(_key, token);
+                if (hasKey)
+                {
+                    var loaded = await _provider.LoadAsync<Dictionary<TKey, TValue>>(_key, token);
+                    if (loaded != null)
+                        foreach (var (loadedKey, loadedValue) in loaded)
+                            Dictionary[loadedKey] = loadedValue;
+                }
+                else if (defaultValues != null)
+                    foreach (var (defaultKey, defaultValue) in defaultValues)
+                        Dictionary[defaultKey] = defaultValue;
             }
             catch (Exception e)
             {
