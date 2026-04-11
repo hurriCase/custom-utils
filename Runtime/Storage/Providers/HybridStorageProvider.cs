@@ -35,13 +35,13 @@ namespace CustomUtils.Runtime.Storage.Providers
             _autoMigrate = autoMigrate;
         }
 
-        public async UniTask<bool> TrySaveAsync<T>(string key, T data, CancellationToken token = default)
+        public async UniTask<bool> TrySaveAsync<T>(string key, T data)
         {
-            if (!await _cloudProvider.TrySaveAsync(key, data, token))
-                return await _localProvider.TrySaveAsync(key, data, token);
+            if (!await _cloudProvider.TrySaveAsync(key, data))
+                return await _localProvider.TrySaveAsync(key, data);
 
             if (_autoMigrate)
-                await _localProvider.TryDeleteKeyAsync(key, token);
+                await _localProvider.TryDeleteKeyAsync(key);
 
             return true;
         }
@@ -59,7 +59,7 @@ namespace CustomUtils.Runtime.Storage.Providers
             if (!_autoMigrate || localData == null)
                 return localData;
 
-            if (await _cloudProvider.TrySaveAsync(key, localData, token))
+            if (await _cloudProvider.TrySaveAsync(key, localData))
                 await _localProvider.TryDeleteKeyAsync(key, token);
 
             return localData;

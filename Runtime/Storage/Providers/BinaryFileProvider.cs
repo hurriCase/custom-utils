@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Threading;
-using CustomUtils.Runtime.Serializer;
 using CustomUtils.Runtime.Storage.Base;
 using CustomUtils.Runtime.Storage.DataTransformers;
 using Cysharp.Threading.Tasks;
@@ -19,20 +18,23 @@ namespace CustomUtils.Runtime.Storage.Providers
     {
         private readonly string _saveDirectory;
 
-        public BinaryFileProvider() : base(new IdentityDataTransformer(), SerializerProvider.Serializer)
+        private const string SaveFolderName = "SaveData";
+        private const string SaveFileExtension = "dat";
+
+        public BinaryFileProvider() : base(new IdentityDataTransformer())
         {
-            _saveDirectory = Path.Combine(Application.persistentDataPath, "SaveData");
+            _saveDirectory = Path.Combine(Application.persistentDataPath, SaveFolderName);
 
             if (!Directory.Exists(_saveDirectory))
                 Directory.CreateDirectory(_saveDirectory);
         }
 
-        private string GetFilePath(string key) => Path.Combine(_saveDirectory, $"{key}.dat");
+        private string GetFilePath(string key) => Path.Combine(_saveDirectory, $"{key}.{SaveFileExtension}");
 
-        protected override async UniTask PlatformSaveAsync(string key, object transformData, CancellationToken token)
+        protected override async UniTask PlatformSaveAsync(string key, object transformData)
         {
             if (TryGetTransformedData<byte[]>(transformData, out var byteData))
-                await File.WriteAllBytesAsync(GetFilePath(key), byteData, token);
+                await File.WriteAllBytesAsync(GetFilePath(key), byteData);
         }
 
         protected override async UniTask<object> PlatformLoadAsync(string key, CancellationToken token)
@@ -42,8 +44,7 @@ namespace CustomUtils.Runtime.Storage.Providers
             if (!File.Exists(filePath))
                 return null;
 
-            var result = await File.ReadAllBytesAsync(filePath, token);
-            return result;
+            return await File.ReadAllBytesAsync(filePath, token);
         }
 
         protected override UniTask<bool> PlatformHasKeyAsync(string key, CancellationToken token)
@@ -64,18 +65,17 @@ namespace CustomUtils.Runtime.Storage.Providers
                 cancellationToken: token);
         }
 
-        protected override UniTask<bool> PlatformTryDeleteAllAsync(CancellationToken token)
-        {
-            return UniTask.RunOnThreadPool(() =>
-                {
-                    if (!Directory.Exists(_saveDirectory))
-                        return true;
+        protected override UniTask<bool> PlatformTryDeleteAllAsync(CancellationToken token) =>
+            UniTask.RunOnThreadPool(RecreateSaveFolder, configureAwait: true, cancellationToken: token);
 
-                    Directory.Delete(_saveDirectory, true);
-                    Directory.CreateDirectory(_saveDirectory);
-                    return true;
-                }, configureAwait: true,
-                cancellationToken: token);
+        private bool RecreateSaveFolder()
+        {
+            if (!Directory.Exists(_saveDirectory))
+                return true;
+
+            Directory.Delete(_saveDirectory, true);
+            Directory.CreateDirectory(_saveDirectory);
+            return true;
         }
     }
 }

@@ -1,11 +1,11 @@
 ﻿#if CRAZY_GAMES
+using System;
 using System.Threading;
 using CustomUtils.Runtime.Storage.Base;
 using CustomUtils.Runtime.Storage.DataTransformers;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using CrazyGames;
-using CustomUtils.Runtime.Serializer;
 
 namespace CustomUtils.Runtime.Storage.Providers
 {
@@ -14,11 +14,11 @@ namespace CustomUtils.Runtime.Storage.Providers
     /// Stores data using the CrazyGames SDK. Requires the <c>CRAZY_GAMES</c> scripting define symbol.
     /// </summary>
     [PublicAPI]
-    public sealed class CrazyGamesStorageProvider : BaseStorageProvider
+    public sealed class CrazyGamesStorageProvider : BaseCloudStorageProvider
     {
-        public CrazyGamesStorageProvider() : base(new StringDataTransformer(), SerializerProvider.Serializer) { }
+        public CrazyGamesStorageProvider(TimeSpan debounceDelay) : base(new StringDataTransformer(), debounceDelay) { }
 
-        protected override UniTask PlatformSaveAsync(string key, object transformData, CancellationToken token)
+        protected override UniTask PlatformSaveAsync(string key, object transformData)
         {
             if (!TryGetTransformedData<string>(transformData, out var serializedString))
                 return UniTask.CompletedTask;

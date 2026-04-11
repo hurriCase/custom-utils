@@ -12,21 +12,21 @@ namespace CustomUtils.Runtime.Storage.Base
     {
         /// <summary>Saves data under the specified key.</summary>
         /// <returns>True if successful, false on error.</returns>
-        UniTask<bool> TrySaveAsync<T>(string key, T data, CancellationToken cancellationToken = default);
+        UniTask<bool> TrySaveAsync<T>(string key, T data);
 
         /// <summary>Loads data of type <typeparamref name="T"/> for the specified key.</summary>
         /// <returns>The loaded value, or default if not found.</returns>
-        UniTask<T> LoadAsync<T>(string key, CancellationToken cancellationToken = default);
+        UniTask<T> LoadAsync<T>(string key, CancellationToken token = default);
 
         /// <summary>Checks whether the specified key exists in storage.</summary>
-        UniTask<bool> HasKeyAsync(string key, CancellationToken cancellationToken = default);
+        UniTask<bool> HasKeyAsync(string key, CancellationToken token = default);
 
         /// <summary>Deletes the value associated with the specified key.</summary>
         /// <returns>True if successful, false on error.</returns>
-        UniTask<bool> TryDeleteKeyAsync(string key, CancellationToken cancellationToken = default);
+        UniTask<bool> TryDeleteKeyAsync(string key, CancellationToken token = default);
 
         /// <summary>Deletes all stored data. This operation cannot be undone.</summary>
         /// <returns>True if successful, false if unsupported or failed.</returns>
-        UniTask<bool> TryDeleteAllAsync(CancellationToken cancellationToken = default);
+        UniTask<bool> TryDeleteAllAsync(CancellationToken token = default);
     }
 }

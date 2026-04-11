@@ -1,7 +1,7 @@
 ﻿#if CLOUD_SAVE_INSTALLED
+using System;
 using System.Collections.Generic;
 using System.Threading;
-using CustomUtils.Runtime.Serializer;
 using CustomUtils.Runtime.Storage.Base;
 using CustomUtils.Runtime.Storage.DataTransformers;
 using Cysharp.Threading.Tasks;
@@ -16,13 +16,13 @@ namespace CustomUtils.Runtime.Storage.Providers
     /// Stores data using Unity Cloud Save. Requires Unity Gaming Services to be initialized before use.
     /// </summary>
     [PublicAPI]
-    public sealed class CloudSaveStorageProvider : BaseStorageProvider
+    public sealed class CloudSaveStorageProvider : BaseCloudStorageProvider
     {
-        public CloudSaveStorageProvider() : base(new StringDataTransformer(), SerializerProvider.Serializer) { }
+        public CloudSaveStorageProvider(TimeSpan debounceDelay) : base(new StringDataTransformer(), debounceDelay) { }
 
         private readonly Dictionary<string, object> _saveBuffer = new(capacity: 1);
 
-        protected override async UniTask PlatformSaveAsync(string key, object transformData, CancellationToken token)
+        protected override async UniTask PlatformSaveAsync(string key, object transformData)
         {
             if (!TryGetTransformedData<string>(transformData, out var serializedString))
                 return;

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using CustomUtils.Runtime.Serializer;
 using CustomUtils.Runtime.Storage.Base;
 using CustomUtils.Runtime.Storage.DataTransformers;
 using Cysharp.Threading.Tasks;
@@ -19,7 +18,7 @@ namespace CustomUtils.Runtime.Storage.Providers
     /// Data is scoped per user under <c>users/{userId}</c>.
     /// </summary>
     [PublicAPI]
-    public sealed class FirebaseStorageProvider : BaseStorageProvider
+    public sealed class FirebaseStorageProvider : BaseCloudStorageProvider
     {
         private const long MaxDownloadSize = 5 * 1024 * 1024;
 
@@ -27,8 +26,8 @@ namespace CustomUtils.Runtime.Storage.Providers
         private readonly string _storagePath;
         private readonly Dictionary<string, byte[]> _memoryCache = new();
 
-        public FirebaseStorageProvider(string userId = null) :
-            base(new IdentityDataTransformer(), SerializerProvider.Serializer)
+        public FirebaseStorageProvider(TimeSpan debounceDelay, string userId = null) :
+            base(new IdentityDataTransformer(), debounceDelay)
         {
             _firebaseStorage = FirebaseStorage.DefaultInstance;
 
@@ -42,7 +41,7 @@ namespace CustomUtils.Runtime.Storage.Providers
         private StorageReference GetFileReference(string key)
             => _firebaseStorage.GetReference($"{_storagePath}/{key}");
 
-        protected override async UniTask PlatformSaveAsync(string key, object transformData, CancellationToken token)
+        protected override async UniTask PlatformSaveAsync(string key, object transformData)
         {
             if (!TryGetTransformedData<byte[]>(transformData, out var byteData))
                 return;
@@ -53,8 +52,7 @@ namespace CustomUtils.Runtime.Storage.Providers
 
                 var reference = GetFileReference(key);
 
-                await reference.PutBytesAsync(byteData, cancelToken: token)
-                    .AsUniTask().AttachExternalCancellation(token);
+                await reference.PutBytesAsync(byteData);
             }
             catch (Exception e)
             {

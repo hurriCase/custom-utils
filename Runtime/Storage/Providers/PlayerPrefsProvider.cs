@@ -1,5 +1,4 @@
 ﻿using System.Threading;
-using CustomUtils.Runtime.Serializer;
 using CustomUtils.Runtime.Storage.Base;
 using CustomUtils.Runtime.Storage.DataTransformers;
 using Cysharp.Threading.Tasks;
@@ -15,9 +14,9 @@ namespace CustomUtils.Runtime.Storage.Providers
     [PublicAPI]
     public sealed class PlayerPrefsProvider : BaseStorageProvider
     {
-        public PlayerPrefsProvider() : base(new StringDataTransformer(), SerializerProvider.Serializer) { }
+        public PlayerPrefsProvider() : base(new StringDataTransformer()) { }
 
-        protected override UniTask PlatformSaveAsync(string key, object transformData, CancellationToken token)
+        protected override UniTask PlatformSaveAsync(string key, object transformData)
         {
             if (!TryGetTransformedData<string>(transformData, out var serializedString))
                 return UniTask.CompletedTask;
