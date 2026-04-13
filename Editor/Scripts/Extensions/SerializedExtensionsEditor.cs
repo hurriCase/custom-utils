@@ -169,6 +169,20 @@ namespace CustomUtils.Editor.Scripts.Extensions
             container.Add(propertyField);
         }
 
+        /// <summary>
+        /// Retrieves the actual runtime value of the serialized property's backing field via reflection.
+        /// </summary>
+        /// <param name="property">The serialized property to retrieve the value from.</param>
+        /// <returns>The field value, or null if the field was not found.</returns>
+        public static object GetFieldValue(this SerializedProperty property)
+        {
+            var target = property.serializedObject.targetObject;
+            return target.GetType()
+                .GetField(property.propertyPath,
+                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                ?.GetValue(target);
+        }
+
         private static void TriggerReactivePropertyNotification(
             SerializedObject serializedObject,
             SerializedProperty reactivePropertyField)

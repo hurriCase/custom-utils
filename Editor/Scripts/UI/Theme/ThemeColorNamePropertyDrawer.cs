@@ -62,10 +62,9 @@ namespace CustomUtils.Editor.Scripts.UI.Theme
                         EditorVisualControls.ColorField(previewRect, "Preview", previewColor);
                     break;
 
-                case ColorType.GraphicGradient
+                case ColorType.VertexGraphicGradient
                     or ColorType.TextGradient
-                    or ColorType.GraphicMultiGradient
-                    or ColorType.DiamondGradient:
+                    or ColorType.ShaderGraphicGradient:
                     if (GradientColorDatabase.Instance.TryGetColorByName(colorName, out var gradient))
                         EditorVisualControls.GradientField(previewRect, "Preview", gradient);
                     break;
@@ -82,10 +81,9 @@ namespace CustomUtils.Editor.Scripts.UI.Theme
                 ColorType.Solid => (
                     SolidColorDatabase.Instance.GetColorNames(),
                     SolidColorDatabase.Instance.GetColorGuids()),
-                ColorType.GraphicGradient
+                ColorType.VertexGraphicGradient
                     or ColorType.TextGradient
-                    or ColorType.GraphicMultiGradient
-                    or ColorType.DiamondGradient => (
+                    or ColorType.ShaderGraphicGradient => (
                         GradientColorDatabase.Instance.GetColorNames(),
                         GradientColorDatabase.Instance.GetColorGuids()),
                 _ => (null, null)

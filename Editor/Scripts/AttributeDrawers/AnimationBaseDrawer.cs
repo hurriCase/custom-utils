@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Reflection;
+using CustomUtils.Editor.Scripts.Extensions;
 using CustomUtils.Runtime.Animations.Base;
 using CustomUtils.Runtime.Extensions;
 using UnityEditor;
@@ -38,21 +38,13 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
             return rootVisualElement;
         }
 
-        private static void InvokePreview(SerializedProperty property, Enum state)
+        private void InvokePreview(SerializedProperty property, Enum state)
         {
             var animation = (property.propertyType == SerializedPropertyType.ManagedReference
                 ? property.managedReferenceValue
-                : GetFieldValue(property)) as IAnimationPreview;
+                : property.GetFieldValue()) as IAnimationPreview;
 
             animation?.PreviewAnimation(state);
-        }
-
-        private static object GetFieldValue(SerializedProperty property)
-        {
-            var target = property.serializedObject.targetObject;
-            return target.GetType()
-                .GetField(property.propertyPath, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                ?.GetValue(target);
         }
     }
 }

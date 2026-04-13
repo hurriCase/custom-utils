@@ -8,6 +8,6 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
     [ExecuteAlways]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Graphic))]
-    [ColorModifier(ColorType.GraphicGradient)]
+    [ColorModifier(ColorType.VertexGraphicGradient)]
     internal sealed class GradientColorModifier : GradientModifierBase<GraphicGradientEffect, Graphic> { }
 }

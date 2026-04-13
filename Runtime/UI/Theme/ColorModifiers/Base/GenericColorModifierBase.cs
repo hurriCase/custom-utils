@@ -32,6 +32,6 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.Base
             this.MarkAsDirty();
         }
 
-        protected abstract void OnUpdateColor(TColor color);
+        protected abstract void OnUpdateColor(TColor gradient);
     }
 }

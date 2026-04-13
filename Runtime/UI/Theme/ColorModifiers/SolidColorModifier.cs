@@ -26,9 +26,9 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers
             this.MarkAsDirty();
         }
 
-        protected override void OnUpdateColor(Color color)
+        protected override void OnUpdateColor(Color gradient)
         {
-            _graphic.color = color;
+            _graphic.color = gradient;
             this.MarkAsDirty();
         }
 

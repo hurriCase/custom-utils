@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using CustomUtils.Editor.Scripts.CustomEditorUtilities;
 using CustomUtils.Editor.Scripts.Extensions;
-using CustomUtils.Runtime.Other;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Attributes;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers.Base;
@@ -14,7 +13,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
 {
     [CustomEditor(typeof(ProceduralImage), true)]
     [CanEditMultipleObjects]
-    public sealed class ProceduralImageEditor : ImageEditor
+    public sealed class ProceduralImageEditor : GraphicEditor
     {
         private static List<ModifierIDAttribute> _attributes;
 
@@ -26,19 +25,16 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
         private SerializedProperty _cornerOffsetBottomRight;
         private SerializedProperty _cornerOffsetBottomLeft;
 
-        private SerializedProperty _sprite;
-
         private int _selectedId;
 
         private EditorStateControls _editorStateControls;
         private ProceduralImage _proceduralImage;
         private Component _targetComponent;
+        private Canvas _canvas;
 
         protected override void OnEnable()
         {
             base.OnEnable();
-
-            _sprite = serializedObject.FindProperty("m_Sprite");
 
             _editorStateControls = new EditorStateControls(target, serializedObject);
 
@@ -57,6 +53,8 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             _proceduralImage = (ProceduralImage)target;
             _targetComponent = (Component)target;
 
+            _canvas = _targetComponent.GetComponentInParent<Canvas>();
+
             if (_proceduralImage.GetComponent<ModifierBase>())
                 _selectedId = _attributes.IndexOf(((ModifierIDAttribute[])_proceduralImage
                     .GetComponent<ModifierBase>().GetType()
@@ -71,10 +69,9 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
 
             serializedObject.Update();
 
-            ProceduralImageSpriteGUI();
-
             _editorStateControls.PropertyField(m_Color);
             _editorStateControls.PropertyField(_useCustomMaterial);
+            _editorStateControls.PropertyField(m_Maskable);
 
             if (_useCustomMaterial.boolValue)
                 _editorStateControls.PropertyField(m_Material);
@@ -97,51 +94,31 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             serializedObject.ApplyModifiedProperties();
         }
 
-        private void ProceduralImageSpriteGUI()
-        {
-            if (_sprite.hasMultipleDifferentValues)
-            {
-                EditorGUILayout.PropertyField(_sprite);
-                return;
-            }
-
-            var resourceReferences = ResourceReferences.Instance;
-            var sprite = (Sprite)EditorGUILayout.ObjectField("Sprite",
-                resourceReferences.EmptySprite == (Sprite)_sprite.objectReferenceValue
-                    ? null
-                    : _sprite.objectReferenceValue, typeof(Sprite), false,
-                GUILayout.Height(16));
-
-            _sprite.objectReferenceValue = sprite ? sprite : resourceReferences.EmptySprite;
-        }
-
         private void CheckForShaderChannelsGUI()
         {
-            var canvas = _targetComponent.GetComponentInParent<Canvas>();
-
-            if (!canvas)
+            if (!_canvas)
             {
                 EditorVisualControls.WarningBox("There is no Canvas in parent of this object.");
                 return;
             }
 
-            if ((canvas.additionalShaderChannels
+            if ((_canvas.additionalShaderChannels
                  | AdditionalCanvasShaderChannels.TexCoord1
                  | AdditionalCanvasShaderChannels.TexCoord2
-                 | AdditionalCanvasShaderChannels.TexCoord3) == canvas.additionalShaderChannels)
+                 | AdditionalCanvasShaderChannels.TexCoord3) == _canvas.additionalShaderChannels)
                 return;
 
             EditorVisualControls.WarningBox(
                 "TexCoord1,2,3 are not enabled as an additional shader channel in parent canvas." +
                 " Procedural Image will not work properly");
 
-            if (!EditorVisualControls.Button("Fix: Enable TexCoord1,2,3 in Canvas: " + canvas.name))
+            if (!EditorVisualControls.Button("Fix: Enable TexCoord1,2,3 in Canvas: " + _canvas.name))
                 return;
 
-            Undo.RecordObject(canvas, "enable TexCoord1,2,3 as additional shader channels");
-            canvas.additionalShaderChannels |= AdditionalCanvasShaderChannels.TexCoord1 |
-                                               AdditionalCanvasShaderChannels.TexCoord2 |
-                                               AdditionalCanvasShaderChannels.TexCoord3;
+            Undo.RecordObject(_canvas, "enable TexCoord1,2,3 as additional shader channels");
+            _canvas.additionalShaderChannels |= AdditionalCanvasShaderChannels.TexCoord1 |
+                                                AdditionalCanvasShaderChannels.TexCoord2 |
+                                                AdditionalCanvasShaderChannels.TexCoord3;
         }
 
         private void ModifierGUI()

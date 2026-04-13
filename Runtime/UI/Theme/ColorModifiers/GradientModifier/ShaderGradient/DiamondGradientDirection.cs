@@ -1,4 +1,4 @@
-﻿namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.Base
+﻿namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier.ShaderGradient
 {
     internal enum DiamondGradientDirection
     {

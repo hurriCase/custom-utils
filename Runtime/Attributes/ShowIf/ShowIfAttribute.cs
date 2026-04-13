@@ -23,6 +23,8 @@ namespace CustomUtils.Runtime.Attributes.ShowIf
         /// </summary>
         public ShowType ShowType { get; private set; }
 
+        public object[] ExpectedValues { get; private set; }
+
         /// <summary>
         /// Initializes a new instance of the ShowIfAttribute class.
         /// </summary>
@@ -37,6 +39,12 @@ namespace CustomUtils.Runtime.Attributes.ShowIf
         {
             ConditionalSourceField = conditionalSourceField;
             ShowType = showType;
+        }
+
+        public ShowIfAttribute(string conditionalSourceField, params object[] expectedValues)
+        {
+            ConditionalSourceField = conditionalSourceField;
+            ExpectedValues = expectedValues;
         }
     }
 }

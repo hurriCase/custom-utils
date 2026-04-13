@@ -83,7 +83,7 @@ namespace CustomUtils.Runtime.Extensions
                 Mathf.Floor(b * (Max16BitValue - 1)) / Max16BitValue
             );
 
-            return Vector2.Dot(encodedValues, _decodeDot);
+            return encodedValues.x + encodedValues.y / Max16BitValue;
         }
 
         /// <summary>

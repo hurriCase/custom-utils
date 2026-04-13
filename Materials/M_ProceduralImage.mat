@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: M_ProceduralImage
-  m_Shader: {fileID: 4800000, guid: 27d83044d20c5de4e9d57d35e4fda368, type: 3}
+  m_Shader: {fileID: 4800000, guid: 6c4c051aeb154f21a2a5e75c6d746da9, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -76,6 +76,7 @@ Material:
     - _GradientDirection: 0
     - _HalftoneOpacity: 0.2
     - _HalftoneOverlay: 0
+    - _HalftoneRotation: 0
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -98,6 +99,6 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _GradientEndColor: {r: 0, g: 0, b: 0, a: 1}
     - _GradientStartColor: {r: 1, g: 1, b: 1, a: 1}
-    - _RectMin: {r: -407.5, g: -4.34256, b: 0, a: 0}
+    - _RectMin: {r: -45, g: -45, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
