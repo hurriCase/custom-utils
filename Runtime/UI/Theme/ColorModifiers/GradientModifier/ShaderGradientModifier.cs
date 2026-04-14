@@ -100,6 +100,9 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            if (!_gradientTexture)
+                return;
+
             UpdateColor(currentColorName);
         }
 #endif
