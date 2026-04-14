@@ -10,8 +10,7 @@ namespace CustomUtils.Runtime.Storage.Base
         private readonly Dictionary<string, CancellationTokenSource> _pendingTokens = new();
         private readonly TimeSpan _debounceDelay;
 
-        protected BaseCloudStorageProvider(IDataTransformer dataTransformer, TimeSpan debounceDelay) : base(
-            dataTransformer)
+        protected BaseCloudStorageProvider(TimeSpan debounceDelay)
         {
             _debounceDelay = debounceDelay;
         }
@@ -29,7 +28,9 @@ namespace CustomUtils.Runtime.Storage.Base
 
             await UniTask.Delay(_debounceDelay, cancellationToken: tokenSource.Token);
 
-            return await base.TrySaveAsync(key, data);
+            return await OnTrySaveAsync(key, data);
         }
+
+        protected abstract UniTask<bool> OnTrySaveAsync<TData>(string key, TData data);
     }
 }

@@ -7,7 +7,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
 {
     internal static class LayoutClipboard
     {
-        private static byte[] _clipboardData;
+        private static string _clipboardData;
 
         internal static bool HasData { get; private set; }
 
@@ -15,7 +15,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
         {
             try
             {
-                _clipboardData = SerializerProvider.Serializer.Serialize(layoutData);
+                _clipboardData = SerializerProvider.StringSerializer.SerializeToString(layoutData);
                 HasData = true;
             }
             catch (Exception e)
@@ -34,12 +34,12 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
 
             try
             {
-                layoutData = SerializerProvider.Serializer.Deserialize<LayoutData>(_clipboardData);
+                layoutData = SerializerProvider.StringSerializer.DeserializeFromString<LayoutData>(_clipboardData);
                 return true;
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to paste layout data: {e.Message}");
+                Debug.LogError($"[LayoutClipboard::TryPaste] Failed to paste layout data: {e.Message}");
                 return false;
             }
         }

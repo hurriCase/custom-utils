@@ -5,11 +5,6 @@ using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime.Storage.Providers
 {
-    /// <inheritdoc />
-    /// <summary>
-    /// A storage provider that writes to cloud with automatic local fallback.
-    /// On load, migrates local data to cloud if <c>autoMigrate</c> is enabled.
-    /// </summary>
     [PublicAPI]
     public sealed class HybridStorageProvider : IStorageProvider
     {
@@ -17,14 +12,6 @@ namespace CustomUtils.Runtime.Storage.Providers
         private readonly IStorageProvider _cloudProvider;
         private readonly bool _autoMigrate;
 
-        /// <summary>
-        /// Creates a hybrid provider combining local and cloud storage.
-        /// </summary>
-        /// <param name="localProvider">Fallback provider used when cloud is unavailable.</param>
-        /// <param name="cloudProvider">Primary provider for cloud persistence.</param>
-        /// <param name="autoMigrate">
-        /// When true, local data is migrated to cloud on load and deleted locally after a successful cloud save.
-        /// </param>
         public HybridStorageProvider(
             IStorageProvider localProvider,
             IStorageProvider cloudProvider,
@@ -69,14 +56,15 @@ namespace CustomUtils.Runtime.Storage.Providers
         {
             if (await _cloudProvider.HasKeyAsync(key, token))
                 return true;
+
             return await _localProvider.HasKeyAsync(key, token);
         }
 
         public async UniTask<bool> TryDeleteKeyAsync(string key, CancellationToken token = default)
         {
-            await _cloudProvider.TryDeleteKeyAsync(key, token);
-            await _localProvider.TryDeleteKeyAsync(key, token);
-            return true;
+            var localSuccess = await _cloudProvider.TryDeleteKeyAsync(key, token);
+            var cloudSuccess = await _localProvider.TryDeleteKeyAsync(key, token);
+            return localSuccess || cloudSuccess;
         }
 
         public async UniTask<bool> TryDeleteAllAsync(CancellationToken token = default)

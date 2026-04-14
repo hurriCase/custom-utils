@@ -27,7 +27,7 @@ namespace CustomUtils.Runtime.CSV
             var csvTable = CsvParser.Parse(csvContent);
             var objects = csvConverter.ConvertToObjects(csvTable);
 
-            var binaryData = SerializerProvider.Serializer.Serialize(objects);
+            var binaryData = SerializerProvider.BytesSerializer.SerializeToBytes(objects);
             File.WriteAllBytes(binaryOutputPath, binaryData);
 
             var logMessage = StringFormatter.Format("[CsvBinarySerializer::ConvertCSVToBinary] " +

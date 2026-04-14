@@ -1,5 +1,4 @@
-﻿using System;
-using CustomUtils.Runtime.Serializer;
+﻿using CustomUtils.Runtime.Serializer;
 using UnityEditor;
 
 namespace CustomUtils.Editor.Scripts.PersistentEditor
@@ -36,8 +35,8 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
                     break;
 
                 default:
-                    var serialized = SerializerProvider.Serializer.Serialize(value);
-                    EditorPrefs.SetString(key, Convert.ToBase64String(serialized));
+                    var serialized = SerializerProvider.StringSerializer.SerializeToString(value);
+                    EditorPrefs.SetString(key, serialized);
                     break;
             }
         }
@@ -68,8 +67,7 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
 
             try
             {
-                var data = Convert.FromBase64String(serialized);
-                return SerializerProvider.Serializer.Deserialize<T>(data);
+                return SerializerProvider.StringSerializer.DeserializeFromString<T>(serialized);
             }
             catch
             {

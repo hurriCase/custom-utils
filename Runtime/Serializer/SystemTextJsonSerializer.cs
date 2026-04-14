@@ -1,11 +1,15 @@
 ﻿using System.Text;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace CustomUtils.Runtime.Serializer
 {
-    internal sealed class SystemTextJsonSerializer : ISerializer
+    [PublicAPI]
+    public sealed class SystemTextJsonSerializer : IBytesSerializer, IStringSerializer
     {
-        public byte[] Serialize<T>(T data) => Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
-        public T Deserialize<T>(byte[] data) => JsonUtility.FromJson<T>(Encoding.UTF8.GetString(data));
+        public byte[] SerializeToBytes<T>(T data) => Encoding.UTF8.GetBytes(SerializeToString(data));
+        public T DeserializeFromBytes<T>(byte[] data) => DeserializeFromString<T>(Encoding.UTF8.GetString(data));
+        public string SerializeToString<T>(T data) => JsonUtility.ToJson(data);
+        public T DeserializeFromString<T>(string data) => JsonUtility.FromJson<T>(data);
     }
 }

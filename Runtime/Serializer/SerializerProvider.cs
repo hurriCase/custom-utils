@@ -8,14 +8,18 @@ namespace CustomUtils.Runtime.Serializer
         static SerializerProvider()
         {
 #if MEMORY_PACK_INSTALLED
-            Serializer = new MemoryPackSerializer();
+            BytesSerializer = new MemoryPackSerializer();
+            StringSerializer = new MemoryPackSerializer();
 #elif NEWTONSOFT_INSTALLED
-            Serializer = new NewtonsoftSerializer();
+            BytesSerializer = new NewtonsoftSerializer();
+            StringSerializer = new NewtonsoftSerializer();
 #else
-            Serializer = new SystemTextJsonSerializer();
+            BytesSerializer = new SystemTextJsonSerializer();
+            StringSerializer = new SystemTextJsonSerializer();
 #endif
         }
 
-        public static ISerializer Serializer { get; }
+        public static IBytesSerializer BytesSerializer { get; }
+        public static IStringSerializer StringSerializer { get; }
     }
 }

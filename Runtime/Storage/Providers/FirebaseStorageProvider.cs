@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using CustomUtils.Runtime.Serializer;
 using CustomUtils.Runtime.Storage.Base;
-using CustomUtils.Runtime.Storage.DataTransformers;
 using Cysharp.Threading.Tasks;
 using Firebase.Extensions;
 using Firebase.Storage;
@@ -12,27 +12,23 @@ using UnityEngine;
 
 namespace CustomUtils.Runtime.Storage.Providers
 {
-    /// <inheritdoc />
-    /// <summary>
-    /// Stores data using Firebase Storage. Requires the <c>FIREBASE</c> scripting define symbol.
-    /// Data is scoped per user under <c>users/{userId}</c>.
-    /// </summary>
     [PublicAPI]
     public sealed class FirebaseStorageProvider : BaseCloudStorageProvider
     {
         private const long MaxDownloadSize = 5 * 1024 * 1024;
 
+        private readonly IBytesSerializer _serializer;
         private readonly FirebaseStorage _firebaseStorage;
         private readonly string _storagePath;
-        private readonly Dictionary<string, byte[]> _memoryCache = new();
+        private readonly Dictionary<string, byte[]> _cache = new();
 
-        public FirebaseStorageProvider(TimeSpan debounceDelay, string userId = null) :
-            base(new IdentityDataTransformer(), debounceDelay)
+        public FirebaseStorageProvider(IBytesSerializer serializer, TimeSpan debounceDelay, string userId = null) :
+            base(debounceDelay)
         {
+            _serializer = serializer;
             _firebaseStorage = FirebaseStorage.DefaultInstance;
 
             userId = string.IsNullOrEmpty(userId) ? SystemInfo.deviceUniqueIdentifier : userId;
-
             _storagePath = $"users/{userId}";
 
             Logger.Log($"[FirebaseStorageProvider::FirebaseStorageProvider] Initialized with user ID: {userId}");
@@ -41,73 +37,73 @@ namespace CustomUtils.Runtime.Storage.Providers
         private StorageReference GetFileReference(string key)
             => _firebaseStorage.GetReference($"{_storagePath}/{key}");
 
-        protected override async UniTask PlatformSaveAsync(string key, object transformData)
+        protected override async UniTask<bool> OnTrySaveAsync<TData>(string key, TData data)
         {
-            if (!TryGetTransformedData<byte[]>(transformData, out var byteData))
-                return;
-
             try
             {
-                _memoryCache[key] = byteData;
+                var bytes = _serializer.SerializeToBytes(data);
+                _cache[key] = bytes;
 
                 var reference = GetFileReference(key);
+                await reference.PutBytesAsync(bytes);
 
-                await reference.PutBytesAsync(byteData);
+                Logger.Log($"[FirebaseStorageProvider::OnTrySaveAsync] Saved data for key '{key}'");
+                return true;
             }
             catch (Exception e)
             {
                 Logger.LogException(e);
-                Logger.LogError("[FirebaseStorageProvider::PlatformSaveAsync] " +
-                                $"Error saving data for key {key}: {e.Message}");
+                Logger.LogError(
+                    $"[FirebaseStorageProvider::OnTrySaveAsync] Error saving data for key '{key}': {e.Message}");
+                return false;
             }
         }
 
-        protected override async UniTask<object> PlatformLoadAsync(string key, CancellationToken token)
+        public override async UniTask<TData> LoadAsync<TData>(string key, CancellationToken token)
         {
             try
             {
-                if (_memoryCache.TryGetValue(key, out var cachedBytes))
-                    return cachedBytes;
+                if (_cache.TryGetValue(key, out var cachedBytes))
+                    return _serializer.DeserializeFromBytes<TData>(cachedBytes);
 
-                var reference = GetFileReference(key);
+                if (!await HasKeyAsync(key, token))
+                    return default;
 
-                if (!await PlatformHasKeyAsync(key, token))
-                    return null;
+                var bytes = await GetFileReference(key)
+                    .GetBytesAsync(MaxDownloadSize)
+                    .AsUniTask()
+                    .AttachExternalCancellation(token);
 
-                var downloadTask = await reference.GetBytesAsync(MaxDownloadSize)
-                    .AsUniTask().AttachExternalCancellation(token);
+                if (bytes == null || bytes.Length == 0)
+                    return default;
 
-                if (downloadTask == null || downloadTask.Length == 0)
-                    return null;
+                _cache[key] = bytes;
+                var data = _serializer.DeserializeFromBytes<TData>(bytes);
 
-                _memoryCache[key] = downloadTask;
-
-                return downloadTask;
+                Logger.Log($"[FirebaseStorageProvider::LoadAsync] Loaded data for key '{key}'");
+                return data;
             }
             catch (Exception e)
             {
                 Logger.LogException(e);
-                Logger.LogError("[FirebaseStorageProvider::PlatformLoadAsync] " +
-                                $"Error loading data for key {key}: {e.Message}");
-                return null;
+                Logger.LogError(
+                    $"[FirebaseStorageProvider::LoadAsync] Error loading data for key '{key}': {e.Message}");
+                return default;
             }
         }
 
-        protected override async UniTask<bool> PlatformHasKeyAsync(string key, CancellationToken token)
+        public override async UniTask<bool> HasKeyAsync(string key, CancellationToken token)
         {
-            if (_memoryCache.ContainsKey(key))
+            if (_cache.ContainsKey(key))
                 return true;
 
             try
             {
-                var reference = GetFileReference(key);
-
-                var result = await reference.GetMetadataAsync()
+                return await GetFileReference(key)
+                    .GetMetadataAsync()
                     .ContinueWithOnMainThread(static task => !task.IsFaulted && !task.IsCanceled)
                     .AsUniTask()
                     .AttachExternalCancellation(token);
-
-                return result;
             }
             catch
             {
@@ -115,29 +111,34 @@ namespace CustomUtils.Runtime.Storage.Providers
             }
         }
 
-        protected override async UniTask PlatformDeleteKeyAsync(string key, CancellationToken token)
+        public override async UniTask<bool> TryDeleteKeyAsync(string key, CancellationToken token)
         {
             try
             {
-                _memoryCache.Remove(key);
+                _cache.Remove(key);
 
-                var reference = GetFileReference(key);
+                if (!await HasKeyAsync(key, token))
+                    return true;
 
-                if (!await PlatformHasKeyAsync(key, token))
-                    return;
+                await GetFileReference(key).DeleteAsync().AsUniTask().AttachExternalCancellation(token);
 
-                await reference.DeleteAsync().AsUniTask().AttachExternalCancellation(token);
+                Logger.Log($"[FirebaseStorageProvider::TryDeleteKeyAsync] Deleted key '{key}'");
+                return true;
             }
             catch (Exception e)
             {
                 Logger.LogException(e);
-                Logger.LogError("[FirebaseStorageProvider::PlatformDeleteKeyAsync] " +
-                                $"Error deleting key {key}: {e.Message}");
+                Logger.LogError(
+                    $"[FirebaseStorageProvider::TryDeleteKeyAsync] Error deleting key '{key}': {e.Message}");
+                return false;
             }
         }
 
-        protected override UniTask<bool> PlatformTryDeleteAllAsync(CancellationToken token) =>
-            UniTask.FromResult(false);
+        public override UniTask<bool> TryDeleteAllAsync(CancellationToken token)
+        {
+            Logger.LogWarning($"[FirebaseStorageProvider::TryDeleteAllAsync] DeleteAll is not supported");
+            return UniTask.FromResult(false);
+        }
     }
 }
 #endif
