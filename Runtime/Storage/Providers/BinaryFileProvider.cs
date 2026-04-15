@@ -29,7 +29,7 @@ namespace CustomUtils.Runtime.Storage.Providers
                 Directory.CreateDirectory(_saveDirectory);
         }
 
-        public override async UniTask<bool> TrySaveAsync<TData>(string key, TData data)
+        public override async UniTask<bool> TrySaveAsync<TData>(string key, TData data, bool isForce = false)
         {
             try
             {

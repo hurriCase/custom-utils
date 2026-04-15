@@ -62,7 +62,8 @@ namespace CustomUtils.Runtime.Storage
             }
         }
 
-        public async UniTask SaveAsync() => await _provider.TrySaveAsync(_key, Property.Value);
+        public async UniTask SaveAsync(bool isForce = false)
+            => await _provider.TrySaveAsync(_key, Property.Value, isForce);
 
         public void Dispose()
         {

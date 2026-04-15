@@ -20,7 +20,7 @@ namespace CustomUtils.Runtime.Storage.Providers
         _serializer = serializer;
     }
 
-    public override UniTask<bool> TrySaveAsync<TData>(string key, TData data)
+    public override UniTask<bool> TrySaveAsync<TData>(string key, TData data, bool isForce = false)
     {
         try
         {

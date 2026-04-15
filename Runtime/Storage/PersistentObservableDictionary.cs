@@ -120,13 +120,13 @@ namespace CustomUtils.Runtime.Storage
         /// Note: Dictionary is automatically saved when changed, so this is typically not needed.
         /// </summary>
         /// <returns>A task that completes when the save operation is finished</returns>
-        public async UniTask SaveAsync()
+        public async UniTask SaveAsync(bool isForce = false)
         {
             _serializationBuffer.Clear();
             foreach (var (key, value) in Dictionary!)
                 _serializationBuffer[key] = value;
 
-            await _provider!.TrySaveAsync(_key, _serializationBuffer);
+            await _provider!.TrySaveAsync(_key, _serializationBuffer, isForce);
         }
 
         /// <summary>

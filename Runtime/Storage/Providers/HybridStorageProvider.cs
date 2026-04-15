@@ -22,10 +22,10 @@ namespace CustomUtils.Runtime.Storage.Providers
             _autoMigrate = autoMigrate;
         }
 
-        public async UniTask<bool> TrySaveAsync<T>(string key, T data)
+        public async UniTask<bool> TrySaveAsync<T>(string key, T data, bool isForce = false)
         {
-            if (!await _cloudProvider.TrySaveAsync(key, data))
-                return await _localProvider.TrySaveAsync(key, data);
+            if (!await _cloudProvider.TrySaveAsync(key, data, isForce))
+                return await _localProvider.TrySaveAsync(key, data, isForce);
 
             if (_autoMigrate)
                 await _localProvider.TryDeleteKeyAsync(key);

@@ -15,7 +15,7 @@ namespace CustomUtils.Runtime.Storage.Base
             _debounceDelay = debounceDelay;
         }
 
-        public override async UniTask<bool> TrySaveAsync<TData>(string key, TData data)
+        public override async UniTask<bool> TrySaveAsync<TData>(string key, TData data, bool isForce = false)
         {
             if (_pendingTokens.TryGetValue(key, out var source))
             {
@@ -26,8 +26,11 @@ namespace CustomUtils.Runtime.Storage.Base
             var tokenSource = new CancellationTokenSource();
             _pendingTokens[key] = tokenSource;
 
-            await UniTask.Delay(_debounceDelay, cancellationToken: tokenSource.Token);
+            if (!isForce)
+                await UniTask.Delay(_debounceDelay, cancellationToken: tokenSource.Token);
 
+            _pendingTokens.Remove(key);
+            tokenSource.Dispose();
             return await OnTrySaveAsync(key, data);
         }
 

@@ -12,7 +12,7 @@ namespace CustomUtils.Runtime.Storage.Base
     {
         /// <summary>Saves data under the specified key.</summary>
         /// <returns>True if successful, false on error.</returns>
-        UniTask<bool> TrySaveAsync<T>(string key, T data);
+        UniTask<bool> TrySaveAsync<T>(string key, T data, bool isForce = false);
 
         /// <summary>Loads data of type <typeparamref name="T"/> for the specified key.</summary>
         /// <returns>The loaded value, or default if not found.</returns>
