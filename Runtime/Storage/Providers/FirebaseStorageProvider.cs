@@ -1,6 +1,5 @@
 ﻿#if FIREBASE
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using CustomUtils.Runtime.Serializer;
 using CustomUtils.Runtime.Storage.Base;
@@ -12,15 +11,19 @@ using UnityEngine;
 
 namespace CustomUtils.Runtime.Storage.Providers
 {
+    /// <inheritdoc />
+    /// <summary>
+    /// Stores data using Firebase Storage. Requires the <c>FIREBASE</c> scripting define symbol.
+    /// Data is scoped per user under <c>users/{userId}</c>.
+    /// </summary>
     [PublicAPI]
-    public sealed class FirebaseStorageProvider : BaseCloudStorageProvider
+    public sealed class FirebaseStorageProvider : BaseCloudStorageProvider<byte[]>
     {
         private const long MaxDownloadSize = 5 * 1024 * 1024;
 
         private readonly IBytesSerializer _serializer;
         private readonly FirebaseStorage _firebaseStorage;
         private readonly string _storagePath;
-        private readonly Dictionary<string, byte[]> _cache = new();
 
         public FirebaseStorageProvider(IBytesSerializer serializer, TimeSpan debounceDelay, string userId = null) :
             base(debounceDelay)
@@ -34,69 +37,30 @@ namespace CustomUtils.Runtime.Storage.Providers
             Logger.Log($"[FirebaseStorageProvider::FirebaseStorageProvider] Initialized with user ID: {userId}");
         }
 
+        protected override byte[] Serialize<TData>(TData data) => _serializer.SerializeToBytes(data);
+        protected override TData Deserialize<TData>(byte[] raw) => _serializer.DeserializeFromBytes<TData>(raw);
+
         private StorageReference GetFileReference(string key)
             => _firebaseStorage.GetReference($"{_storagePath}/{key}");
 
-        protected override async UniTask<bool> OnTrySaveAsync<TData>(string key, TData data)
+        protected override async UniTask PlatformSaveAsync(string key, byte[] data)
+            => await GetFileReference(key).PutBytesAsync(data);
+
+        protected override async UniTask<byte[]> PlatformLoadAsync(string key, CancellationToken token)
         {
-            try
-            {
-                var bytes = _serializer.SerializeToBytes(data);
-                _cache[key] = bytes;
+            if (!await PlatformHasKeyAsync(key, token))
+                return null;
 
-                var reference = GetFileReference(key);
-                await reference.PutBytesAsync(bytes);
+            var bytes = await GetFileReference(key)
+                .GetBytesAsync(MaxDownloadSize)
+                .AsUniTask()
+                .AttachExternalCancellation(token);
 
-                Logger.Log($"[FirebaseStorageProvider::OnTrySaveAsync] Saved data for key '{key}'");
-                return true;
-            }
-            catch (Exception e)
-            {
-                Logger.LogException(e);
-                Logger.LogError(
-                    $"[FirebaseStorageProvider::OnTrySaveAsync] Error saving data for key '{key}': {e.Message}");
-                return false;
-            }
+            return bytes == null || bytes.Length == 0 ? null : bytes;
         }
 
-        public override async UniTask<TData> LoadAsync<TData>(string key, CancellationToken token)
+        protected override async UniTask<bool> PlatformHasKeyAsync(string key, CancellationToken token)
         {
-            try
-            {
-                if (_cache.TryGetValue(key, out var cachedBytes))
-                    return _serializer.DeserializeFromBytes<TData>(cachedBytes);
-
-                if (!await HasKeyAsync(key, token))
-                    return default;
-
-                var bytes = await GetFileReference(key)
-                    .GetBytesAsync(MaxDownloadSize)
-                    .AsUniTask()
-                    .AttachExternalCancellation(token);
-
-                if (bytes == null || bytes.Length == 0)
-                    return default;
-
-                _cache[key] = bytes;
-                var data = _serializer.DeserializeFromBytes<TData>(bytes);
-
-                Logger.Log($"[FirebaseStorageProvider::LoadAsync] Loaded data for key '{key}'");
-                return data;
-            }
-            catch (Exception e)
-            {
-                Logger.LogException(e);
-                Logger.LogError(
-                    $"[FirebaseStorageProvider::LoadAsync] Error loading data for key '{key}': {e.Message}");
-                return default;
-            }
-        }
-
-        public override async UniTask<bool> HasKeyAsync(string key, CancellationToken token)
-        {
-            if (_cache.ContainsKey(key))
-                return true;
-
             try
             {
                 return await GetFileReference(key)
@@ -111,30 +75,15 @@ namespace CustomUtils.Runtime.Storage.Providers
             }
         }
 
-        public override async UniTask<bool> TryDeleteKeyAsync(string key, CancellationToken token)
+        protected override async UniTask PlatformDeleteKeyAsync(string key, CancellationToken token)
         {
-            try
-            {
-                _cache.Remove(key);
+            if (!await PlatformHasKeyAsync(key, token))
+                return;
 
-                if (!await HasKeyAsync(key, token))
-                    return true;
-
-                await GetFileReference(key).DeleteAsync().AsUniTask().AttachExternalCancellation(token);
-
-                Logger.Log($"[FirebaseStorageProvider::TryDeleteKeyAsync] Deleted key '{key}'");
-                return true;
-            }
-            catch (Exception e)
-            {
-                Logger.LogException(e);
-                Logger.LogError(
-                    $"[FirebaseStorageProvider::TryDeleteKeyAsync] Error deleting key '{key}': {e.Message}");
-                return false;
-            }
+            await GetFileReference(key).DeleteAsync().AsUniTask().AttachExternalCancellation(token);
         }
 
-        public override UniTask<bool> TryDeleteAllAsync(CancellationToken token)
+        protected override UniTask<bool> PlatformTryDeleteAllAsync(CancellationToken token)
         {
             Logger.LogWarning($"[FirebaseStorageProvider::TryDeleteAllAsync] DeleteAll is not supported");
             return UniTask.FromResult(false);

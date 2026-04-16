@@ -62,15 +62,15 @@ namespace CustomUtils.Runtime.Storage.Providers
 
         public async UniTask<bool> TryDeleteKeyAsync(string key, CancellationToken token = default)
         {
-            var localSuccess = await _cloudProvider.TryDeleteKeyAsync(key, token);
-            var cloudSuccess = await _localProvider.TryDeleteKeyAsync(key, token);
+            var cloudSuccess = await _cloudProvider.TryDeleteKeyAsync(key, token);
+            var localSuccess = await _localProvider.TryDeleteKeyAsync(key, token);
             return localSuccess || cloudSuccess;
         }
 
         public async UniTask<bool> TryDeleteAllAsync(CancellationToken token = default)
         {
-            var localSuccess = await _localProvider.TryDeleteAllAsync(token);
             var cloudSuccess = await _cloudProvider.TryDeleteAllAsync(token);
+            var localSuccess = await _localProvider.TryDeleteAllAsync(token);
             return localSuccess || cloudSuccess;
         }
     }

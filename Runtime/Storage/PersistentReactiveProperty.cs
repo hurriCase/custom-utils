@@ -50,11 +50,11 @@ namespace CustomUtils.Runtime.Storage
                 if (hasKey)
                     Property.Value = await _provider.LoadAsync<TProperty>(_key, token);
             }
-            catch (Exception e)
+            catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                Debug.LogException(e);
+                Debug.LogException(exception);
                 Debug.LogError("[PersistentReactiveProperty::InitializeAsync] " +
-                               $"Failed to load key '{_key}': {e.Message}");
+                               $"Failed to load key '{_key}': {exception.Message}");
             }
             finally
             {

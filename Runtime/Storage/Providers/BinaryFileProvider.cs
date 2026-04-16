@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Threading;
 using CustomUtils.Runtime.Serializer;
 using CustomUtils.Runtime.Storage.Base;
@@ -10,11 +8,15 @@ using UnityEngine;
 
 namespace CustomUtils.Runtime.Storage.Providers
 {
+    /// <inheritdoc />
+    /// <summary>
+    /// Stores data as binary files in <see cref="P:UnityEngine.Application.persistentDataPath">UnityEngine.Application.persistentDataPath</see>.
+    /// Recommended for Android builds where PlayerPrefs may be unreliable.
+    /// </summary>
     [PublicAPI]
-    public sealed class BinaryFileProvider : BaseStorageProvider
+    public sealed class BinaryFileProvider : BaseStorageProvider<byte[]>
     {
         private readonly IBytesSerializer _serializer;
-        private readonly Dictionary<string, byte[]> _cache = new();
         private readonly string _saveDirectory;
 
         private const string SaveFolderName = "SaveData";
@@ -29,75 +31,37 @@ namespace CustomUtils.Runtime.Storage.Providers
                 Directory.CreateDirectory(_saveDirectory);
         }
 
-        public override async UniTask<bool> TrySaveAsync<TData>(string key, TData data, bool isForce = false)
+        protected override byte[] Serialize<TData>(TData data) => _serializer.SerializeToBytes(data);
+        protected override TData Deserialize<TData>(byte[] raw) => _serializer.DeserializeFromBytes<TData>(raw);
+
+        protected override async UniTask PlatformSaveAsync(string key, byte[] data)
+            => await File.WriteAllBytesAsync(GetFilePath(key), data);
+
+        protected override async UniTask<byte[]> PlatformLoadAsync(string key, CancellationToken token)
         {
-            try
-            {
-                var bytes = _serializer.SerializeToBytes(data);
-                _cache[key] = bytes;
-                await File.WriteAllBytesAsync(GetFilePath(key), bytes);
-                Logger.Log($"[{nameof(BinaryFileProvider)}::TrySaveAsync] Saved data for key '{key}'");
-                return true;
-            }
-            catch (Exception e)
-            {
-                Logger.LogException(e);
-                Logger.LogError($"[{nameof(BinaryFileProvider)}::TrySaveAsync] Error during saving data: {e.Message}");
-                return false;
-            }
+            var filePath = GetFilePath(key);
+            if (!File.Exists(filePath))
+                return null;
+
+            return await File.ReadAllBytesAsync(filePath, token);
         }
 
-        public override async UniTask<TData> LoadAsync<TData>(string key, CancellationToken token)
-        {
-            try
-            {
-                if (_cache.TryGetValue(key, out var cachedBytes))
-                    return _serializer.DeserializeFromBytes<TData>(cachedBytes);
+        protected override UniTask<bool> PlatformHasKeyAsync(string key, CancellationToken token)
+            => UniTask.FromResult(File.Exists(GetFilePath(key)));
 
-                var filePath = GetFilePath(key);
-                if (!File.Exists(filePath))
-                    return default;
-
-                var bytes = await File.ReadAllBytesAsync(filePath, token);
-                _cache[key] = bytes;
-                var data = _serializer.DeserializeFromBytes<TData>(bytes);
-                Logger.Log($"[{nameof(BinaryFileProvider)}::LoadAsync] Loaded data for key '{key}'");
-                return data;
-            }
-            catch (Exception e)
-            {
-                Logger.LogException(e);
-                Logger.LogError($"[{nameof(BinaryFileProvider)}::LoadAsync] Error loading data: {e.Message}");
-                return default;
-            }
-        }
-
-        public override UniTask<bool> HasKeyAsync(string key, CancellationToken token)
-            => UniTask.FromResult(_cache.ContainsKey(key) || File.Exists(GetFilePath(key)));
-
-        public override async UniTask<bool> TryDeleteKeyAsync(string key, CancellationToken token)
-        {
-            try
-            {
-                _cache.Remove(key);
-                var filePath = GetFilePath(key);
-                await UniTask.RunOnThreadPool(static path =>
+        protected override UniTask PlatformDeleteKeyAsync(string key, CancellationToken token)
+            => UniTask.RunOnThreadPool(
+                static path =>
                 {
-                    if (File.Exists((string)path)) File.Delete((string)path);
-                }, filePath, configureAwait: true, cancellationToken: token);
-                Logger.Log($"[{nameof(BinaryFileProvider)}::TryDeleteKeyAsync] Deleted key '{key}'");
-                return true;
-            }
-            catch (Exception e)
-            {
-                Logger.LogException(e);
-                Logger.LogError($"[{nameof(BinaryFileProvider)}::TryDeleteKeyAsync] Error deleting key: {e.Message}");
-                return false;
-            }
-        }
+                    if (File.Exists((string)path))
+                        File.Delete((string)path);
+                },
+                GetFilePath(key),
+                configureAwait: true,
+                cancellationToken: token);
 
-        public override UniTask<bool> TryDeleteAllAsync(CancellationToken token) =>
-            UniTask.RunOnThreadPool(RecreateSaveFolder, configureAwait: true, cancellationToken: token);
+        protected override UniTask<bool> PlatformTryDeleteAllAsync(CancellationToken token)
+            => UniTask.RunOnThreadPool(RecreateSaveFolder, configureAwait: true, cancellationToken: token);
 
         private string GetFilePath(string key) => Path.Combine(_saveDirectory, $"{key}.{SaveFileExtension}");
 
@@ -105,6 +69,7 @@ namespace CustomUtils.Runtime.Storage.Providers
         {
             if (!Directory.Exists(_saveDirectory))
                 return true;
+
             Directory.Delete(_saveDirectory, true);
             Directory.CreateDirectory(_saveDirectory);
             return true;

@@ -5,7 +5,7 @@ using Cysharp.Threading.Tasks;
 
 namespace CustomUtils.Runtime.Storage.Base
 {
-    public abstract class BaseCloudStorageProvider : BaseStorageProvider, ICloudStorageProvider
+    public abstract class BaseCloudStorageProvider<TCached> : BaseStorageProvider<TCached>, ICloudStorageProvider
     {
         private readonly Dictionary<string, CancellationTokenSource> _pendingTokens = new();
         private readonly TimeSpan _debounceDelay;
@@ -26,14 +26,16 @@ namespace CustomUtils.Runtime.Storage.Base
             var tokenSource = new CancellationTokenSource();
             _pendingTokens[key] = tokenSource;
 
+            var isCanceled = false;
+
             if (!isForce)
-                await UniTask.Delay(_debounceDelay, cancellationToken: tokenSource.Token);
+                isCanceled = await UniTask.Delay(_debounceDelay, cancellationToken: tokenSource.Token)
+                    .SuppressCancellationThrow();
 
             _pendingTokens.Remove(key);
             tokenSource.Dispose();
-            return await OnTrySaveAsync(key, data);
-        }
 
-        protected abstract UniTask<bool> OnTrySaveAsync<TData>(string key, TData data);
+            return !isCanceled && await base.TrySaveAsync(key, data);
+        }
     }
 }
