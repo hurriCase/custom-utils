@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using CustomUtils.Runtime.Extensions;
 using Cysharp.Threading.Tasks;
 
 namespace CustomUtils.Runtime.Storage.Base
@@ -17,25 +18,40 @@ namespace CustomUtils.Runtime.Storage.Base
 
         public override async UniTask<bool> TrySaveAsync<TData>(string key, TData data, bool isForce = false)
         {
-            if (_pendingTokens.TryGetValue(key, out var source))
-            {
-                source.Cancel();
-                source.Dispose();
-            }
+            var firstSave = !_pendingTokens.TryGetValue(key, out var tokenSource);
 
-            var tokenSource = new CancellationTokenSource();
+            var token = CancellationExtensions.GetFreshToken(ref tokenSource);
             _pendingTokens[key] = tokenSource;
 
-            var isCanceled = false;
+            if (isForce || firstSave)
+            {
+                DeleteKeyAfterDelayAsync(tokenSource, key, token).Forget();
+                return await base.TrySaveAsync(key, data);
+            }
 
-            if (!isForce)
-                isCanceled = await UniTask.Delay(_debounceDelay, cancellationToken: tokenSource.Token)
-                    .SuppressCancellationThrow();
+            await UniTask.Delay(_debounceDelay, cancellationToken: token).SuppressCancellationThrow();
 
-            _pendingTokens.Remove(key);
+            if (!token.IsCancellationRequested)
+                return await base.TrySaveAsync(key, data);
+
+            CleanSave(tokenSource, key);
+            return false;
+        }
+
+        private async UniTaskVoid DeleteKeyAfterDelayAsync(
+            CancellationTokenSource tokenSource,
+            string key,
+            CancellationToken token)
+        {
+            await UniTask.Delay(_debounceDelay, cancellationToken: token).SuppressCancellationThrow();
+            if (!token.IsCancellationRequested)
+                CleanSave(tokenSource, key);
+        }
+
+        private void CleanSave(CancellationTokenSource tokenSource, string key)
+        {
             tokenSource.Dispose();
-
-            return !isCanceled && await base.TrySaveAsync(key, data);
+            _pendingTokens.Remove(key);
         }
     }
 }
