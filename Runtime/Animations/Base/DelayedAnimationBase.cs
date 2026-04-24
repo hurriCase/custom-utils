@@ -34,7 +34,8 @@ namespace CustomUtils.Runtime.Animations.Base
             return _currentAnimation = Tween.Delay(
                 this,
                 _animationSettings.Delay,
-                static self => self.UpdateState());
+                static self => self.UpdateState(),
+                _animationSettings.UseUnscaledTime);
         }
 
         protected abstract void UpdateState();
