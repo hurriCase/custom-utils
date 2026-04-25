@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using CustomUtils.Runtime.Other;
-using CustomUtils.Unsafe;
+using CustomUtils.Unmanaged;
 using JetBrains.Annotations;
 using UnityEngine;
 using Debug = UnityEngine.Debug;

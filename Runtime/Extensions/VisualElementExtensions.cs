@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using CustomUtils.Unsafe;
+using CustomUtils.Unmanaged;
 using JetBrains.Annotations;
 using R3;
 using UnityEngine.UIElements;

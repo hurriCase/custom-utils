@@ -1,6 +1,6 @@
 {
-    "name": "CustomUtils.Unsafe",
-    "rootNamespace": "CustomUtils.Unsafe",
+    "name": "CustomUtils.Unmanaged",
+    "rootNamespace": "CustomUtils.Unmanaged ",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
