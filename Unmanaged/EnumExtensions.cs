@@ -17,7 +17,7 @@ namespace CustomUtils.Unmanaged
         /// <param name="value">The enum value to check.</param>
         /// <param name="flag">The flag to test for.</param>
         /// <returns><c>true</c> if all bits in <paramref name="flag"/> are set in <paramref name="value"/>.</returns>
-        public static bool HasFlag<TEnum>(this TEnum value, TEnum flag) where TEnum : struct, Enum
+        public static bool HasFlagNoAlloc<TEnum>(this TEnum value, TEnum flag) where TEnum : struct, Enum
         {
             var intValue = Unsafe.As<TEnum, int>(ref value);
             var intFlag = Unsafe.As<TEnum, int>(ref flag);
