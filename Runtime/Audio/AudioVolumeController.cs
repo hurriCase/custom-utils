@@ -47,8 +47,13 @@ namespace CustomUtils.Runtime.Audio
         {
             _audioMixer = await _addressablesLoader.LoadAsync<AudioMixer>(_audioConfig.AudioMixerReference, token);
 
-            await SfxVolume.InitializeAsync(SfxVolumeKey, token, DefaultSfxVolume);
-            await MusicVolume.InitializeAsync(MusicVolumeKey, token, DefaultMusicVolume);
+            var initTasks = new[]
+            {
+                SfxVolume.InitializeAsync(SfxVolumeKey, token, DefaultSfxVolume),
+                MusicVolume.InitializeAsync(MusicVolumeKey, token, DefaultMusicVolume)
+            };
+
+            await UniTask.WhenAll(initTasks);
 
             var sfxSubscription = SfxVolume.Subscribe(this,
                 static (volume, self) => self.SetSfxVolume(volume));
