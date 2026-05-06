@@ -61,7 +61,6 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
             _graphic.material = _material;
 
             UpdateColor(currentColorName);
-            this.MarkAsDirty();
         }
 
         protected override void OnUpdateColor(Gradient gradient)

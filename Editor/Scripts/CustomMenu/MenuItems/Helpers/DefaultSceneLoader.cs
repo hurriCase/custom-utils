@@ -23,6 +23,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
         {
             EditorApplication.delayCall += ChangePlayModeScene;
             EditorApplication.quitting += OnEditorQuitting;
+            EditorSceneManager.activeSceneChangedInEditMode += OnSceneChanged;
 
             ChangePlayModeScene();
         }

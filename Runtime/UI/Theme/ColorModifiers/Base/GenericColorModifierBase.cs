@@ -1,4 +1,5 @@
-﻿using CustomUtils.Runtime.Extensions;
+﻿using System.Collections.Generic;
+using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.UI.Theme.Databases.Base;
 using UnityEngine;
 
@@ -14,6 +15,8 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.Base
 
         [SerializeField, HideInInspector] protected string currentColorName;
 
+        private TColor _currentColor;
+
         protected virtual void Awake()
         {
 #if MULTI_THEME
@@ -24,11 +27,13 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.Base
 
         internal override void UpdateColor(string guid)
         {
-            if (!ThemeDatabase.TryGetColorByGuid(guid, out var color))
+            if (!ThemeDatabase.TryGetColorByGuid(guid, out var color)
+                || EqualityComparer<TColor>.Default.Equals(color, _currentColor))
                 return;
 
             OnUpdateColor(color);
             currentColorName = guid;
+            _currentColor = color;
             this.MarkAsDirty();
         }
 
