@@ -181,5 +181,13 @@ namespace CustomUtils.Runtime.Extensions
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
         }
+
+        /// <summary>
+        /// Converts a camelCase, PascalCase, or any object's string representation to snake_case.
+        /// </summary>
+        /// <param name="value">The object to convert.</param>
+        /// <returns>A snake_case string representation of the object.</returns>
+        public static string ToSnakeCase(this object value)
+            => Regex.Replace(value.ToString(), "(?<=[a-z])([A-Z])", "_$1").ToLower();
     }
 }
