@@ -28,9 +28,10 @@ namespace CustomUtils.Runtime.UI.Windows
         [SerializeField] private Transform _popupsContainer;
 
         public ReadOnlyReactiveProperty<Type> CurrentScreenType => _currentScreenType;
-        public Type CurrentPopupType => _popupRegistry.CurrentPopupType;
+        public ReadOnlyReactiveProperty<Type> CurrentPopupType => _currentPopupType;
 
         private readonly ReactiveProperty<Type> _currentScreenType = new();
+        private readonly ReactiveProperty<Type> _currentPopupType = new();
 
         private ScreenRegistry _screenRegistry;
         private PopupRegistry _popupRegistry;
@@ -63,6 +64,7 @@ namespace CustomUtils.Runtime.UI.Windows
             if (_popupReferences.Count > 0)
             {
                 _popupRegistry = new PopupRegistry(
+                    _currentPopupType,
                     _popupsContainer,
                     _objectResolver,
                     _addressablesLoader,

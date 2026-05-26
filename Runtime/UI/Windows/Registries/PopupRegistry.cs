@@ -16,18 +16,17 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
     [PublicAPI]
     internal sealed class PopupRegistry : WindowRegistry<SharedPopupBase>
     {
-        public Type CurrentPopupType { get; private set; }
-
         private readonly Stack<SharedPopupBase> _previousOpenedPopups = new();
 
         private CancellationToken _token;
 
         internal PopupRegistry(
+            ReactiveProperty<Type> currentPopupType,
             Transform container,
             IObjectResolver objectResolver,
             IAddressablesLoader addressablesLoader,
             CancellationToken token)
-            : base(container, objectResolver, addressablesLoader)
+            : base(currentPopupType, container, objectResolver, addressablesLoader)
         {
             _token = token;
         }
@@ -58,20 +57,19 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             }
 
             currentWindow = sharedPopupBase;
-            CurrentPopupType = sharedPopupBase.GetType();
             return sharedPopupBase;
         }
 
         internal void HideAll()
         {
-            CurrentPopupType = null;
+            SetCurrentType(null);
             HideCurrent();
             _previousOpenedPopups.Clear();
         }
 
         private void HandlePopupHide()
         {
-            CurrentPopupType = null;
+            SetCurrentType(null);
 
             var needShow = currentWindow && currentWindow.IsSingle;
             currentWindow = null;

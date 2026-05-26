@@ -13,23 +13,18 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
     [PublicAPI]
     internal sealed class ScreenRegistry : WindowRegistry<SharedScreenBase>
     {
-        private readonly ReactiveProperty<Type> _currentScreenType;
-
         internal ScreenRegistry(
             ReactiveProperty<Type> currentScreenType,
             Transform container,
             IObjectResolver objectResolver,
             IAddressablesLoader addressablesLoader)
-            : base(container, objectResolver, addressablesLoader)
-        {
-            _currentScreenType = currentScreenType;
-        }
+            : base(currentScreenType, container, objectResolver, addressablesLoader) { }
 
         protected override void OnRegistered(SharedScreenBase sharedScreenBase)
         {
             if (sharedScreenBase.InitialWindow)
             {
-                _currentScreenType.Value = sharedScreenBase.GetType();
+                SetCurrentType(sharedScreenBase.GetType());
                 return;
             }
 
@@ -44,7 +39,6 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
                 await currentWindow.HideAsync(token);
 
             currentWindow = sharedScreenBase;
-            _currentScreenType.Value = sharedScreenBase.GetType();
             await sharedScreenBase.ShowAsync(token);
             return sharedScreenBase;
         }

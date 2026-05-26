@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Threading;
 using CustomUtils.Runtime.AddressableSystem;
+using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.UI.Windows.Windows.Base;
 using CustomUtils.Runtime.UI.Windows.Windows.Parameterized;
 using Cysharp.Threading.Tasks;
+using R3;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using VContainer;
@@ -18,15 +20,18 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
 
         private readonly Dictionary<Type, TWindow> _windows = new();
 
+        private readonly ReactiveProperty<Type> _currentType;
         private readonly Transform _container;
         private readonly IObjectResolver _objectResolver;
         private readonly IAddressablesLoader _addressablesLoader;
 
         internal WindowRegistry(
+            ReactiveProperty<Type> currentType,
             Transform container,
             IObjectResolver objectResolver,
             IAddressablesLoader addressablesLoader)
         {
+            _currentType = currentType;
             _container = container;
             _objectResolver = objectResolver;
             _addressablesLoader = addressablesLoader;
@@ -60,7 +65,9 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             if (!TryGet<TConcreteWindow>(out var window))
                 return null;
 
-            return await OpenWindow(window, token);
+            var openedWindow = await OpenWindow(window, token);
+            SetCurrentType(openedWindow.AsNullable()?.GetType());
+            return openedWindow;
         }
 
         internal async UniTask<TWindow> Open<TConcreteWindow, TParameters>(
@@ -72,7 +79,9 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
                 return null;
 
             ((IParameterizedWindow<TParameters>)window).SetParameters(parameters);
-            return await OpenWindow(window, token);
+            var openedWindow = await OpenWindow(window, token);
+            SetCurrentType(openedWindow.AsNullable()?.GetType());
+            return openedWindow;
         }
 
         internal void HideCurrent()
@@ -95,6 +104,11 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             Debug.LogError($"[{nameof(WindowRegistry<TWindow>)}::{nameof(TryGet)}]" +
                            $" No window registered for type: {typeof(TConcreteWindow)}");
             return false;
+        }
+
+        protected void SetCurrentType(Type type)
+        {
+            _currentType.Value = type;
         }
     }
 }
