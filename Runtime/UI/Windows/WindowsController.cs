@@ -46,7 +46,7 @@ namespace CustomUtils.Runtime.UI.Windows
             _addressablesLoader = addressablesLoader;
         }
 
-        public async UniTask InitializeAsync(CancellationToken token = default)
+        public virtual async UniTask InitializeAsync(CancellationToken token = default)
         {
             var sourceWithDestroy = token.CreateLinkedTokenSourceWithDestroy(this);
 
