@@ -103,7 +103,7 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
             if (!_gradientTexture)
                 return;
 
-            UpdateColor(currentColorName);
+            UpdateColor(currentColorName, true);
         }
 #endif
     }

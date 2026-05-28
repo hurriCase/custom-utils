@@ -25,9 +25,10 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.Base
 #endif
         }
 
-        internal override void UpdateColor(string guid)
+        internal override void UpdateColor(string guid, bool isForce = false)
         {
-            if (!ThemeDatabase.TryGetColorByGuid(guid, out var color)
+            if (!isForce
+                || !ThemeDatabase.TryGetColorByGuid(guid, out var color)
                 || EqualityComparer<TColor>.Default.Equals(color, _currentColor))
                 return;
 
