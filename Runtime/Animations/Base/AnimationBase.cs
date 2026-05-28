@@ -1,6 +1,5 @@
 ﻿using System;
 using CustomUtils.Runtime.Animations.Base.Settings;
-using CustomUtils.Runtime.Attributes;
 using CustomUtils.Runtime.CustomTypes.Collections;
 using PrimeTween;
 using UnityEngine;
@@ -8,7 +7,7 @@ using UnityEngine;
 namespace CustomUtils.Runtime.Animations.Base
 {
     [Serializable]
-    public abstract class AnimationBase<TState, TValue, TAnimationSettings> : IAnimation<TState>
+    public abstract class AnimationBase<TState, TValue, TAnimationSettings> : StatefulAnimationBase<TState>
 #if UNITY_EDITOR
         , IAnimationPreview
 #endif
@@ -18,21 +17,9 @@ namespace CustomUtils.Runtime.Animations.Base
     {
         [SerializeField] protected EnumArray<TState, TAnimationSettings> states;
 
-#if UNITY_EDITOR
-
-        // ReSharper disable once NotAccessedField.Local | only for display purposes
-        [SerializeField, InspectorReadOnly] private TState _currentState;
-#endif
-
-        private Tween _currentAnimation;
-
-        public Tween PlayAnimation(TState state, bool isInstant = false)
+        protected override Tween OnPlayAnimation(TState state, bool isInstant)
         {
             var currentState = states[state];
-
-#if UNITY_EDITOR
-            _currentState = state;
-#endif
 
             if (isInstant)
             {
@@ -40,15 +27,10 @@ namespace CustomUtils.Runtime.Animations.Base
                 return default;
             }
 
-            if (_currentAnimation.isAlive)
-                _currentAnimation.Stop();
+            if (CurrentAnimation.isAlive)
+                CurrentAnimation.Stop();
 
-            return _currentAnimation = CreateTween(currentState);
-        }
-
-        public void CancelAnimation()
-        {
-            _currentAnimation.Stop();
+            return CreateTween(currentState);
         }
 
         protected abstract void SetValueInstant(TValue value);

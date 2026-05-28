@@ -5,17 +5,16 @@ using UnityEngine;
 
 namespace CustomUtils.Runtime.Animations.Base
 {
-    public abstract class DelayedAnimationBase<TTarget, TContent, TState> : IAnimation<TState>
+    [Serializable]
+    public abstract class DelayedAnimationBase<TTarget, TContent, TState> : StatefulAnimationBase<TState>
         where TState : unmanaged, Enum
     {
         [SerializeField] protected TTarget target;
         [SerializeField] private DelayedAnimationSettingsBase<TState, TContent> _animationSettings;
 
-        private Tween _currentAnimation;
-
         protected TContent targetSource;
 
-        public Tween PlayAnimation(TState state, bool isInstant)
+        protected override Tween OnPlayAnimation(TState state, bool isInstant)
         {
             if (isInstant && _animationSettings.SkipWhenInstant)
                 return default;
@@ -28,10 +27,10 @@ namespace CustomUtils.Runtime.Animations.Base
                 return default;
             }
 
-            if (_currentAnimation.isAlive)
-                _currentAnimation.Stop();
+            if (CurrentAnimation.isAlive)
+                CurrentAnimation.Stop();
 
-            return _currentAnimation = Tween.Delay(
+            return Tween.Delay(
                 this,
                 _animationSettings.Delay,
                 static self => self.UpdateState(),
@@ -39,10 +38,5 @@ namespace CustomUtils.Runtime.Animations.Base
         }
 
         protected abstract void UpdateState();
-
-        public void CancelAnimation()
-        {
-            _currentAnimation.Stop();
-        }
     }
 }
