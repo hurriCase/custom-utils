@@ -1,0 +1,25 @@
+{
+    "name": "CustomUtils.Animations",
+    "rootNamespace": "CustomUtils",
+    "references": [
+        "GUID:80ecb87cae9c44d19824e70ea7229748",
+        "GUID:8031620cc87fb5749ab47dc35288ff76"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "PRIMETWEEN_INSTALLED"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.kyrylokuzyk.primetween",
+            "expression": "",
+            "define": "PRIMETWEEN_INSTALLED"
+        }
+    ],
+    "noEngineReferences": false
+}

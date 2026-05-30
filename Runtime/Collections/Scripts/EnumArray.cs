@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using CustomUtils.Runtime.Other;
 using CustomUtils.Unmanaged;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -14,7 +13,7 @@ using Debug = UnityEngine.Debug;
 using MemoryPack;
 #endif
 
-namespace CustomUtils.Runtime.CustomTypes.Collections
+namespace CustomUtils.Collections.Scripts
 {
     /// <summary>
     /// A generic class that associates an array of values with an underlying enum type as keys.

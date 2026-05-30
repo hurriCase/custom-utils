@@ -1,5 +1,5 @@
 ﻿using System;
-using CustomUtils.Runtime.CustomTypes.Collections;
+using CustomUtils.Collections.Scripts;
 using JetBrains.Annotations;
 using UnityEngine;
 

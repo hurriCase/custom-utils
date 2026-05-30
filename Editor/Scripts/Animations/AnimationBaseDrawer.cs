@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
-namespace CustomUtils.Editor.Scripts.AttributeDrawers
+namespace CustomUtils.Editor.Scripts.Animations
 {
     [CustomPropertyDrawer(typeof(AnimationBase<,,>), useForChildren: true)]
     internal sealed class AnimationBaseDrawer : PropertyDrawer

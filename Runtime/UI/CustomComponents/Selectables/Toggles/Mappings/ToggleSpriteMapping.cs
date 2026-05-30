@@ -1,4 +1,4 @@
-﻿using CustomUtils.Runtime.CustomTypes.Collections;
+﻿using CustomUtils.Collections.Scripts;
 using CustomUtils.Runtime.Other;
 using JetBrains.Annotations;
 using UnityEngine;

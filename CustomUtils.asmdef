@@ -17,7 +17,9 @@
         "GUID:f62c4463da54e444a94f136e514a4e82",
         "GUID:0caab94c8c0a20b4e83e8dc1e4b2a416",
         "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5",
-        "GUID:be0d2672886cc45b2bcea5a5053a5347"
+        "GUID:be0d2672886cc45b2bcea5a5053a5347",
+        "GUID:32dae8e57fffc9041b8c8826b0c79988",
+        "GUID:8031620cc87fb5749ab47dc35288ff76"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -51,6 +53,11 @@
             "name": "com.unity.services.cloudsave",
             "expression": "",
             "define": "CLOUD_SAVE_INSTALLED"
+        },
+        {
+            "name": "com.kyrylokuzyk.primetween",
+            "expression": "",
+            "define": "PRIMETWEEN_INSTALLED"
         }
     ],
     "noEngineReferences": false

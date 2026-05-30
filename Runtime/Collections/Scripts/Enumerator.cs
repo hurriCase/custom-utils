@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using JetBrains.Annotations;
 
-namespace CustomUtils.Runtime.CustomTypes.Collections
+namespace CustomUtils.Collections.Scripts
 {
     /// <summary>
     /// Provides a struct-based enumerator for iterating over an array of elements.

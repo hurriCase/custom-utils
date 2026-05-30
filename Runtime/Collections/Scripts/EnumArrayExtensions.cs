@@ -2,10 +2,10 @@
 using JetBrains.Annotations;
 using Random = UnityEngine.Random;
 
-namespace CustomUtils.Runtime.CustomTypes.Collections
+namespace CustomUtils.Collections.Scripts
 {
     /// <summary>
-    /// Provides extension methods for <see cref="EnumArray{TEnum, TValue}"/>.
+    /// Provides extension methods for <see cref="EnumArray{TEnum,TValue}"/>.
     /// </summary>
     [PublicAPI]
     public static class EnumArrayExtensions

@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using CustomUtils.Collections.Scripts;
 using CustomUtils.Editor.Scripts.Extensions;
-using CustomUtils.Runtime.CustomTypes;
-using CustomUtils.Runtime.CustomTypes.Collections;
 using CustomUtils.Runtime.Extensions;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
-namespace CustomUtils.Editor.Scripts
+namespace CustomUtils.Editor.Scripts.Collections
 {
     [CustomPropertyDrawer(typeof(EnumArray<,>))]
     public class EnumArrayDrawer : PropertyDrawer

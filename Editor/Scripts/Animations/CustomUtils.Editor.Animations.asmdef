@@ -1,0 +1,18 @@
+{
+    "name": "CustomUtils.Editor.Animations",
+    "rootNamespace": "CustomUtils",
+    "references": [
+        "GUID:32dae8e57fffc9041b8c8826b0c79988",
+        "GUID:b47807b4f80d18a4ea4c0909b959c60e",
+        "GUID:e83d267d115097b489005b6b908a868a"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

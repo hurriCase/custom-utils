@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using JetBrains.Annotations;
 
-namespace CustomUtils.Runtime.CustomTypes.Collections
+namespace CustomUtils.Collections.Scripts
 {
     /// <summary>
     /// Provides an enumerator for iterating through key-value pairs where keys are enum values.

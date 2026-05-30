@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using CustomUtils.Runtime.Attributes;
 using PrimeTween;
 using UnityEngine;
 
@@ -12,7 +11,7 @@ namespace CustomUtils.Runtime.Animations.Base
     {
         [SerializeField] private bool _skipIfSameState;
 
-        [SerializeField, InspectorReadOnly] private TState _currentState;
+        [SerializeField] private TState _currentState;
 
         protected Tween CurrentAnimation { get; private set; }
 

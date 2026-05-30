@@ -1,6 +1,6 @@
 ﻿#if CUSTOM_LOCALIZATION
+using CustomUtils.Collections.Scripts;
 using CustomUtils.Runtime.AssetLoader;
-using CustomUtils.Runtime.CustomTypes.Collections;
 using CustomUtils.Runtime.CustomTypes.Singletons;
 using CustomUtils.Unmanaged;
 using JetBrains.Annotations;

@@ -1,6 +1,6 @@
 ﻿using System;
+using CustomUtils.Collections.Scripts;
 using CustomUtils.Runtime.Animations.Base.Settings;
-using CustomUtils.Runtime.CustomTypes.Collections;
 using PrimeTween;
 using UnityEngine;
 

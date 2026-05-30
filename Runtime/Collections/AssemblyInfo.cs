@@ -3,5 +3,5 @@ using ZLinq;
 
 [assembly: InternalsVisibleTo("CustomUtils.Editor.Collections")]
 
-[assembly: ZLinqDropIn("CustomUtils.Editor",
+[assembly: ZLinqDropIn("CustomUtils.Collections",
     DropInGenerateTypes.Array | DropInGenerateTypes.List | DropInGenerateTypes.Enumerable)]

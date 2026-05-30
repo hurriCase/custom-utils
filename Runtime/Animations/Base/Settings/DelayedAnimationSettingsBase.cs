@@ -1,10 +1,10 @@
 ﻿using System;
-using CustomUtils.Runtime.CustomTypes.Collections;
+using CustomUtils.Collections.Scripts;
 using UnityEngine;
 
 namespace CustomUtils.Runtime.Animations.Base.Settings
 {
-    public class DelayedAnimationSettingsBase<TState, TContent> : AnimationSettingsBase
+    public sealed class DelayedAnimationSettingsBase<TState, TContent> : AnimationSettingsBase
         where TState : unmanaged, Enum
     {
         [field: SerializeField] internal float Delay { get; private set; }

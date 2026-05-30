@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace CustomUtils.Runtime.CustomTypes.Collections
+namespace CustomUtils.Collections.Scripts
 {
     // Was created to support serialization for nested types without any issues
     [Serializable]

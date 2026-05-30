@@ -1,0 +1,16 @@
+{
+    "name": "CustomUtils.Collections",
+    "rootNamespace": "CustomUtils",
+    "references": [
+        "GUID:b2e096561d798f84eaa79b5111bbad5c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

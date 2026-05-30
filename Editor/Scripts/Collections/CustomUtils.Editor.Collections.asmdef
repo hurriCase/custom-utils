@@ -1,0 +1,18 @@
+{
+    "name": "CustomUtils.Editor.Collections",
+    "rootNamespace": "CustomUtils",
+    "references": [
+        "GUID:b47807b4f80d18a4ea4c0909b959c60e",
+        "GUID:8031620cc87fb5749ab47dc35288ff76",
+        "GUID:e83d267d115097b489005b6b908a868a"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
