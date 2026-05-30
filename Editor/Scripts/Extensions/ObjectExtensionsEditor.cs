@@ -32,7 +32,11 @@ namespace CustomUtils.Editor.Scripts.Extensions
             var objectId = GlobalObjectId.TryParse(GlobalObjectId.GetGlobalObjectIdSlow(target).ToString(),
                 out var globalId)
                 ? globalId.ToString().GetHashCode()
+#if UNITY_6000_5_OR_NEWER
+                : target.GetEntityId().GetHashCode();
+#else
                 : target.GetInstanceID();
+#endif
 
             return StringFormatter.Format("{0}.{1}", baseKey, objectId);
         }
