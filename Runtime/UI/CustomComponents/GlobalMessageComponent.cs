@@ -1,4 +1,5 @@
-﻿using CustomUtils.Runtime.Attributes;
+﻿#if PRIMETWEEN_INSTALLED
+using CustomUtils.Runtime.Attributes;
 using JetBrains.Annotations;
 using PrimeTween;
 using TMPro;
@@ -81,3 +82,4 @@ namespace CustomUtils.Runtime.UI.CustomComponents
         }
     }
 }
+#endif

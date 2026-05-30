@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if PRIMETWEEN_INSTALLED
+using System.Collections.Generic;
 using CustomUtils.Runtime.Animations;
 using CustomUtils.Runtime.Animations.Base;
 using CustomUtils.Runtime.Attributes;
@@ -70,3 +71,4 @@ namespace CustomUtils.Runtime.UI
         }
     }
 }
+#endif

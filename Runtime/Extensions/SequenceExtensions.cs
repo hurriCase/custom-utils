@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿#if PRIMETWEEN_INSTALLED
+using JetBrains.Annotations;
 using PrimeTween;
 using UnityEngine;
 
@@ -45,3 +46,4 @@ namespace CustomUtils.Runtime.Extensions
                 .Group(Tween.Scale(rectTransform, Vector3.one, duration));
     }
 }
+#endif

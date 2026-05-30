@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if PRIMETWEEN_INSTALLED
+using System.Collections.Generic;
 using System.Threading;
 using CustomUtils.Runtime.Animations.Base;
 using Cysharp.Threading.Tasks;
@@ -46,3 +47,4 @@ namespace CustomUtils.Runtime.UI.Windows
         }
     }
 }
+#endif

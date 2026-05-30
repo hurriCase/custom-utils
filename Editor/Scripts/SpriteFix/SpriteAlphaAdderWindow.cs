@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if PRIMETWEEN_INSTALLED
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -351,3 +352,4 @@ namespace CustomUtils.Editor.Scripts.SpriteFix
         }
     }
 }
+#endif

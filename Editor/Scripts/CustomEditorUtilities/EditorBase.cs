@@ -19,11 +19,13 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
 
         private EditorStateControls _editorStateControls;
 
+#if PRIMETWEEN_INSTALLED
         /// <summary>
         /// Access to the progress tracker for handling long-running operations.
         /// </summary>
         protected EditorProgressTracker EditorProgressTracker => _editorProgressTracker ??= new EditorProgressTracker();
         private EditorProgressTracker _editorProgressTracker;
+#endif
 
         private const string DefaultInspectorLabelName = "Default Inspector";
         private const string PrefPrefix = "AbstractEditor_";
@@ -36,7 +38,9 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         {
             serializedObject.Update();
 
+#if PRIMETWEEN_INSTALLED
             DrawProgressIfNeeded();
+#endif
 
             DrawCustomSections();
 
@@ -71,6 +75,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// </summary>
         protected virtual void CleanupEditor() { }
 
+#if PRIMETWEEN_INSTALLED
         /// <summary>
         /// Updates the progress information and triggers a repaint of the inspector
         /// </summary>
@@ -84,6 +89,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Completes the current operation and resets progress tracking
         /// </summary>
         protected void CompleteOperation(string completeInfo = null) => EditorProgressTracker.CompleteOperation(completeInfo);
+#endif
 
         /// <summary>
         /// Draw a custom section with a foldout header.
@@ -123,7 +129,9 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         {
             CleanupEditor();
 
+#if PRIMETWEEN_INSTALLED
             _editorProgressTracker?.Dispose();
+#endif
 
             var targetTypeName = target.GetType().Name;
             EditorPrefs.SetBool($"{PrefPrefix}{targetTypeName}{DefaultInspectorPostfix}", _showDefaultInspector);
@@ -143,7 +151,9 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
                 () => DrawDefaultInspector());
         }
 
+#if PRIMETWEEN_INSTALLED
         private void DrawProgressIfNeeded() => EditorProgressTracker.DrawProgressIfNeeded();
+#endif
 
         private string SanitizeKey(string key, bool reverse = false)
             => reverse ? key.Replace("_", " ").Replace("__", ".") : key.Replace(" ", "_").Replace(".", "__");

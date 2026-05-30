@@ -28,11 +28,13 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         protected EditorStateControls EditorStateControls => _editorStateControls ??= new EditorStateControls(this);
         private EditorStateControls _editorStateControls;
 
+#if PRIMETWEEN_INSTALLED
         /// <summary>
         /// Access to the progress tracker for handling long-running operations.
         /// </summary>
         protected EditorProgressTracker EditorProgressTracker => _editorProgressTracker ??= new EditorProgressTracker();
         private EditorProgressTracker _editorProgressTracker;
+#endif
 
         protected SerializedObject serializedObject;
 
@@ -100,6 +102,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// </remarks>
         protected static SectionScope BeginSection(string title) => EditorVisualControls.BeginSection(title);
 
+#if PRIMETWEEN_INSTALLED
         /// <summary>
         /// Updates the progress information and triggers a repaint of the window
         /// </summary>
@@ -118,6 +121,7 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         /// Completes the current operation and resets progress tracking
         /// </summary>
         protected void CompleteOperation(string completeInfo = null) => EditorProgressTracker.CompleteOperation(completeInfo);
+#endif
 
         protected void PropertyField(string fieldName, bool includeChildren = true)
         {
@@ -140,7 +144,9 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
 
         private void OnDisable()
         {
+#if PRIMETWEEN_INSTALLED
             _editorProgressTracker?.Dispose();
+#endif
 
             CleanupWindow();
             SaveWindowPreferences();

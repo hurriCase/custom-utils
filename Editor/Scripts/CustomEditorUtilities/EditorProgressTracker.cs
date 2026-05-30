@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if PRIMETWEEN_INSTALLED
+using System;
 using System.Threading;
 using CustomUtils.Runtime.Helpers;
 using Cysharp.Threading.Tasks;
@@ -185,3 +186,4 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
         }
     }
 }
+#endif
