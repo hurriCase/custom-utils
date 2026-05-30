@@ -16,7 +16,11 @@ namespace CustomUtils.Runtime.Other
     [PublicAPI]
     public abstract class StepBase : ScriptableObject
     {
-        [SerializeReference, SerializeReferenceDropdown] private ILocalization _loadingKey;
+        [SerializeReference]
+#if SERIALIZE_REFERENCE_DROPDOWN_INSTALLED
+        [SerializeReferenceDropdown]
+#endif
+        private ILocalization _loadingKey;
 
         /// <summary>
         /// Gets an observable that emits when the step completes execution.

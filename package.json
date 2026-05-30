@@ -9,7 +9,6 @@
     "com.unity.editorcoroutines": "1.0.0",
     "com.cysharp.zlinq": "1.4.2",
     "com.unity.addressables": "2.2.2",
-    "com.eflatun.scenereference": "4.1.1",
-    "com.alexeytaranov.serializereferencedropdown": "1.1.4"
+    "com.eflatun.scenereference": "4.1.1"
   }
 }

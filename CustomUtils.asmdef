@@ -58,6 +58,11 @@
             "name": "com.kyrylokuzyk.primetween",
             "expression": "",
             "define": "PRIMETWEEN_INSTALLED"
+        },
+        {
+            "name": "com.alexeytaranov.serializereferencedropdown",
+            "expression": "",
+            "define": "SERIALIZE_REFERENCE_DROPDOWN_INSTALLED"
         }
     ],
     "noEngineReferences": false
