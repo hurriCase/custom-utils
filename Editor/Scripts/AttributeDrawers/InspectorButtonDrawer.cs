@@ -27,11 +27,21 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
 
         private static void DrawMethodCallButtons(UnityEditor.Editor editor)
         {
-            if (editor.target is not GameObject gameObject)
-                return;
+            switch (editor.target)
+            {
+                case GameObject gameObject:
+                    foreach (var monoBehaviour in gameObject.GetComponents<MonoBehaviour>())
+                    {
+                        if (monoBehaviour)
+                            DrawMethodButtons(monoBehaviour);
+                    }
 
-            foreach (var monoBehaviour in gameObject.GetComponents<MonoBehaviour>())
-                DrawMethodButtons(monoBehaviour);
+                    break;
+
+                case ScriptableObject:
+                    DrawMethodButtons(editor.target);
+                    break;
+            }
         }
 
         private static void DrawMethodButtons(Object monoBehaviour)
@@ -47,7 +57,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
             if (!DrawFoldout(monoBehaviour))
                 return;
 
-            DrawScriptReference((MonoBehaviour)monoBehaviour);
+            DrawScriptReference(monoBehaviour);
 
             foreach (var method in methods)
                 DrawMethod(monoBehaviour, method);
@@ -64,15 +74,15 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
             return expanded;
         }
 
-        private static void DrawScriptReference(MonoBehaviour monoBehaviour)
+        private static void DrawScriptReference(Object target)
         {
             GUI.enabled = false;
 
-            EditorGUILayout.ObjectField(
-                ScriptReferenceLabel,
-                MonoScript.FromMonoBehaviour(monoBehaviour),
-                typeof(MonoScript),
-                false);
+            var script = target is MonoBehaviour monoBehaviour
+                ? MonoScript.FromMonoBehaviour(monoBehaviour)
+                : MonoScript.FromScriptableObject((ScriptableObject)target);
+
+            EditorGUILayout.ObjectField(ScriptReferenceLabel, script, typeof(MonoScript), false);
 
             GUI.enabled = true;
         }
