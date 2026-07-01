@@ -84,15 +84,6 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             return openedWindow;
         }
 
-        internal void HideCurrent()
-        {
-            if (!currentWindow)
-                return;
-
-            currentWindow.HideImmediately();
-            currentWindow = null;
-        }
-
         protected abstract void OnRegistered(TWindow window);
         protected abstract UniTask<TWindow> OpenWindow(TWindow window, CancellationToken token);
 

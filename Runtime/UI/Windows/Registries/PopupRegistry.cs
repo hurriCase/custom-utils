@@ -63,8 +63,13 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
         internal void HideAll()
         {
             SetCurrentType(null);
-            HideCurrent();
+
+            foreach (var previousOpenedPopup in _previousOpenedPopups)
+                previousOpenedPopup.HideImmediately();
+
             _previousOpenedPopups.Clear();
+
+            currentWindow = null;
         }
 
         private void HandlePopupHide()
