@@ -10,8 +10,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (!property.objectReferenceValue)
-                AutoAssignComponent(property);
+            AutoAssignComponent(property);
 
             GUI.enabled = false;
             EditorGUI.PropertyField(position, property, label, true);
@@ -20,7 +19,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
 
         private void AutoAssignComponent(SerializedProperty property)
         {
-            if (!property.TryGetComponent(fieldInfo.FieldType, out var targetComponent))
+            if (!property.TryGetComponent(fieldInfo.FieldType, out var targetComponent) || targetComponent == property.objectReferenceValue)
                 return;
 
             property.objectReferenceValue = targetComponent;
