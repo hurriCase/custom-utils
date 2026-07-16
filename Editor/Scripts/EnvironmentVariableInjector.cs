@@ -1,4 +1,4 @@
-﻿#if UNITY_ANDROID
+﻿#if UNITY_ANDROID && !UNITY_CLOUD_BUILD
 using CustomUtils.Editor.Scripts.InputDialog;
 using CustomUtils.Runtime.Extensions;
 using UnityEditor;
