@@ -66,9 +66,12 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
         protected override void OnUpdateColor(Gradient gradient)
         {
             BakeGradient(gradient);
-
             _material.SetTexture(_gradientTextureId, _gradientTexture);
+            ApplyMaterialProperties();
+        }
 
+        private void ApplyMaterialProperties()
+        {
             _material.shaderKeywords = Array.Empty<string>();
             var gradientKeyword = GradientConfig.Instance.GradientKeywords[_gradientType];
             _material.EnableKeyword(gradientKeyword);
@@ -103,7 +106,7 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
             if (!_gradientTexture)
                 return;
 
-            UpdateColor(currentColorName, true);
+            ApplyMaterialProperties();
         }
 #endif
     }
