@@ -36,5 +36,28 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="list">The list to get a random element from.</param>
         /// <returns>A randomly selected element from the list.</returns>
         public static T Random<T>([NotNull] this IList<T> list) => list[UnityEngine.Random.Range(0, list.Count)];
+
+        /// <summary>
+        /// Selects a random index from the list based on weighted chances at each position.
+        /// Uses accumulated probability to perform a single random roll.
+        /// </summary>
+        /// <param name="chancePerEntry">The list of chance weights, where each index represents an entry's weight.</param>
+        /// <param name="fallback">The index to return if no entry matches the roll.</param>
+        /// <returns>A randomly selected index weighted by chance, or <paramref name="fallback"/> if none matched.</returns>
+        public static int PickIndexByChance(this IList<int> chancePerEntry, int fallback = -1)
+        {
+            var totalChance = chancePerEntry.Sum();
+            var roll = UnityEngine.Random.Range(0, totalChance);
+            var accumulatedChance = 0f;
+
+            for (var i = 0; i < chancePerEntry.Count; i++)
+            {
+                accumulatedChance += chancePerEntry[i];
+                if (roll <= accumulatedChance)
+                    return i;
+            }
+
+            return fallback;
+        }
     }
 }
