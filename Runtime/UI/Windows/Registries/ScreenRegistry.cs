@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 using CustomUtils.Runtime.AddressableSystem;
+using CustomUtils.Runtime.Extensions;
+using CustomUtils.Runtime.Extensions.Observables;
 using CustomUtils.Runtime.UI.Windows.Windows.Base;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
@@ -13,18 +15,32 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
     [PublicAPI]
     internal sealed class ScreenRegistry : WindowRegistry<SharedScreenBase>
     {
+        private CancellationToken _controllerCancellationToken;
+
         internal ScreenRegistry(
             ReactiveProperty<Type> currentScreenType,
-            Transform container,
+            IAddressablesLoader addressablesLoader,
             IObjectResolver objectResolver,
-            IAddressablesLoader addressablesLoader)
-            : base(currentScreenType, container, objectResolver, addressablesLoader) { }
+            PopupRegistry popupRegistry,
+            Transform container,
+            CancellationToken token)
+            : base(currentScreenType, container, objectResolver, addressablesLoader)
+        {
+            _controllerCancellationToken = token;
+
+            popupRegistry?.OnAllPopupClosed
+                .SubscribeSelf(this, token, static (token, self) => self.currentWindow.AsNullable()?.ShowAsync(token)
+                    .Forget())
+                .RegisterTo(token);
+        }
 
         protected override void OnRegistered(SharedScreenBase sharedScreenBase)
         {
             if (sharedScreenBase.InitialWindow)
             {
                 SetCurrentType(sharedScreenBase.GetType());
+                currentWindow = sharedScreenBase;
+                sharedScreenBase.ShowAsync(_controllerCancellationToken).Forget();
                 return;
             }
 

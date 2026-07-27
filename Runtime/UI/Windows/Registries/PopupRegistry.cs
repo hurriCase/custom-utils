@@ -16,7 +16,10 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
     [PublicAPI]
     internal sealed class PopupRegistry : WindowRegistry<SharedPopupBase>
     {
-        private readonly Stack<SharedPopupBase> _previousOpenedPopups = new();
+        public Observable<Unit> OnAllPopupClosed => _allPopupClosed;
+        private readonly Subject<Unit> _allPopupClosed = new();
+
+        private readonly List<SharedPopupBase> _previousOpenedPopups = new();
 
         private CancellationToken _token;
 
@@ -35,7 +38,7 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
         {
             sharedPopupBase.HideImmediately();
             sharedPopupBase.OnHidden
-                .SubscribeSelf(this, static self => self.HandlePopupHide())
+                .SubscribeSelf(this, static (popup, self) => self.HandlePopupHide(popup))
                 .RegisterTo(_token);
         }
 
@@ -50,7 +53,7 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
 
             if (currentWindow)
             {
-                _previousOpenedPopups.Push(currentWindow);
+                _previousOpenedPopups.Add(currentWindow);
 
                 if (sharedPopupBase.IsSingle)
                     currentWindow.HideImmediately();
@@ -72,19 +75,31 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             currentWindow = null;
         }
 
-        private void HandlePopupHide()
+        private void HandlePopupHide(SharedPopupBase popup)
         {
+            if (popup != currentWindow)
+            {
+                _previousOpenedPopups.Remove(popup);
+                return;
+            }
+
             SetCurrentType(null);
 
             var needShow = currentWindow && currentWindow.IsSingle;
             currentWindow = null;
 
-            if (!_previousOpenedPopups.TryPop(out var previousPopup))
+            if (_previousOpenedPopups.Count == 0)
+            {
+                _allPopupClosed.OnNext(Unit.Default);
                 return;
+            }
 
-            currentWindow = previousPopup;
+            var lastIndex = _previousOpenedPopups.Count - 1;
+            currentWindow = _previousOpenedPopups[lastIndex];
+            _previousOpenedPopups.RemoveAt(lastIndex);
+
             if (needShow)
-                previousPopup.ShowAsync(previousPopup.destroyCancellationToken).Forget();
+                currentWindow.ShowAsync(currentWindow.destroyCancellationToken).Forget();
         }
     }
 }

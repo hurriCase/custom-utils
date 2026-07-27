@@ -60,7 +60,7 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             }
         }
 
-        internal async UniTask<TWindow> Open<TConcreteWindow>(CancellationToken token) where TConcreteWindow : TWindow
+        internal async UniTask<TWindow> Show<TConcreteWindow>(CancellationToken token) where TConcreteWindow : TWindow
         {
             if (!TryGet<TConcreteWindow>(out var window))
                 return null;
@@ -70,7 +70,7 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             return openedWindow;
         }
 
-        internal async UniTask<TWindow> Open<TConcreteWindow, TParameters>(
+        internal async UniTask<TWindow> Show<TConcreteWindow, TParameters>(
             TParameters parameters,
             CancellationToken token)
             where TConcreteWindow : TWindow, IParameterizedWindow<TParameters>
@@ -82,6 +82,14 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             var openedWindow = await OpenWindow(window, token);
             SetCurrentType(openedWindow.AsNullable()?.GetType());
             return openedWindow;
+        }
+
+        internal async UniTask CloseAsync<TConcreteWindow>(CancellationToken token) where TConcreteWindow : TWindow
+        {
+            if (!TryGet<TConcreteWindow>(out var window))
+                return;
+
+            await window.HideAsync(token);
         }
 
         protected abstract void OnRegistered(TWindow window);

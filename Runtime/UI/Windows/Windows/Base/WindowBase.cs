@@ -24,6 +24,17 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
         public abstract UniTask ShowAsync(CancellationToken token);
         public abstract UniTask HideAsync(CancellationToken token);
 
+        public async UniTask ToggleVisibility(bool isVisible, CancellationToken token)
+        {
+            if (isVisible)
+            {
+                await ShowAsync(token);
+                return;
+            }
+
+            await HideAsync(token);
+        }
+
         public virtual void HideImmediately()
         {
             canvasGroup.Hide();

@@ -32,8 +32,8 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
         public Observable<Unit> OnShown => _shown;
         private readonly Subject<Unit> _shown = new();
 
-        public Observable<Unit> OnHidden => _hidden;
-        private readonly Subject<Unit> _hidden = new();
+        public Observable<SharedPopupBase> OnHidden => _hidden;
+        private readonly Subject<SharedPopupBase> _hidden = new();
 
         public override void BaseInitialize()
         {
@@ -62,7 +62,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 
             canvasGroup.Hide();
 
-            _hidden.OnNext(Unit.Default);
+            _hidden.OnNext(this);
         }
 
         public override void HideImmediately()
@@ -73,7 +73,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 
             canvasGroup.Hide();
 
-            _hidden.OnNext(Unit.Default);
+            _hidden.OnNext(this);
         }
 
         protected virtual void OnDestroy()
