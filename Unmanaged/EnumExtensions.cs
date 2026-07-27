@@ -23,5 +23,19 @@ namespace CustomUtils.Unmanaged
             var intFlag = Unsafe.As<TEnum, int>(ref flag);
             return (intValue & intFlag) == intFlag;
         }
+
+        /// <summary>
+        /// Checks whether any of the bits in the specified flag are set, without boxing or virtual dispatch.
+        /// </summary>
+        /// <typeparam name="TEnum">The enum type. Must be backed by <see cref="int"/>.</typeparam>
+        /// <param name="value">The enum value to check.</param>
+        /// <param name="flag">The flag to test for.</param>
+        /// <returns><c>true</c> if at least one bit in <paramref name="flag"/> is set in <paramref name="value"/>.</returns>
+        public static bool HasAnyFlagNoAlloc<TEnum>(this TEnum value, TEnum flag) where TEnum : struct, Enum
+        {
+            var intValue = Unsafe.As<TEnum, int>(ref value);
+            var intFlag = Unsafe.As<TEnum, int>(ref flag);
+            return (intValue & intFlag) != 0;
+        }
     }
 }
