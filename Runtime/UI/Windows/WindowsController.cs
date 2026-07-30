@@ -97,7 +97,7 @@ namespace CustomUtils.Runtime.UI.Windows
             where TPopup : PopupBase
             => await _popupRegistry.Show<TPopup>(token);
 
-        public async UniTask ClosePopupAsync<TPopup>(CancellationToken token = default) where TPopup : PopupBase
+        public async UniTask ClosePopupAsync<TPopup>(CancellationToken token = default) where TPopup : SharedPopupBase
             => await _popupRegistry.CloseAsync<TPopup>(token);
 
         public async UniTask<SharedPopupBase> OpenPopup<TParameterizedPopup, TParameters>(
