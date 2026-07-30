@@ -18,10 +18,10 @@ namespace CustomUtils.Runtime.UI.Windows
 
         private List<UniTask> _cachedTasks = new();
 
-        public virtual async UniTask ShowAsync(CancellationToken token, bool isInstant)
+        public virtual async UniTask ShowAsync(CancellationToken token, bool isInstant = false)
             => await CreateVisibilitySequence(VisibilityState.Visible, token, isInstant);
 
-        public virtual async UniTask HideAsync(CancellationToken token, bool isInstant)
+        public virtual async UniTask HideAsync(CancellationToken token, bool isInstant = false)
             => await CreateVisibilitySequence(VisibilityState.Hidden, token, isInstant);
 
         public void HideImmediately()
