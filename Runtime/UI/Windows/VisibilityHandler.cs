@@ -18,11 +18,11 @@ namespace CustomUtils.Runtime.UI.Windows
 
         private List<UniTask> _cachedTasks = new();
 
-        public virtual async UniTask ShowAsync(CancellationToken token)
-            => await CreateVisibilitySequence(VisibilityState.Visible, token);
+        public virtual async UniTask ShowAsync(CancellationToken token, bool isInstant)
+            => await CreateVisibilitySequence(VisibilityState.Visible, token, isInstant);
 
-        public virtual async UniTask HideAsync(CancellationToken token)
-            => await CreateVisibilitySequence(VisibilityState.Hidden, token);
+        public virtual async UniTask HideAsync(CancellationToken token, bool isInstant)
+            => await CreateVisibilitySequence(VisibilityState.Hidden, token, isInstant);
 
         public void HideImmediately()
         {
@@ -30,7 +30,7 @@ namespace CustomUtils.Runtime.UI.Windows
                 visibilityAnimation.PlayAnimation(VisibilityState.Hidden, true);
         }
 
-        private async UniTask CreateVisibilitySequence(VisibilityState visibilityState, CancellationToken token)
+        private async UniTask CreateVisibilitySequence(VisibilityState visibilityState, CancellationToken token, bool isInstant)
         {
             _cachedTasks.Clear();
 
@@ -38,7 +38,7 @@ namespace CustomUtils.Runtime.UI.Windows
             {
                 // ToYieldInstruction() is required to avoid struct boxing allocation.
                 // It uses a pooled TweenCoroutineEnumerator instead of allocating on each call.
-                _cachedTasks.Add(visibilityAnimation.PlayAnimation(visibilityState)
+                _cachedTasks.Add(visibilityAnimation.PlayAnimation(visibilityState, isInstant)
                     .ToYieldInstruction()
                     .ToUniTask(cancellationToken: token));
             }
