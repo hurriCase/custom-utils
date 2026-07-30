@@ -67,8 +67,8 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
         {
             SetCurrentType(null);
 
-            foreach (var previousOpenedPopup in _previousOpenedPopups)
-                previousOpenedPopup.HideImmediately();
+            for (var i = _previousOpenedPopups.Count - 1; i >= 0; i--)
+                _previousOpenedPopups[i].HideImmediately();
 
             _previousOpenedPopups.Clear();
 
