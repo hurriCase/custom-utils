@@ -65,7 +65,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
 
         private static bool DrawFoldout(Object monoBehaviour)
         {
-            var key = $"{FoldoutKeyPrefix}{monoBehaviour.GetInstanceID()}";
+            var key = $"{FoldoutKeyPrefix}{GetTargetId(monoBehaviour)}";
             var expanded = SessionState.GetBool(key, true);
             EditorGUI.indentLevel++;
             expanded = EditorGUILayout.Foldout(expanded, monoBehaviour.GetType().Name, true);
@@ -92,7 +92,7 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
             var parameters = method.GetParameters();
             var methodNames = parameters.Select(static parameter => parameter.ParameterType.Name).ToArray();
             var signature = StringFormatter.Join("_", methodNames);
-            var key = $"{ParameterKeyPrefix}{monoBehaviour.GetInstanceID()}_{method.Name}_{signature}";
+            var key = $"{ParameterKeyPrefix}{GetTargetId(monoBehaviour)}_{method.Name}_{signature}";
 
             if (!_parameterValues.ContainsKey(key))
                 _parameterValues[key] = new object[parameters.Length];
@@ -129,6 +129,15 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers
                     currentValue as Enum ?? (Enum)Enum.GetValues(type).GetValue(0)),
                 _ => currentValue
             };
+        }
+
+        private static string GetTargetId(Object target)
+        {
+#if UNITY_6000_2_OR_NEWER
+            return target.GetEntityId().ToString();
+#else
+            return target.GetInstanceID().ToString();
+#endif
         }
     }
 }
