@@ -35,7 +35,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
             await HideAsync(token);
         }
 
-        public virtual void HideImmediately()
+        public virtual void HideImmediately(bool isSilent = false)
         {
             canvasGroup.Hide();
         }

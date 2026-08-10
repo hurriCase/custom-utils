@@ -65,8 +65,8 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             if (!TryGet<TConcreteWindow>(out var window))
                 return null;
 
+            _currentType.Value = typeof(TConcreteWindow);
             var openedWindow = await OpenWindow(window, token);
-            SetCurrentType(openedWindow.AsNullable()?.GetType());
             return openedWindow;
         }
 
@@ -79,8 +79,8 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
                 return null;
 
             ((IParameterizedWindow<TParameters>)window).SetParameters(parameters);
+            _currentType.Value = typeof(TConcreteWindow);
             var openedWindow = await OpenWindow(window, token);
-            SetCurrentType(openedWindow.AsNullable()?.GetType());
             return openedWindow;
         }
 

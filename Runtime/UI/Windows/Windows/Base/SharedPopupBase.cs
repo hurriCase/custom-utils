@@ -65,7 +65,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
             _hidden.OnNext(this);
         }
 
-        public override void HideImmediately()
+        public override void HideImmediately(bool isSilent = false)
         {
 #if PRIMETWEEN_INSTALLED
             _visibilityHandler.HideImmediately();
@@ -73,7 +73,8 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 
             canvasGroup.Hide();
 
-            _hidden.OnNext(this);
+            if (!isSilent)
+                _hidden.OnNext(this);
         }
 
         protected virtual void OnDestroy()

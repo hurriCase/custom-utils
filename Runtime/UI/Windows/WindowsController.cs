@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using CustomUtils.Runtime.AddressableSystem;
 using CustomUtils.Runtime.Extensions;
-using CustomUtils.Runtime.Extensions.Observables;
 using CustomUtils.Runtime.UI.Windows.Registries;
 using CustomUtils.Runtime.UI.Windows.Windows.Base;
 using CustomUtils.Runtime.UI.Windows.Windows.Parameterized;
@@ -91,6 +90,13 @@ namespace CustomUtils.Runtime.UI.Windows
         {
             _popupRegistry.HideAll();
             return await _screenRegistry.Show<TParameterizedScreen, TParameters>(parameters, token);
+        }
+
+        public async UniTask<SharedPopupBase> OpenPopupClean<TPopup>(CancellationToken token = default)
+            where TPopup : PopupBase
+        {
+            _popupRegistry.HideAll();
+            return await _popupRegistry.Show<TPopup>(token);
         }
 
         public async UniTask<SharedPopupBase> OpenPopup<TPopup>(CancellationToken token = default)
