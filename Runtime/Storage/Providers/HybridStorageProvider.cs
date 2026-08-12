@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using CustomUtils.Runtime.Storage.Base;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
@@ -11,24 +10,19 @@ namespace CustomUtils.Runtime.Storage.Providers
     {
         private readonly IStorageProvider _localProvider;
         private readonly IStorageProvider _cloudProvider;
-        private readonly bool _autoMigrate;
 
-        public HybridStorageProvider(
-            IStorageProvider localProvider,
-            IStorageProvider cloudProvider,
-            bool autoMigrate = true)
+        public HybridStorageProvider(IStorageProvider localProvider, IStorageProvider cloudProvider)
         {
             _localProvider = localProvider;
             _cloudProvider = cloudProvider;
-            _autoMigrate = autoMigrate;
         }
 
         public async UniTask<bool> TrySaveAsync<T>(string key, T data, bool isForce = false)
         {
-            if (!await _cloudProvider.TrySaveAsync(key, data, isForce))
-                return await _localProvider.TrySaveAsync(key, data, isForce);
+            if (!await _localProvider.TrySaveAsync(key, data, isForce))
+                return false;
 
-            if (_autoMigrate)
+            if (await _cloudProvider.TrySaveAsync(key, data, isForce))
                 await _localProvider.TryDeleteKeyAsync(key);
 
             return true;
@@ -36,42 +30,41 @@ namespace CustomUtils.Runtime.Storage.Providers
 
         public async UniTask<T> LoadAsync<T>(string key, CancellationToken token = default)
         {
-            if (await _cloudProvider.HasKeyAsync(key, token))
-                return await _cloudProvider.LoadAsync<T>(key, token);
+            if (await _localProvider.HasKeyAsync(key, token))
+            {
+                var localData = await _localProvider.LoadAsync<T>(key, token);
 
-            if (!await _localProvider.HasKeyAsync(key, token))
+                if (await _cloudProvider.TrySaveAsync(key, localData, true))
+                    await _localProvider.TryDeleteKeyAsync(key, token);
+
+                return localData;
+            }
+
+            if (!await _cloudProvider.HasKeyAsync(key, token))
                 return default;
 
-            var localData = await _localProvider.LoadAsync<T>(key, token);
-
-            if (!_autoMigrate || EqualityComparer<T>.Default.Equals(localData, default))
-                return localData;
-
-            if (await _cloudProvider.TrySaveAsync(key, localData))
-                await _localProvider.TryDeleteKeyAsync(key, token);
-
-            return localData;
+            return await _cloudProvider.LoadAsync<T>(key, token);
         }
 
         public async UniTask<bool> HasKeyAsync(string key, CancellationToken token = default)
         {
-            if (await _cloudProvider.HasKeyAsync(key, token))
+            if (await _localProvider.HasKeyAsync(key, token))
                 return true;
 
-            return await _localProvider.HasKeyAsync(key, token);
+            return await _cloudProvider.HasKeyAsync(key, token);
         }
 
         public async UniTask<bool> TryDeleteKeyAsync(string key, CancellationToken token = default)
         {
-            var cloudSuccess = await _cloudProvider.TryDeleteKeyAsync(key, token);
             var localSuccess = await _localProvider.TryDeleteKeyAsync(key, token);
+            var cloudSuccess = await _cloudProvider.TryDeleteKeyAsync(key, token);
             return localSuccess || cloudSuccess;
         }
 
         public async UniTask<bool> TryDeleteAllAsync(CancellationToken token = default)
         {
-            var cloudSuccess = await _cloudProvider.TryDeleteAllAsync(token);
             var localSuccess = await _localProvider.TryDeleteAllAsync(token);
+            var cloudSuccess = await _cloudProvider.TryDeleteAllAsync(token);
             return localSuccess || cloudSuccess;
         }
     }
