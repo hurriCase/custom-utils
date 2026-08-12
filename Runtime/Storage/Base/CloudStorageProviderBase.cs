@@ -50,8 +50,10 @@ namespace CustomUtils.Runtime.Storage.Base
 
         private void CleanSave(CancellationTokenSource tokenSource, string key)
         {
+            if (_pendingTokens.TryGetValue(key, out var current) && current == tokenSource)
+                _pendingTokens.Remove(key);
+
             tokenSource.Dispose();
-            _pendingTokens.Remove(key);
         }
     }
 }
