@@ -28,6 +28,35 @@ namespace CustomUtils.Runtime.Scenes
             _initialScene = SceneManager.GetActiveScene();
         }
 
+        public async UniTask ShowTransitionSceneAsync(SceneReference transitionScene, CancellationToken token)
+        {
+            IsLoading = true;
+
+            _transitionScene = await _sceneLoader.LoadSceneAsync(
+                transitionScene.Address,
+                token,
+                LoadSceneMode.Additive);
+        }
+
+        public async UniTask CompleteTransitionAsync(
+            SceneReference destinationScene,
+            CancellationToken token,
+            bool isEndAfterTransition = true)
+        {
+            if (_initialScene.isLoaded)
+                SceneManager.UnloadSceneAsync(_initialScene);
+
+            if (_currentScene.Scene.IsValid())
+                _sceneLoader.TryUnloadScene(_currentScene);
+
+            _currentScene = await _sceneLoader.LoadSceneAsync(destinationScene.Address, token, LoadSceneMode.Additive);
+
+            IsLoading = false;
+
+            if (isEndAfterTransition)
+                EndTransition().Forget();
+        }
+
         public async UniTask StartTransition(
             SceneReference transitionScene,
             SceneReference destinationScene,

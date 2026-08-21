@@ -10,6 +10,13 @@ namespace CustomUtils.Runtime.Scenes.Base
     {
         bool IsLoading { get; }
 
+        UniTask ShowTransitionSceneAsync(SceneReference transitionScene, CancellationToken token);
+
+        UniTask CompleteTransitionAsync(
+            SceneReference destinationScene,
+            CancellationToken token,
+            bool isEndAfterTransition = true);
+
         UniTask StartTransition(
             SceneReference transitionScene,
             SceneReference destinationScene,
