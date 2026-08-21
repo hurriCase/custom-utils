@@ -28,6 +28,8 @@ namespace CustomUtils.Runtime.UI.Theme
         [SerializeField, HideInInspector] private ColorData _previousColorData;
 #endif
 
+        public ColorData ColorData => _colorData;
+
         /// <summary>
         /// Updates the color data for this theme component and applies the corresponding color modifier.
         /// </summary>
