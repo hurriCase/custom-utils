@@ -1,11 +1,21 @@
 ﻿#if ZSTRING_INSTALLED
 using Cysharp.Text;
+using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime.Extensions
 {
-    internal static class TimeExtensions
+    /// <summary>
+    /// Provides extension methods for formatting time values.
+    /// </summary>
+    [PublicAPI]
+    public static class TimeExtensions
     {
-        internal static string ToTimeFormat(this int totalSeconds)
+        /// <summary>
+        /// Converts a total seconds value to a "mm:ss" formatted string.
+        /// </summary>
+        /// <param name="totalSeconds">The total number of seconds to format.</param>
+        /// <returns>A string representing the time in "mm:ss" format.</returns>
+        public static string ToTimeFormat(this int totalSeconds)
         {
             var minutes = totalSeconds / 60;
             var seconds = totalSeconds % 60;
