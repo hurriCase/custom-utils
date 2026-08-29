@@ -24,6 +24,17 @@ namespace CustomUtils.Runtime.UI.Windows
         public virtual async UniTask HideAsync(CancellationToken token, bool isInstant = false)
             => await CreateVisibilitySequence(VisibilityState.Hidden, token, isInstant);
 
+        public virtual async UniTask ToggleVisibilityAsync(bool isVisible, CancellationToken token, bool isInstant = false)
+        {
+            if (isVisible)
+            {
+                await ShowAsync(token, isInstant);
+                return;
+            }
+
+            await HideAsync(token, isInstant);
+        }
+
         public void HideImmediately()
         {
             foreach (var visibilityAnimation in _visibilityAnimations)
