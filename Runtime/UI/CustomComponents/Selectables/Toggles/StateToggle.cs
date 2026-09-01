@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Extensions.Observables;
-using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage;
 using CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles.Mappings;
 using JetBrains.Annotations;
 using R3;
@@ -15,7 +14,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles
     public class StateToggle : Toggle
     {
         [field: SerializeField] public TextMeshProUGUI Text { get; private set; }
-        [field: SerializeField] public ProceduralImage Image { get; private set; }
+        [field: SerializeField] public Image Image { get; private set; }
         [field: SerializeField] public List<GameObject> CheckedObjects { get; private set; } = new();
         [field: SerializeField] public List<GameObject> UncheckedObjects { get; private set; } = new();
         [field: SerializeField] public List<ToggleGraphicMapping> AdditionalGraphics { get; set; } = new();
