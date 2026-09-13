@@ -38,9 +38,9 @@ namespace CustomUtils.Runtime.Pools.UI
         public void AddElement(TData data)
         {
             var item = GetOrCreateItem(data);
+            AddActiveItem(item, data);
 
-            _activeItems.Add(item);
-            _activeData.Add(data);
+            _events.OnActivated?.Invoke(data, item);
         }
 
         public void RemoveElement(TData data)
@@ -65,7 +65,7 @@ namespace CustomUtils.Runtime.Pools.UI
             }
 
             for (var i = _activeItems.Count; i < data.Length; i++)
-                AddElement(data[i]);
+                AddActiveItem(GetOrCreateItem(data[i]), data[i]);
 
             for (var i = 0; i < data.Length; i++)
                 _events.OnActivated?.Invoke(data[i], _activeItems[i]);
@@ -79,7 +79,7 @@ namespace CustomUtils.Runtime.Pools.UI
             }
 
             foreach (var item in dataList.Skip(_activeItems.Count))
-                AddElement(item);
+                AddActiveItem(GetOrCreateItem(item), item);
 
             var index = 0;
             foreach (var data in dataList)
@@ -87,6 +87,12 @@ namespace CustomUtils.Runtime.Pools.UI
                 _events.OnActivated?.Invoke(data, _activeItems[index]);
                 index++;
             }
+        }
+
+        private void AddActiveItem(TPrefab item, TData data)
+        {
+            _activeItems.Add(item);
+            _activeData.Add(data);
         }
 
         private TPrefab GetOrCreateItem(TData data)
