@@ -136,13 +136,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
                                                    AdditionalCanvasShaderChannels.TexCoord3;
         }
 
-        private Vector4 FixRadius(Vector4 cornerRadius)
-        {
-            cornerRadius = cornerRadius.ClampToPositive();
-            var scaleFactor = rectTransform.rect.CalculateScaleFactorForBounds(cornerRadius);
-            return cornerRadius * scaleFactor;
-        }
-
         protected override void OnPopulateMesh(VertexHelper toFill)
         {
             base.OnPopulateMesh(toFill);
@@ -203,7 +196,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             var imageRect = GetPixelAdjustedRect();
             var pixelSize = 1f / Mathf.Max(0.0001f, FalloffDistance);
 
-            var radius = FixRadius(ModifierBase.CalculateRadius(imageRect));
+            var radius = CalculateRadius(imageRect);
 
             var minSide = Mathf.Min(imageRect.width, imageRect.height);
 
@@ -218,6 +211,27 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
                 normalizedBorderWidth);
 
             return info;
+        }
+
+        internal ProceduralShape GetShape()
+        {
+            var imageRect = GetPixelAdjustedRect();
+            var halfSize = imageRect.size * 0.5f;
+
+            return new ProceduralShape(
+                new Vector2(-halfSize.x, halfSize.y) + CornerOffsetTopLeft,
+                new Vector2(halfSize.x, halfSize.y) + CornerOffsetTopRight,
+                new Vector2(halfSize.x, -halfSize.y) + CornerOffsetBottomRight,
+                new Vector2(-halfSize.x, -halfSize.y) + CornerOffsetBottomLeft,
+                CalculateRadius(imageRect),
+                FalloffDistance);
+        }
+
+        private Vector4 CalculateRadius(Rect imageRect)
+        {
+            var cornerRadius = ModifierBase.CalculateRadius(imageRect).ClampToPositive();
+            var scaleFactor = rectTransform.rect.CalculateScaleFactorForBounds(cornerRadius);
+            return cornerRadius * scaleFactor;
         }
 
         private Vector2 GetCornerOffset(Vector2 uv) => (uv.y > 0.9f, uv.x > 0.9f) switch
