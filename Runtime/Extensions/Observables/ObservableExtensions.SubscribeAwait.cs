@@ -22,15 +22,18 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="observable">Observable to subscribe to.</param>
         /// <param name="self">MonoBehaviour instance for disposal registration.</param>
         /// <param name="onNextAsync">Async action called with MonoBehaviour instance.</param>
-        public static void SubscribeAwaitExclusive<TSelf, T>(
+        public static IDisposable SubscribeAwaitExclusive<TSelf, T>(
             this Observable<T> observable,
             TSelf self,
             Func<TSelf, CancellationToken, ValueTask> onNextAsync)
-            where TSelf : MonoBehaviour =>
-            observable.SubscribeAwait((self, onNextAsync),
-                    static (_, state, cancellationToken) =>
-                        state.onNextAsync(state.self, cancellationToken), AwaitOperation.Drop)
-                .RegisterTo(self.destroyCancellationToken);
+            where TSelf : MonoBehaviour
+        {
+            var subscription = observable.SubscribeAwait((self, onNextAsync),
+                static (_, state, cancellationToken) =>
+                    state.onNextAsync(state.self, cancellationToken), AwaitOperation.Drop);
+            subscription.RegisterTo(self.destroyCancellationToken);
+            return subscription;
+        }
 
         /// <summary>
         /// Subscribes to observable with async handler using <see cref="AwaitOperation.Drop"/> strategy.
@@ -42,15 +45,18 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="observable">Observable to subscribe to.</param>
         /// <param name="self">MonoBehaviour instance for disposal registration.</param>
         /// <param name="onNextAsync">Async action called with observable value and MonoBehaviour instance.</param>
-        public static void SubscribeAwaitExclusive<TSelf, T>(
+        public static IDisposable SubscribeAwaitExclusive<TSelf, T>(
             this Observable<T> observable,
             TSelf self,
             Func<T, TSelf, CancellationToken, ValueTask> onNextAsync)
-            where TSelf : MonoBehaviour =>
-            observable.SubscribeAwait((self, onNextAsync),
-                    static (value, state, cancellationToken) =>
-                        state.onNextAsync(value, state.self, cancellationToken), AwaitOperation.Drop)
-                .RegisterTo(self.destroyCancellationToken);
+            where TSelf : MonoBehaviour
+        {
+            var subscription = observable.SubscribeAwait((self, onNextAsync),
+                static (value, state, cancellationToken) =>
+                    state.onNextAsync(value, state.self, cancellationToken), AwaitOperation.Drop);
+            subscription.RegisterTo(self.destroyCancellationToken);
+            return subscription;
+        }
 
         /// <summary>
         /// Subscribes to observable with async handler using <see cref="AwaitOperation.Drop"/> strategy.
@@ -64,16 +70,19 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="self">MonoBehaviour instance for disposal registration.</param>
         /// <param name="tuple">Additional data passed to the async action.</param>
         /// <param name="onNextAsync">Async action called with additional data and MonoBehaviour instance.</param>
-        public static void SubscribeAwaitExclusive<TSelf, T, TTuple>(
+        public static IDisposable SubscribeAwaitExclusive<TSelf, T, TTuple>(
             this Observable<T> observable,
             TSelf self,
             TTuple tuple,
             Func<TTuple, TSelf, CancellationToken, ValueTask> onNextAsync)
-            where TSelf : MonoBehaviour =>
-            observable.SubscribeAwait((self, tuple, onNextAsync),
-                    static (_, state, cancellationToken) =>
-                        state.onNextAsync(state.tuple, state.self, cancellationToken), AwaitOperation.Drop)
-                .RegisterTo(self.destroyCancellationToken);
+            where TSelf : MonoBehaviour
+        {
+            var subscription = observable.SubscribeAwait((self, tuple, onNextAsync),
+                static (_, state, cancellationToken) =>
+                    state.onNextAsync(state.tuple, state.self, cancellationToken), AwaitOperation.Drop);
+            subscription.RegisterTo(self.destroyCancellationToken);
+            return subscription;
+        }
 
         /// <summary>
         /// Subscribes to observable with async handler using <see cref="AwaitOperation.Drop"/> strategy.
@@ -87,15 +96,18 @@ namespace CustomUtils.Runtime.Extensions.Observables
         /// <param name="self">MonoBehaviour instance for disposal registration.</param>
         /// <param name="tuple">Additional data passed to the async action.</param>
         /// <param name="onNextAsync">Async action called with observable value, MonoBehaviour instance, and additional data.</param>
-        public static void SubscribeAwaitExclusive<TSelf, T, TTuple>(
+        public static IDisposable SubscribeAwaitExclusive<TSelf, T, TTuple>(
             this Observable<T> observable,
             TSelf self,
             TTuple tuple,
             Func<T, TSelf, TTuple, CancellationToken, ValueTask> onNextAsync)
-            where TSelf : MonoBehaviour =>
-            observable.SubscribeAwait((self, tuple, onNextAsync),
-                    static (value, state, cancellationToken) =>
-                        state.onNextAsync(value, state.self, state.tuple, cancellationToken), AwaitOperation.Drop)
-                .RegisterTo(self.destroyCancellationToken);
+            where TSelf : MonoBehaviour
+        {
+            var subscription = observable.SubscribeAwait((self, tuple, onNextAsync),
+                static (value, state, cancellationToken) =>
+                    state.onNextAsync(value, state.self, state.tuple, cancellationToken), AwaitOperation.Drop);
+            subscription.RegisterTo(self.destroyCancellationToken);
+            return subscription;
+        }
     }
 }
