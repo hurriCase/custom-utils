@@ -58,7 +58,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             set => base.material = value;
         }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR
         private static readonly ProfilerMarker _markerEncodeVertices
             = new(ProfilerCategory.Render, nameof(ProceduralImage) + "." + nameof(EncodeAllInfoIntoVertices));
 
@@ -159,7 +159,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 
         private void EncodeAllInfoIntoVertices(VertexHelper vertexHelper)
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR
             using var encodeVerticesScope = _markerEncodeVertices.Auto();
 #endif
 
@@ -194,9 +194,9 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             }
         }
 
-        private ProceduralImageInfo CalculateInfo()
+        internal ProceduralImageInfo CalculateInfo()
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR
             using var calculateInfoScope = _markerCalculateInfo.Auto();
 #endif
 
