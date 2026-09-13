@@ -4,12 +4,14 @@ using UnityEngine.UI;
 
 namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 {
+    [RequireComponent(typeof(CanvasRenderer))]
     [ExecuteAlways]
     [AddComponentMenu("UI/Procedural Image Glow")]
     public sealed class ProceduralImageGlow : MaskableGraphic
     {
         [field: SerializeField] public ProceduralImage SourceImage { get; private set; }
         [field: SerializeField] public float GlowRadius { get; private set; }
+        [field: SerializeField] public float GlowFalloffExponent { get; private set; }
 
         public override Material material
         {
@@ -22,6 +24,9 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
         protected override void OnPopulateMesh(VertexHelper vertexHelper)
         {
             vertexHelper.Clear();
+
+            if (!SourceImage)
+                return;
 
             var shapeInfo = SourceImage.CalculateInfo();
             var halfWidth = shapeInfo.Width * 0.5f;
@@ -58,19 +63,22 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             Vector2 cornerTopRight,
             Vector2 cornerBottomRight)
         {
-            var packedGlowRadius = new Vector3(GlowRadius, 0.0f, 0.0f);
+            var packedGlowData = new Vector3(GlowRadius, GlowFalloffExponent, 0.0f);
 
-            vertexHelper.AddVert(new Vector3(minX, minY), color, cornerBottomLeft, cornerTopLeft, cornerTopRight,
-                cornerBottomRight, packedGlowRadius, Vector4.zero);
-            vertexHelper.AddVert(new Vector3(minX, maxY), color, cornerBottomLeft, cornerTopLeft, cornerTopRight,
-                cornerBottomRight, packedGlowRadius, Vector4.zero);
-            vertexHelper.AddVert(new Vector3(maxX, maxY), color, cornerBottomLeft, cornerTopLeft, cornerTopRight,
-                cornerBottomRight, packedGlowRadius, Vector4.zero);
-            vertexHelper.AddVert(new Vector3(maxX, minY), color, cornerBottomLeft, cornerTopLeft, cornerTopRight,
-                cornerBottomRight, packedGlowRadius, Vector4.zero);
+            vertexHelper.AddVert(new Vector3(minX, minY), color, cornerBottomLeft, cornerTopLeft, cornerTopRight, cornerBottomRight, packedGlowData, Vector4.zero);
+            vertexHelper.AddVert(new Vector3(minX, maxY), color, cornerBottomLeft, cornerTopLeft, cornerTopRight, cornerBottomRight, packedGlowData, Vector4.zero);
+            vertexHelper.AddVert(new Vector3(maxX, maxY), color, cornerBottomLeft, cornerTopLeft, cornerTopRight, cornerBottomRight, packedGlowData, Vector4.zero);
+            vertexHelper.AddVert(new Vector3(maxX, minY), color, cornerBottomLeft, cornerTopLeft, cornerTopRight, cornerBottomRight, packedGlowData, Vector4.zero);
 
             vertexHelper.AddTriangle(0, 1, 2);
             vertexHelper.AddTriangle(2, 3, 0);
+        }
+
+        protected override void OnValidate()
+        {
+            base.OnValidate();
+
+            SetVerticesDirty();
         }
     }
 }
