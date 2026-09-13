@@ -2,7 +2,8 @@ Shader "UI/Procedural UI Image Glow"
 {
     Properties
     {
-        _Color ("Tint", Color) = (1,1,1,1)
+        _Color ("Glow Color", Color) = (1,1,1,0.6)
+        _GlowFalloffExponent ("Glow Falloff Exponent", Range(0.5, 8)) = 3
 
         [HideInInspector] _StencilComp ("Stencil Comparison", Float) = 8
         [HideInInspector] _Stencil ("Stencil ID", Float) = 0

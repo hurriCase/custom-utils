@@ -8,6 +8,7 @@
 
 CBUFFER_START(UnityPerMaterial)
     float4 _Color;
+    float _GlowFalloffExponent;
 CBUFFER_END
 
 float4 _ClipRect;
@@ -35,7 +36,6 @@ struct Varyings
     float2 cornerTopRight : TEXCOORD3;
     float2 cornerBottomRight : TEXCOORD4;
     float glowRadius : TEXCOORD5;
-    float glowFalloffExponent : TEXCOORD6;
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
@@ -54,7 +54,6 @@ Varyings Vertex(Attributes input)
     output.cornerTopRight = input.cornerTopRight;
     output.cornerBottomRight = input.cornerBottomRight;
     output.glowRadius = input.normalOS.x;
-    output.glowFalloffExponent = input.normalOS.y;
 
     #ifndef UNITY_COLORSPACE_GAMMA
     if (_UIVertexColorAlwaysGammaSpace)
@@ -85,8 +84,10 @@ float4 Fragment(Varyings input) : SV_Target
         ? signedDistance / input.glowRadius
         : 0.0f;
 
+    // Logistic sigmoid centered on the shape's true edge: 0.5 exactly at the
+    // edge, approaching 1 deep inside and 0 far outside.
     float glow = input.glowRadius > 0.0f
-        ? saturate(1.0f / (1.0f + exp(-normalizedDistance * input.glowFalloffExponent)))
+        ? saturate(1.0f / (1.0f + exp(-normalizedDistance * _GlowFalloffExponent)))
         : 0.0f;
 
     color.a *= glow;
