@@ -24,7 +24,8 @@ namespace CustomUtils.Runtime.AddressableSystem
 #if ADDRESSABLES_LOG_ALL
             using var stopWatchScope = AddressablesLogger.LogWithTimePast("[PrefabLoader::LoadAsync]");
 #endif
-            var asset = await Addressables.LoadAssetAsync<T>(assetGuid).WithCancellation(token);
+            var asset = await Addressables.LoadAssetAsync<T>(assetGuid)
+                .WithCancellation(token, autoReleaseWhenCanceled: true);
 
             AddressablesLogger.Log($"[PrefabLoader::LoadAsync] Loaded '{asset.name}' ({typeof(T).Name})");
             return asset;
@@ -42,7 +43,8 @@ namespace CustomUtils.Runtime.AddressableSystem
             using var stopWatchScope = AddressablesLogger.LogWithTimePast("[PrefabLoader::LoadAsync]");
 #endif
             var asset =
-                await Addressables.LoadAssetAsync<GameObject>(assetReference).WithCancellation(token);
+                await Addressables.LoadAssetAsync<GameObject>(assetReference)
+                    .WithCancellation(token, autoReleaseWhenCanceled: true);
 
             AddressablesLogger.Log(StringFormatter.Format("[PrefabLoader::LoadAsync] Loaded '{0}' ({0})",
                 asset.name,
