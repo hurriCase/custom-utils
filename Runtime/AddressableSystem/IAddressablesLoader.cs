@@ -51,7 +51,8 @@ namespace CustomUtils.Runtime.AddressableSystem
         /// <param name="image">Target Image component.</param>
         /// <param name="assetReference">Sprite asset reference.</param>
         /// <param name="token">Cancellation token.</param>
-        UniTask AssignImageAsync(Image image, AssetReference assetReference, CancellationToken token);
+        /// <returns>Loaded sprite, to be passed to <see cref="Release"/> when no longer needed.</returns>
+        UniTask<Sprite> AssignImageAsync(Image image, AssetReference assetReference, CancellationToken token);
 
         /// <summary>
         /// Loads sprite from cached sprite data and assigns to Image component.
@@ -59,6 +60,13 @@ namespace CustomUtils.Runtime.AddressableSystem
         /// <param name="image">Target Image component.</param>
         /// <param name="cachedSprite">Cached sprite data.</param>
         /// <param name="token">Cancellation token.</param>
-        UniTask AssignImageAsync(Image image, CachedSprite cachedSprite, CancellationToken token);
+        /// <returns>Loaded sprite, or null if <paramref name="cachedSprite"/> is invalid.</returns>
+        UniTask<Sprite> AssignImageAsync(Image image, CachedSprite cachedSprite, CancellationToken token);
+
+        /// <summary>
+        /// Releases an asset previously loaded through this loader.
+        /// </summary>
+        /// <param name="asset">Loaded asset to release. Ignored if null.</param>
+        void Release(Object asset);
     }
 }

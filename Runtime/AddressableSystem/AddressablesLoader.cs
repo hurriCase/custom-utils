@@ -51,13 +51,26 @@ namespace CustomUtils.Runtime.AddressableSystem
             return asset.GetComponent<TComponent>();
         }
 
-        public async UniTask AssignImageAsync(Image image, AssetReference assetReference, CancellationToken token)
+        public async UniTask<Sprite> AssignImageAsync(
+            Image image,
+            AssetReference assetReference,
+            CancellationToken token)
             => image.sprite = await LoadAsync<Sprite>(assetReference, token);
 
-        public async UniTask AssignImageAsync(Image image, CachedSprite cachedSprite, CancellationToken token)
+        public async UniTask<Sprite> AssignImageAsync(Image image, CachedSprite cachedSprite, CancellationToken token)
         {
-            if (cachedSprite.IsValid)
-                image.sprite = await LoadAsync<Sprite>(cachedSprite.AssetGUID, token);
+            if (!cachedSprite.IsValid)
+                return null;
+
+            return image.sprite = await LoadAsync<Sprite>(cachedSprite.AssetGUID, token);
+        }
+
+        public void Release(Object asset)
+        {
+            if (!asset)
+                return;
+
+            Addressables.Release(asset);
         }
     }
 }
