@@ -1,4 +1,5 @@
 ﻿#if IS_RECTTRANSFORM_EXTENDED_ENABLED
+using System;
 using System.Reflection;
 using CustomUtils.Editor.Scripts.CustomEditorUtilities;
 using UnityEditor;
@@ -13,7 +14,6 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
         private UnityEditor.Editor _defaultEditor;
         private LayoutGUIDrawer _guiDrawer;
         private LayoutCalculator _layoutCalculator;
-        private bool _hasInitialized;
 
         private float _parentWidth;
         private float _parentHeight;
@@ -22,13 +22,16 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
         private float _topMargin;
         private float _bottomMargin;
 
+        private LayoutField _editedFields;
+        private LayoutField _mixedFields;
+
         private bool _showFoldout;
 
         protected override void InitializeEditor()
         {
-            _guiDrawer = new LayoutGUIDrawer();
+            _guiDrawer = new LayoutGUIDrawer(EditorStateControls);
             _layoutCalculator = new LayoutCalculator();
-            _hasInitialized = false;
+            _editedFields = LayoutField.None;
 
             var assembly = Assembly.GetAssembly(typeof(UnityEditor.Editor));
             var rectTransformEditorType = assembly.GetType("UnityEditor.RectTransformEditor");
@@ -50,26 +53,47 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
 
             serializedObject.Update();
 
-            if (!_hasInitialized)
-            {
-                RecalculateFromCurrent();
-                _hasInitialized = true;
-            }
-
+            RefreshFromTargets();
             DrawLayoutHelper();
 
             serializedObject.ApplyModifiedProperties();
         }
 
-        private void RecalculateFromCurrent()
+        private void RefreshFromTargets()
         {
-            var layoutData = _layoutCalculator.Calculate(target);
+            var current = _layoutCalculator.Calculate(target);
+
+            _mixedFields = LayoutField.None;
+            for (var i = 1; i < targets.Length; i++)
+                _mixedFields |= current.GetDifferentFields(_layoutCalculator.Calculate(targets[i]));
+
+            SetDisplayedLayout(current.WithFieldsFrom(GetDisplayedLayout(), _editedFields));
+        }
+
+        private LayoutData GetDisplayedLayout() => new()
+        {
+            ParentWidth = _parentWidth,
+            ParentHeight = _parentHeight,
+            LeftMargin = _leftMargin,
+            RightMargin = _rightMargin,
+            TopMargin = _topMargin,
+            BottomMargin = _bottomMargin
+        };
+
+        private void SetDisplayedLayout(LayoutData layoutData)
+        {
             _parentWidth = layoutData.ParentWidth;
             _parentHeight = layoutData.ParentHeight;
             _leftMargin = layoutData.LeftMargin;
             _rightMargin = layoutData.RightMargin;
             _topMargin = layoutData.TopMargin;
             _bottomMargin = layoutData.BottomMargin;
+        }
+
+        private bool IsMixed(LayoutField field)
+        {
+            var layoutField = _mixedFields & ~_editedFields;
+            return layoutField.HasFlag(field);
         }
 
         private void DrawLayoutHelper()
@@ -87,11 +111,15 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
         {
             EditorGUI.indentLevel++;
 
+            var layoutBeforeEdit = GetDisplayedLayout();
+
             DrawSizeFields();
             EditorGUILayout.Space();
 
             DrawMarginFields();
             EditorGUILayout.Space();
+
+            _editedFields |= layoutBeforeEdit.GetDifferentFields(GetDisplayedLayout());
 
             DrawCalculatedContentSize();
             EditorGUILayout.Space();
@@ -120,42 +148,51 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
             menu.AddSeparator("");
             menu.AddItem(new GUIContent("Reset Layout"), false, ResetLayout);
 
+            if (_editedFields != LayoutField.None)
+                menu.AddItem(new GUIContent("Discard Edits"), false, DiscardEdits);
+            else
+                menu.AddDisabledItem(new GUIContent("Discard Edits"));
+
             menu.ShowAsContext();
             currentEvent.Use();
         }
 
+        private void DiscardEdits() => _editedFields = LayoutField.None;
+
         private void ResetLayout()
         {
-            RecalculateFromCurrent();
-
-            _leftMargin = 0f;
-            _rightMargin = 0f;
-            _topMargin = 0f;
-            _bottomMargin = 0f;
-
-            ApplyAnchors();
+            ApplyLayout(static layoutData =>
+            {
+                layoutData.LeftMargin = 0f;
+                layoutData.RightMargin = 0f;
+                layoutData.TopMargin = 0f;
+                layoutData.BottomMargin = 0f;
+                return layoutData;
+            });
         }
 
         private void DrawButtonsSection()
         {
-            using var horizontalScope = EditorVisualControls.CreateHorizontalGroup();
-
             EditorVisualControls.Button("Apply Anchors", ApplyAnchors);
-            EditorVisualControls.Button("Recalculate from Current", RecalculateFromCurrent);
         }
 
         private void DrawSizeFields()
         {
-            _guiDrawer.DrawVector2FieldStacked("Parent", ref _parentWidth,
-                ref _parentHeight, EditorStateControls, "Width", "Height");
+            var parentField = new Vector2FieldData("Parent", "Width", "Height",
+                IsMixed(LayoutField.ParentWidth), IsMixed(LayoutField.ParentHeight));
+
+            _guiDrawer.DrawVector2FieldStacked(parentField, ref _parentWidth, ref _parentHeight);
         }
 
         private void DrawMarginFields()
         {
-            _guiDrawer.DrawVector2FieldHorizontal("Left/Right Margin", ref _leftMargin, ref _rightMargin,
-                EditorStateControls, "L", "R");
-            _guiDrawer.DrawVector2FieldHorizontal("Top/Bottom Margin", ref _topMargin, ref _bottomMargin,
-                EditorStateControls, "T", "B");
+            var horizontalField = new Vector2FieldData("Left/Right Margin", "L", "R",
+                IsMixed(LayoutField.LeftMargin), IsMixed(LayoutField.RightMargin));
+            var verticalField = new Vector2FieldData("Top/Bottom Margin", "T", "B",
+                IsMixed(LayoutField.TopMargin), IsMixed(LayoutField.BottomMargin));
+
+            _guiDrawer.DrawVector2FieldHorizontal(horizontalField, ref _leftMargin, ref _rightMargin);
+            _guiDrawer.DrawVector2FieldHorizontal(verticalField, ref _topMargin, ref _bottomMargin);
         }
 
         private void DrawCalculatedContentSize()
@@ -163,78 +200,86 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
             var contentWidth = _parentWidth - _leftMargin - _rightMargin;
             var contentHeight = _parentHeight - _topMargin - _bottomMargin;
 
-            _guiDrawer.DrawVector2ReadOnly("Content",
-                contentWidth,
-                contentHeight,
-                "Width", "Height");
+            const LayoutField widthFields = LayoutField.ParentWidth | LayoutField.LeftMargin | LayoutField.RightMargin;
+            const LayoutField heightFields = LayoutField.ParentHeight | LayoutField.TopMargin | LayoutField.BottomMargin;
+            var visibleMixedFields = _mixedFields & ~_editedFields;
+
+            var contentField = new Vector2FieldData("Content", "Width", "Height",
+                (visibleMixedFields & widthFields) != 0,
+                (visibleMixedFields & heightFields) != 0);
+
+            _guiDrawer.DrawVector2ReadOnly(contentField, contentWidth, contentHeight);
         }
 
         private void CopyLayout()
         {
-            var layoutData = new LayoutData
-            {
-                ParentWidth = _parentWidth,
-                ParentHeight = _parentHeight,
-                LeftMargin = _leftMargin,
-                RightMargin = _rightMargin,
-                TopMargin = _topMargin,
-                BottomMargin = _bottomMargin
-            };
-
-            LayoutClipboard.Copy(layoutData);
+            LayoutClipboard.Copy(GetDisplayedLayout());
         }
 
         private void PasteLayout()
         {
-            if (!LayoutClipboard.TryPaste(out var layoutData))
+            if (!LayoutClipboard.TryPaste(out var pastedLayout))
             {
                 Debug.LogWarning("[RectTransformExtendedEditor::PasteLayout] " +
                                  "Failed to paste layout data from clipboard");
                 return;
             }
 
-            _parentWidth = layoutData.ParentWidth;
-            _parentHeight = layoutData.ParentHeight;
-            _leftMargin = layoutData.LeftMargin;
-            _rightMargin = layoutData.RightMargin;
-            _topMargin = layoutData.TopMargin;
-            _bottomMargin = layoutData.BottomMargin;
-
-            ApplyAnchors();
+            ApplyLayout(_ => pastedLayout);
         }
 
         private void ApplyAnchors()
         {
-            if (_parentWidth <= 0 || _parentHeight <= 0)
-            {
-                Debug.LogWarning("[RectTransformExtendedEditor::ApplyAnchors] " +
-                                 "Cannot apply anchors: Parent size is invalid. Try 'Recalculate from Current' first.");
-                return;
-            }
+            var editedLayout = GetDisplayedLayout();
+            var editedFields = _editedFields;
 
-            var widthRatio = 1f / _parentWidth;
-            var heightRatio = 1f / _parentHeight;
+            ApplyLayout(layoutData => layoutData.WithFieldsFrom(editedLayout, editedFields));
+        }
+
+        private void ApplyLayout(Func<LayoutData, LayoutData> modifyLayout)
+        {
+            Undo.SetCurrentGroupName("Set RectTransform Anchors and Reset Offsets");
 
             foreach (var selectedTarget in targets)
             {
                 if (!selectedTarget || selectedTarget is not RectTransform rectTransform)
                     continue;
 
+                var layoutData = modifyLayout(_layoutCalculator.Calculate(rectTransform));
+
+                if (layoutData.ParentWidth <= 0 || layoutData.ParentHeight <= 0)
+                {
+                    Debug.LogWarning("[RectTransformExtendedEditor::ApplyLayout] " +
+                                     $"Cannot apply anchors to '{rectTransform.name}': Parent size is invalid.",
+                        rectTransform);
+                    continue;
+                }
+
                 Undo.RecordObject(rectTransform, "Set RectTransform Anchors and Reset Offsets");
 
-                rectTransform.anchorMin = new Vector2(
-                    widthRatio * _leftMargin,
-                    heightRatio * _bottomMargin);
-
-                rectTransform.anchorMax = new Vector2(
-                    1 - widthRatio * _rightMargin,
-                    1 - heightRatio * _topMargin);
-
-                rectTransform.offsetMin = Vector2.zero;
-                rectTransform.offsetMax = Vector2.zero;
+                SetAnchors(rectTransform, layoutData);
 
                 EditorUtility.SetDirty(rectTransform);
             }
+
+            _editedFields = LayoutField.None;
+        }
+
+        private static void SetAnchors(RectTransform rectTransform, LayoutData layoutData)
+        {
+            var widthRatio = 1f / layoutData.ParentWidth;
+            var heightRatio = 1f / layoutData.ParentHeight;
+
+            rectTransform.anchorMin = new Vector2(
+                widthRatio * layoutData.LeftMargin,
+                heightRatio * layoutData.BottomMargin);
+
+            rectTransform.anchorMax = new Vector2(
+                1 - widthRatio * layoutData.RightMargin,
+                1 - heightRatio * layoutData.TopMargin);
+
+            rectTransform.anchoredPosition = Vector2.zero;
+            rectTransform.sizeDelta = Vector2.zero;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
         {
             var rectTransform = target as RectTransform;
             if (!rectTransform)
-                return LayoutData.Empty;
+                return default;
 
             var parentSize = CalculateParentSize(rectTransform);
 
@@ -56,61 +56,15 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
             if (parentSize.x <= 0 || parentSize.y <= 0)
                 return;
 
-            var horizontalMargins = CalculateHorizontalMargins(rectTransform, parentSize.x);
-            var verticalMargins = CalculateVerticalMargins(rectTransform, parentSize.y);
-
-            layoutData.LeftMargin = horizontalMargins.left;
-            layoutData.RightMargin = horizontalMargins.right;
-            layoutData.TopMargin = verticalMargins.top;
-            layoutData.BottomMargin = verticalMargins.bottom;
-        }
-
-        private (float left, float right) CalculateHorizontalMargins(RectTransform rectTransform, float parentWidth)
-        {
             var anchorMin = rectTransform.anchorMin;
             var anchorMax = rectTransform.anchorMax;
+            var offsetMin = rectTransform.offsetMin;
+            var offsetMax = rectTransform.offsetMax;
 
-            if (Mathf.Approximately(anchorMin.x, anchorMax.x))
-            {
-                var anchorX = anchorMin.x * parentWidth;
-                var pivot = rectTransform.pivot;
-                var sizeDelta = rectTransform.sizeDelta;
-                var anchoredPosition = rectTransform.anchoredPosition;
-
-                var left = anchorX + anchoredPosition.x - sizeDelta.x * pivot.x;
-                var right = parentWidth - (anchorX + anchoredPosition.x + sizeDelta.x * (1 - pivot.x));
-                return (left, right);
-            }
-            else
-            {
-                var left = anchorMin.x * parentWidth + rectTransform.offsetMin.x;
-                var right = (1 - anchorMax.x) * parentWidth - rectTransform.offsetMax.x;
-                return (left, right);
-            }
-        }
-
-        private (float top, float bottom) CalculateVerticalMargins(RectTransform rectTransform, float parentHeight)
-        {
-            var anchorMin = rectTransform.anchorMin;
-            var anchorMax = rectTransform.anchorMax;
-
-            if (Mathf.Approximately(anchorMin.y, anchorMax.y))
-            {
-                var anchorY = anchorMin.y * parentHeight;
-                var pivot = rectTransform.pivot;
-                var sizeDelta = rectTransform.sizeDelta;
-                var anchoredPosition = rectTransform.anchoredPosition;
-
-                var bottom = anchorY + anchoredPosition.y - sizeDelta.y * pivot.y;
-                var top = parentHeight - (anchorY + anchoredPosition.y + sizeDelta.y * (1 - pivot.y));
-                return (top, bottom);
-            }
-            else
-            {
-                var bottom = anchorMin.y * parentHeight - rectTransform.offsetMin.y;
-                var top = (1 - anchorMax.y) * parentHeight + rectTransform.offsetMax.y;
-                return (top, bottom);
-            }
+            layoutData.LeftMargin = anchorMin.x * parentSize.x + offsetMin.x;
+            layoutData.RightMargin = (1 - anchorMax.x) * parentSize.x - offsetMax.x;
+            layoutData.BottomMargin = anchorMin.y * parentSize.y + offsetMin.y;
+            layoutData.TopMargin = (1 - anchorMax.y) * parentSize.y - offsetMax.y;
         }
     }
 }

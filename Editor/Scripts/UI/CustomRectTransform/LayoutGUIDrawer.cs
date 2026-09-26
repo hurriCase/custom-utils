@@ -1,4 +1,4 @@
-﻿#if IS_RECTTRANSFORM_EXTENDED_ENABLED
+#if IS_RECTTRANSFORM_EXTENDED_ENABLED
 using System.Reflection;
 using CustomUtils.Editor.Scripts.CustomEditorUtilities;
 using UnityEditor;
@@ -10,6 +10,8 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
     {
         private static readonly MethodInfo _multiFieldPrefixLabelMethod;
         private static readonly MethodInfo _calcPrefixLabelWidthMethod;
+
+        private readonly EditorStateControls _stateControls;
 
         static LayoutGUIDrawer()
         {
@@ -24,78 +26,94 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
                 null, new[] { typeof(GUIContent), typeof(GUIStyle) }, null);
         }
 
-        internal void DrawVector2FieldStacked(string mainLabel, ref float xValue, ref float yValue, EditorStateControls stateControls, string xLabel = "X", string yLabel = "Y")
+        internal LayoutGUIDrawer(EditorStateControls stateControls)
         {
-            var controlRect = EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight * 2f);
-            controlRect.height = EditorGUIUtility.singleLineHeight;
-
-            var labelRect = new Rect(controlRect.x, controlRect.y, EditorGUIUtility.labelWidth, controlRect.height);
-            EditorVisualControls.LabelField(labelRect, mainLabel);
-
-            var (firstColumn, secondColumn) = GetTwoColumnRects(controlRect);
-
-            DrawStackedField(firstColumn, xLabel, ref xValue, stateControls);
-            DrawStackedField(secondColumn, yLabel, ref yValue, stateControls);
+            _stateControls = stateControls;
         }
 
-        internal void DrawVector2FieldHorizontal(string label, ref float xValue, ref float yValue, EditorStateControls stateControls, string xLabel = "X", string yLabel = "Y")
+        internal void DrawVector2FieldStacked(in Vector2FieldData field, ref float xValue, ref float yValue)
+        {
+            var (firstColumn, secondColumn) = DrawStackedLabel(field.Label);
+
+            DrawStackedField(firstColumn, field.XLabel, ref xValue, field.IsXMixed);
+            DrawStackedField(secondColumn, field.YLabel, ref yValue, field.IsYMixed);
+        }
+
+        internal void DrawVector2FieldHorizontal(in Vector2FieldData field, ref float xValue, ref float yValue)
         {
             var controlRect = EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight);
-            var controlId = GUIUtility.GetControlID(label.GetHashCode(), FocusType.Keyboard, controlRect);
+            var controlId = GUIUtility.GetControlID(field.Label.GetHashCode(), FocusType.Keyboard, controlRect);
 
             var fieldRect = (Rect)_multiFieldPrefixLabelMethod.Invoke(null,
-                new object[] { controlRect, controlId, new GUIContent(label), 2 });
+                new object[] { controlRect, controlId, new GUIContent(field.Label), 2 });
 
             var originalLabelWidth = EditorGUIUtility.labelWidth;
             var originalIndentLevel = EditorGUI.indentLevel;
 
             var subLabelWidth = (float)_calcPrefixLabelWidthMethod.Invoke(null,
-                new object[] { new GUIContent(xLabel), EditorStyles.label });
+                new object[] { new GUIContent(field.XLabel), EditorStyles.label });
 
             EditorGUI.indentLevel = 0;
             EditorGUIUtility.labelWidth = subLabelWidth;
 
             var (xRect, yRect) = GetHorizontalFieldRects(fieldRect);
 
-            xValue = stateControls.FloatField(xRect, $"{label} {xLabel}", new GUIContent(xLabel), xValue);
-            yValue = stateControls.FloatField(yRect, $"{label} {yLabel}", new GUIContent(yLabel), yValue);
+            EditorGUI.showMixedValue = field.IsXMixed;
+            xValue = _stateControls.FloatField(xRect, $"{field.Label} {field.XLabel}",
+                new GUIContent(field.XLabel), xValue);
+            EditorGUI.showMixedValue = field.IsYMixed;
+            yValue = _stateControls.FloatField(yRect, $"{field.Label} {field.YLabel}",
+                new GUIContent(field.YLabel), yValue);
+            EditorGUI.showMixedValue = false;
 
             EditorGUIUtility.labelWidth = originalLabelWidth;
             EditorGUI.indentLevel = originalIndentLevel;
         }
 
-        internal void DrawVector2ReadOnly(string mainLabel, float xValue, float yValue, string xLabel = "X", string yLabel = "Y")
+        internal void DrawVector2ReadOnly(in Vector2FieldData field, float xValue, float yValue)
+        {
+            var (firstColumn, secondColumn) = DrawStackedLabel(field.Label);
+
+            DrawStackedReadOnlyField(firstColumn, field.XLabel, xValue, field.IsXMixed);
+            DrawStackedReadOnlyField(secondColumn, field.YLabel, yValue, field.IsYMixed);
+        }
+
+        private (Rect first, Rect second) DrawStackedLabel(string label)
         {
             var controlRect = EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight * 2f);
             controlRect.height = EditorGUIUtility.singleLineHeight;
 
             var labelRect = new Rect(controlRect.x, controlRect.y, EditorGUIUtility.labelWidth, controlRect.height);
-            EditorVisualControls.LabelField(labelRect, mainLabel);
+            EditorVisualControls.LabelField(labelRect, label);
 
-            var (firstColumn, secondColumn) = GetTwoColumnRects(controlRect);
-
-            DrawStackedReadOnlyField(firstColumn, xLabel, xValue);
-            DrawStackedReadOnlyField(secondColumn, yLabel, yValue);
+            return GetTwoColumnRects(controlRect);
         }
 
-        private void DrawStackedReadOnlyField(Rect columnRect, string labelText, float value)
+        private void DrawStackedReadOnlyField(Rect columnRect, string labelText, float value, bool isMixed)
         {
-            var labelRect = new Rect(columnRect.x, columnRect.y, columnRect.width, EditorGUIUtility.singleLineHeight);
-            var fieldRect = new Rect(columnRect.x, columnRect.y + EditorGUIUtility.singleLineHeight, columnRect.width,
-                EditorGUIUtility.singleLineHeight);
+            var fieldRect = DrawStackedFieldLabel(columnRect, labelText);
 
-            EditorVisualControls.LabelField(labelRect, labelText);
+            EditorGUI.showMixedValue = isMixed;
             EditorVisualControls.ReadOnlyFloatField(fieldRect, value);
+            EditorGUI.showMixedValue = false;
         }
 
-        private void DrawStackedField(Rect columnRect, string labelText, ref float value, EditorStateControls stateControls)
+        private void DrawStackedField(Rect columnRect, string labelText, ref float value, bool isMixed)
+        {
+            var fieldRect = DrawStackedFieldLabel(columnRect, labelText);
+
+            EditorGUI.showMixedValue = isMixed;
+            value = _stateControls.FloatField(fieldRect, labelText, value);
+            EditorGUI.showMixedValue = false;
+        }
+
+        private Rect DrawStackedFieldLabel(Rect columnRect, string labelText)
         {
             var labelRect = new Rect(columnRect.x, columnRect.y, columnRect.width, EditorGUIUtility.singleLineHeight);
-            var fieldRect = new Rect(columnRect.x, columnRect.y + EditorGUIUtility.singleLineHeight, columnRect.width,
-                EditorGUIUtility.singleLineHeight);
-
             EditorVisualControls.LabelField(labelRect, labelText);
-            value = stateControls.FloatField(fieldRect, labelText, value);
+
+            return new Rect(columnRect.x, columnRect.y + EditorGUIUtility.singleLineHeight, columnRect.width,
+                EditorGUIUtility.singleLineHeight);
         }
 
         private (Rect first, Rect second) GetTwoColumnRects(Rect totalRect)
