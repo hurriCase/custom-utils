@@ -9,9 +9,9 @@ namespace CustomUtils.Runtime.Storage.Providers
     public sealed class HybridStorageProvider : IStorageProvider
     {
         private readonly IStorageProvider _localProvider;
-        private readonly IStorageProvider _cloudProvider;
+        private readonly ICloudStorageProvider _cloudProvider;
 
-        public HybridStorageProvider(IStorageProvider localProvider, IStorageProvider cloudProvider)
+        public HybridStorageProvider(IStorageProvider localProvider, ICloudStorageProvider cloudProvider)
         {
             _localProvider = localProvider;
             _cloudProvider = cloudProvider;
