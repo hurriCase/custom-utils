@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using CustomUtils.Editor.Scripts.CustomEditorUtilities;
 using CustomUtils.Editor.Scripts.Extensions;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage;
@@ -8,6 +10,7 @@ using UnityEditor;
 using UnityEditor.UI;
 using UnityEditorInternal;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
 {
@@ -16,6 +19,14 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
     public sealed class ProceduralImageEditor : GraphicEditor
     {
         private static List<ModifierIDAttribute> _attributes;
+
+        private const string RelativeOffsetTooltip =
+            "Shown in pixels at the current rect size. Stored as a fraction of the size, " +
+            "so the offset scales with the rect (x by width, y by height).";
+
+        private static readonly GUIContent _cornerOffsetModeContent = new("Corner Offset Mode",
+            "Absolute: offsets are pixels and don't change on resize.\n" +
+            "Relative: offsets scale with the rect size. Switching keeps the current shape.");
 
         private SerializedProperty _useCustomMaterial;
         private SerializedProperty _borderWidth;
@@ -84,12 +95,118 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
 
             _editorStateControls.PropertyField(_borderWidth);
             _editorStateControls.PropertyField(_falloffDistance);
+
+            serializedObject.ApplyModifiedProperties();
+
+            CornerOffsetModeGUI();
+
+            if (!HasOnlyAbsoluteOffsets())
+            {
+                RelativeCornerOffsetsGUI();
+                return;
+            }
+
+            serializedObject.Update();
+
             _editorStateControls.PropertyField(_cornerOffsetTopLeft);
             _editorStateControls.PropertyField(_cornerOffsetTopRight);
             _editorStateControls.PropertyField(_cornerOffsetBottomRight);
             _editorStateControls.PropertyField(_cornerOffsetBottomLeft);
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        private bool HasOnlyAbsoluteOffsets()
+            => targets.All(static item => ((ProceduralImage)item).CornerOffsetMode == CornerOffsetMode.Absolute);
+
+        private void CornerOffsetModeGUI()
+        {
+            var mode = _proceduralImage.CornerOffsetMode;
+
+            EditorGUI.showMixedValue = targets.Any(item => ((ProceduralImage)item).CornerOffsetMode != mode);
+            EditorGUI.BeginChangeCheck();
+
+            var newMode = (CornerOffsetMode)EditorGUILayout.EnumPopup(_cornerOffsetModeContent, mode);
+
+            EditorGUI.showMixedValue = false;
+
+            if (!EditorGUI.EndChangeCheck())
+                return;
+
+            Undo.RecordObjects(targets, "Change Corner Offset Mode");
+            foreach (var item in targets)
+            {
+                var proceduralImage = (ProceduralImage)item;
+                proceduralImage.SetCornerOffsetMode(newMode);
+                MarkModified(proceduralImage);
+            }
+        }
+
+        private void RelativeCornerOffsetsGUI()
+        {
+            RelativeCornerOffsetField(
+                "Corner Offset Top Left",
+                static image => image.CornerOffsetTopLeft,
+                static (image, value) => image.CornerOffsetTopLeft = value);
+
+            RelativeCornerOffsetField(
+                "Corner Offset Top Right",
+                static image => image.CornerOffsetTopRight,
+                static (image, value) => image.CornerOffsetTopRight = value);
+
+            RelativeCornerOffsetField(
+                "Corner Offset Bottom Right",
+                static image => image.CornerOffsetBottomRight,
+                static (image, value) => image.CornerOffsetBottomRight = value);
+
+            RelativeCornerOffsetField(
+                "Corner Offset Bottom Left",
+                static image => image.CornerOffsetBottomLeft,
+                static (image, value) => image.CornerOffsetBottomLeft = value);
+        }
+
+        private void RelativeCornerOffsetField(
+            string label,
+            Func<ProceduralImage, Vector2> getOffset,
+            Action<ProceduralImage, Vector2> setOffset)
+        {
+            var pixels = _proceduralImage.StoredOffsetToPixels(getOffset(_proceduralImage));
+
+            EditorGUI.showMixedValue = targets.Any(item =>
+            {
+                var proceduralImage = (ProceduralImage)item;
+                return proceduralImage.StoredOffsetToPixels(getOffset(proceduralImage)) != pixels;
+            });
+            EditorGUI.BeginChangeCheck();
+
+            var content = new GUIContent($"{label} (px)", RelativeOffsetTooltip);
+            var newPixels = EditorGUILayout.Vector2Field(content, pixels);
+
+            EditorGUI.showMixedValue = false;
+
+            if (!EditorGUI.EndChangeCheck())
+                return;
+
+            Undo.RecordObjects(targets, $"Change {label}");
+            foreach (var item in targets)
+            {
+                var proceduralImage = (ProceduralImage)item;
+                var currentPixels = proceduralImage.StoredOffsetToPixels(getOffset(proceduralImage));
+
+                var resultPixels = new Vector2(
+                    Mathf.Approximately(newPixels.x, pixels.x) ? currentPixels.x : newPixels.x,
+                    Mathf.Approximately(newPixels.y, pixels.y) ? currentPixels.y : newPixels.y);
+
+                setOffset(proceduralImage, proceduralImage.PixelsToStoredOffset(resultPixels));
+                proceduralImage.SetVerticesDirty();
+                MarkModified(proceduralImage);
+            }
+        }
+
+        private static void MarkModified(Object proceduralImage)
+        {
+            PrefabUtility.RecordPrefabInstancePropertyModifications(proceduralImage);
+            EditorUtility.SetDirty(proceduralImage);
         }
 
         private void CheckForShaderChannelsGUI()

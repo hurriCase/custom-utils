@@ -4,6 +4,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 #include "Packages/com.firsttry.customutils/Shaders/Shared/Common.hlsl"
+#include "Packages/com.firsttry.customutils/Shaders/Shared/QuadSDF.hlsl"
 
 #define SQRT_2 1.41421356f
 #define MIN_GLOW_SIZE 0.001f
@@ -50,36 +51,6 @@ float Erf7(float x)
     float xx = x * x;
     x = x + (0.24295f + (0.03395f + 0.0104f * xx) * xx) * (x * xx);
     return x / sqrt(1.0f + x * x);
-}
-
-float DistanceToEdge(float2 a, float2 b, float orientation)
-{
-    float2 edge = b - a;
-    float2 direction = edge / max(length(edge), MIN_GLOW_SIZE);
-    float2 outward = float2(-direction.y, direction.x) * orientation;
-    return -dot(a, outward);
-}
-
-struct QuadEdges
-{
-    float top;
-    float right;
-    float bottom;
-    float left;
-};
-
-QuadEdges CalculateQuadEdges(float2 topLeft, float2 topRight, float2 bottomRight, float2 bottomLeft)
-{
-    float doubleArea = Cross2D(topLeft, topRight) + Cross2D(topRight, bottomRight)
-        + Cross2D(bottomRight, bottomLeft) + Cross2D(bottomLeft, topLeft);
-    float orientation = doubleArea < 0.0f ? 1.0f : -1.0f;
-
-    QuadEdges edges;
-    edges.top = DistanceToEdge(topLeft, topRight, orientation);
-    edges.right = DistanceToEdge(topRight, bottomRight, orientation);
-    edges.bottom = DistanceToEdge(bottomRight, bottomLeft, orientation);
-    edges.left = DistanceToEdge(bottomLeft, topLeft, orientation);
-    return edges;
 }
 
 float BlurredRoundedQuad(QuadEdges edges, float width, float height, float4 radii, float sigma, float spread)
@@ -133,12 +104,7 @@ float BlurredRoundedQuad(QuadEdges edges, float width, float height, float4 radi
 
 float SourceCoverage(QuadEdges edges, float4 radii, float falloff)
 {
-    bool isRight = edges.right > edges.left;
-    bool isTop = edges.top > edges.bottom;
-    float radius = isRight ? isTop ? radii.y : radii.z : isTop ? radii.x : radii.w;
-
-    float2 q = float2(max(edges.left, edges.right), max(edges.top, edges.bottom)) + radius;
-    float sdf = length(max(q, 0.0f)) + min(max(q.x, q.y), 0.0f) - radius;
+    float sdf = SdfRoundedQuad(edges, radii);
 
     float pixelScale = clamp(1.0f / max(falloff, MIN_PIXEL_WORLD_SCALE), MIN_PIXEL_WORLD_SCALE, MAX_PIXEL_WORLD_SCALE);
     return saturate(-sdf * pixelScale);

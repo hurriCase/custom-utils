@@ -3,7 +3,6 @@ using CustomUtils.Runtime.Other;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers.Base;
 using JetBrains.Annotations;
-using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,11 +19,28 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
         [field: SerializeField] public Vector2 CornerOffsetBottomRight { get; set; }
         [field: SerializeField] public Vector2 CornerOffsetBottomLeft { get; set; }
 
+        [SerializeField] private CornerOffsetMode _cornerOffsetMode;
         [SerializeField, Min(0)] private float _borderWidth;
         [SerializeField, Min(0)] private float _falloffDistance;
 
+        internal const string CornerOffsetModeFieldName = nameof(_cornerOffsetMode);
         internal const string BorderWidthFieldName = nameof(_borderWidth);
         internal const string FalloffDistanceFieldName = nameof(_falloffDistance);
+
+        private const float MinEdgeLength = 0.001f;
+
+        public CornerOffsetMode CornerOffsetMode
+        {
+            get => _cornerOffsetMode;
+            set
+            {
+                if (_cornerOffsetMode == value)
+                    return;
+
+                _cornerOffsetMode = value;
+                SetVerticesDirty();
+            }
+        }
 
         public float BorderWidth
         {
@@ -58,14 +74,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             set => base.material = value;
         }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        private static readonly ProfilerMarker _markerEncodeVertices
-            = new(ProfilerCategory.Render, nameof(ProceduralImage) + "." + nameof(EncodeAllInfoIntoVertices));
-
-        private static readonly ProfilerMarker _markerCalculateInfo
-            = new(ProfilerCategory.Render, nameof(ProceduralImage) + "." + nameof(CalculateInfo));
-#endif
-
         private ResourceReferences ResourceReferences => ResourceReferences.Instance;
 
         private ModifierBase _modifierBase;
@@ -98,6 +106,46 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 
             return true;
         }
+
+        public void SetCornerOffsetMode(CornerOffsetMode mode, bool preserveShape = true)
+        {
+            if (_cornerOffsetMode == mode)
+                return;
+
+            if (preserveShape)
+            {
+                var size = GetPixelAdjustedRect().size;
+                CornerOffsetTopLeft = ConvertOffset(ResolveOffset(CornerOffsetTopLeft, size), size, mode);
+                CornerOffsetTopRight = ConvertOffset(ResolveOffset(CornerOffsetTopRight, size), size, mode);
+                CornerOffsetBottomRight = ConvertOffset(ResolveOffset(CornerOffsetBottomRight, size), size, mode);
+                CornerOffsetBottomLeft = ConvertOffset(ResolveOffset(CornerOffsetBottomLeft, size), size, mode);
+            }
+
+            CornerOffsetMode = mode;
+        }
+
+        public Vector2 StoredOffsetToPixels(Vector2 storedOffset)
+        {
+            var pixelAdjustedRect = GetPixelAdjustedRect();
+            return ResolveOffset(storedOffset, pixelAdjustedRect.size);
+        }
+
+        public Vector2 PixelsToStoredOffset(Vector2 pixelOffset)
+        {
+            var pixelAdjustedRect = GetPixelAdjustedRect();
+            return ConvertOffset(pixelOffset, pixelAdjustedRect.size, _cornerOffsetMode);
+        }
+
+        private Vector2 ResolveOffset(Vector2 storedOffset, Vector2 size)
+            => _cornerOffsetMode == CornerOffsetMode.Relative ? Vector2.Scale(storedOffset, size) : storedOffset;
+
+        private static Vector2 ConvertOffset(Vector2 pixelOffset, Vector2 size, CornerOffsetMode targetMode)
+            => targetMode == CornerOffsetMode.Relative
+                ? new Vector2(SafeDivide(pixelOffset.x, size.x), SafeDivide(pixelOffset.y, size.y))
+                : pixelOffset;
+
+        private static float SafeDivide(float value, float divisor)
+            => Mathf.Approximately(divisor, 0f) ? 0f : value / divisor;
 
         private ModifierBase AddNewModifier(System.Type modifierType)
         {
@@ -152,77 +200,76 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 
         private void EncodeAllInfoIntoVertices(VertexHelper vertexHelper)
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            using var encodeVerticesScope = _markerEncodeVertices.Auto();
-#endif
+            var imageRect = GetPixelAdjustedRect();
+            var size = imageRect.size;
+            var shape = GetShape();
 
-            var info = CalculateInfo();
+            var topLeft = imageRect.center + shape.TopLeft;
+            var topRight = imageRect.center + shape.TopRight;
+            var bottomRight = imageRect.center + shape.BottomRight;
+            var bottomLeft = imageRect.center + shape.BottomLeft;
 
-            var uv1 = new Vector2(info.Width, info.Height);
+            var orientation = CalculateOrientation(topLeft, topRight, bottomRight, bottomLeft);
+            var topNormal = CalculateEdgeNormal(topLeft, topRight, orientation);
+            var rightNormal = CalculateEdgeNormal(topRight, bottomRight, orientation);
+            var bottomNormal = CalculateEdgeNormal(bottomRight, bottomLeft, orientation);
+            var leftNormal = CalculateEdgeNormal(bottomLeft, topLeft, orientation);
 
-            var normalizedRadius = info.NormalizedRadius;
-            var uv2 = new Vector2(
-                normalizedRadius.x.PackAs16BitWith(normalizedRadius.y),
-                normalizedRadius.z.PackAs16BitWith(normalizedRadius.w)
-            );
-
-            var normalizedBorderWidth = info.NormalizedBorderWidth == 0
-                ? 1
-                : Mathf.Clamp01(info.NormalizedBorderWidth);
-
-            var uv3 = new Vector2(normalizedBorderWidth, info.PixelSize);
+            var lineWeight = BorderWidth > 0f ? BorderWidth : -1f;
+            var pixelScale = 1f / Mathf.Max(0.0001f, FalloffDistance);
 
             var vert = new UIVertex();
             for (var i = 0; i < vertexHelper.currentVertCount; i++)
             {
                 vertexHelper.PopulateUIVertex(ref vert, i);
 
-                vert.position += (Vector3)GetCornerOffset(vert.uv0);
+                vert.position += (Vector3)ResolveOffset(GetCornerOffset(vert.uv0), size);
 
-                vert.uv1 = uv1;
-                vert.uv2 = uv2;
-                vert.uv3 = uv3;
+                var position = (Vector2)vert.position;
+
+                vert.uv0 = new Vector4(vert.uv0.x, vert.uv0.y, lineWeight, pixelScale);
+                vert.uv1 = new Vector4(
+                    Vector2.Dot(position - topLeft, topNormal),
+                    Vector2.Dot(position - topRight, rightNormal),
+                    Vector2.Dot(position - bottomRight, bottomNormal),
+                    Vector2.Dot(position - bottomLeft, leftNormal));
+                vert.uv2 = shape.Radii;
 
                 vertexHelper.SetUIVertex(vert, i);
             }
         }
 
-        private ProceduralImageInfo CalculateInfo()
+        private static float CalculateOrientation(
+            Vector2 topLeft,
+            Vector2 topRight,
+            Vector2 bottomRight,
+            Vector2 bottomLeft)
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            using var calculateInfoScope = _markerCalculateInfo.Auto();
-#endif
-
-            var imageRect = GetPixelAdjustedRect();
-            var pixelSize = 1f / Mathf.Max(0.0001f, FalloffDistance);
-
-            var radius = CalculateRadius(imageRect);
-
-            var minSide = Mathf.Min(imageRect.width, imageRect.height);
-
-            var normalizedRadius = radius / minSide;
-            var normalizedBorderWidth = BorderWidth / minSide;
-
-            var info = new ProceduralImageInfo(
-                imageRect.width + FalloffDistance,
-                imageRect.height + FalloffDistance,
-                pixelSize,
-                normalizedRadius,
-                normalizedBorderWidth);
-
-            return info;
+            var doubleArea = Cross(topLeft, topRight) + Cross(topRight, bottomRight) +
+                             Cross(bottomRight, bottomLeft) + Cross(bottomLeft, topLeft);
+            return doubleArea < 0f ? 1f : -1f;
         }
+
+        private static Vector2 CalculateEdgeNormal(Vector2 start, Vector2 end, float orientation)
+        {
+            var edge = end - start;
+            var direction = edge / Mathf.Max(edge.magnitude, MinEdgeLength);
+            return new Vector2(-direction.y, direction.x) * orientation;
+        }
+
+        private static float Cross(Vector2 left, Vector2 right) => left.x * right.y - left.y * right.x;
 
         internal ProceduralShape GetShape()
         {
             var imageRect = GetPixelAdjustedRect();
-            var halfSize = imageRect.size * 0.5f;
+            var size = imageRect.size;
+            var halfSize = size * 0.5f;
 
             return new ProceduralShape(
-                new Vector2(-halfSize.x, halfSize.y) + CornerOffsetTopLeft,
-                new Vector2(halfSize.x, halfSize.y) + CornerOffsetTopRight,
-                new Vector2(halfSize.x, -halfSize.y) + CornerOffsetBottomRight,
-                new Vector2(-halfSize.x, -halfSize.y) + CornerOffsetBottomLeft,
+                new Vector2(-halfSize.x, halfSize.y) + ResolveOffset(CornerOffsetTopLeft, size),
+                new Vector2(halfSize.x, halfSize.y) + ResolveOffset(CornerOffsetTopRight, size),
+                new Vector2(halfSize.x, -halfSize.y) + ResolveOffset(CornerOffsetBottomRight, size),
+                new Vector2(-halfSize.x, -halfSize.y) + ResolveOffset(CornerOffsetBottomLeft, size),
                 CalculateRadius(imageRect),
                 FalloffDistance);
         }

@@ -4,7 +4,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 #include "Packages/com.firsttry.customutils/Shaders/Shared/Common.hlsl"
-#include "Packages/com.firsttry.customutils/Shaders/Shared/SDF.hlsl"
+#include "Packages/com.firsttry.customutils/Shaders/Shared/QuadSDF.hlsl"
 
 TEXTURE2D(_MainTex);
 SAMPLER(sampler_MainTex);
@@ -22,10 +22,9 @@ struct Attributes
 {
     float4 positionOS : POSITION;
     float4 color : COLOR;
-    float2 uv0 : TEXCOORD0;
-    float2 uv1 : TEXCOORD1;
-    float2 uv2 : TEXCOORD2;
-    float2 uv3 : TEXCOORD3;
+    float4 uv0 : TEXCOORD0;
+    float4 uv1 : TEXCOORD1;
+    float4 uv2 : TEXCOORD2;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -34,11 +33,9 @@ struct Varyings
     float4 positionHCS : SV_POSITION;
     float4 color : COLOR;
     float4 worldPosition : TEXCOORD0;
-    float2 uv : TEXCOORD1;
-    float2 size : TEXCOORD2;
-    float4 radius : TEXCOORD3;
-    float lineWeight : TEXCOORD4;
-    float pixelScale : TEXCOORD5;
+    float4 uvAndBorder : TEXCOORD1;
+    float4 edges : TEXCOORD2;
+    float4 radii : TEXCOORD3;
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
@@ -51,13 +48,11 @@ Varyings Vertex(Attributes input)
 
     output.worldPosition = input.positionOS;
     output.positionHCS = TransformObjectToHClip(input.positionOS.xyz);
-    output.uv = TRANSFORM_TEX(input.uv0, _MainTex);
-    output.size = input.uv1;
-
-    float minSide = min(input.uv1.x, input.uv1.y);
-    output.radius = float4(Decode2(input.uv2.x), Decode2(input.uv2.y)) * minSide;
-    output.lineWeight = input.uv3.x * minSide;
-    output.pixelScale = clamp(input.uv3.y, MIN_PIXEL_WORLD_SCALE, MAX_PIXEL_WORLD_SCALE);
+    output.uvAndBorder.xy = TRANSFORM_TEX(input.uv0.xy, _MainTex);
+    output.uvAndBorder.z = input.uv0.z;
+    output.uvAndBorder.w = clamp(input.uv0.w, MIN_PIXEL_WORLD_SCALE, MAX_PIXEL_WORLD_SCALE);
+    output.edges = input.uv1;
+    output.radii = input.uv2;
 
     #ifndef UNITY_COLORSPACE_GAMMA
     if (_UIVertexColorAlwaysGammaSpace)
@@ -70,7 +65,7 @@ Varyings Vertex(Attributes input)
 
 float4 Fragment(Varyings input) : SV_Target
 {
-    half4 color = (SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) + _TextureSampleAdd) * input.color;
+    half4 color = (SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uvAndBorder.xy) + _TextureSampleAdd) * input.color;
 
     #ifdef UNITY_UI_CLIP_RECT
     color.a *= UnityGet2DClipping(input.worldPosition.xy, _ClipRect);
@@ -80,11 +75,15 @@ float4 Fragment(Varyings input) : SV_Target
     clip(color.a - 0.001f);
     #endif
 
-    float2 halfSize = input.size * 0.5f;
-    float2 centeredPosition = input.uv * input.size - halfSize;
-    float sdf = -SdfRoundedRect(centeredPosition, halfSize, input.radius);
-    float borderCenter = (input.lineWeight + 1.0f / input.pixelScale) * 0.5f;
-    color.a *= saturate((borderCenter - distance(sdf, borderCenter)) * input.pixelScale);
+    float lineWeight = input.uvAndBorder.z;
+    float pixelScale = input.uvAndBorder.w;
+
+    float depth = -SdfRoundedQuad(input.edges, input.radii);
+
+    float fill = saturate(depth * pixelScale);
+    float borderCenter = (lineWeight + 1.0f / pixelScale) * 0.5f;
+    float border = saturate((borderCenter - distance(depth, borderCenter)) * pixelScale);
+    color.a *= lineWeight > 0.0f ? border : fill;
 
     clip(color.a - 0.001f);
 
