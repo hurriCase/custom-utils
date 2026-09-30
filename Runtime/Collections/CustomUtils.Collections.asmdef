@@ -2,7 +2,8 @@
     "name": "CustomUtils.Collections",
     "rootNamespace": "CustomUtils",
     "references": [
-        "GUID:b2e096561d798f84eaa79b5111bbad5c"
+        "GUID:b2e096561d798f84eaa79b5111bbad5c",
+        "GUID:756335c0388f7114790e504ed368ae1d"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -11,6 +12,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.cysharp.memorypack",
+            "expression": "",
+            "define": "MEMORY_PACK_INSTALLED"
+        }
+    ],
     "noEngineReferences": false
 }
