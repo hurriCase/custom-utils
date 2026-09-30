@@ -1,8 +1,14 @@
 ﻿#if CUSTOM_LOCALIZATION
 using System;
-using AYellowpaper.SerializedCollections;
 using CustomUtils.Runtime.Attributes;
 using UnityEngine;
+
+#if UNITY_6000_6_OR_NEWER
+using System.Collections.Generic;
+
+#else
+using AYellowpaper.SerializedCollections;
+#endif
 
 namespace CustomUtils.Runtime.Localization
 {
@@ -14,7 +20,11 @@ namespace CustomUtils.Runtime.Localization
         [field: SerializeField, InspectorReadOnly] internal string TableName { get; private set; }
 
         [field: SerializeField, InspectorReadOnly]
+#if UNITY_6000_6_OR_NEWER
+        internal Dictionary<SystemLanguage, string> Translations { get; private set; } = new();
+#else
         internal SerializedDictionary<SystemLanguage, string> Translations { get; private set; } = new();
+#endif
 
         internal bool IsValid => !string.IsNullOrEmpty(Key)
                                  && !string.IsNullOrEmpty(GUID)

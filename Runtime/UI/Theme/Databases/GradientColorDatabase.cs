@@ -14,7 +14,7 @@ namespace CustomUtils.Runtime.UI.Theme.Databases
     internal sealed class GradientColorDatabase :
         ThemeColorDatabaseBase<GradientColorDatabase, ThemeGradientColor, Gradient>
     {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && !MULTI_THEME
         protected override void OnValidate()
         {
             base.OnValidate();

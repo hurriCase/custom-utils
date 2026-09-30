@@ -1,5 +1,5 @@
 ﻿#if MULTI_THEME
-using CustomUtils.Runtime.CustomTypes.Collections;
+using CustomUtils.Collections.Scripts;
 #endif
 
 namespace CustomUtils.Runtime.UI.Theme.ThemeColors
