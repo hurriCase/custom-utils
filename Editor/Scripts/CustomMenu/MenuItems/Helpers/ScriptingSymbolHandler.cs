@@ -1,5 +1,7 @@
 ﻿using UnityEditor;
 using UnityEditor.Build;
+using UnityEditor.Build.Profile;
+using UnityEditor.Compilation;
 using UnityEngine;
 using ZLinq;
 
@@ -46,13 +48,43 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
         public static bool IsSymbolEnabled(string prefsKey, bool defaultValue = false) =>
             EditorPrefs.GetBool(prefsKey, defaultValue);
 
+        private static string GetCurrentDefineSymbols()
+        {
+            var activeBuildProfile = BuildProfile.GetActiveBuildProfile();
+            if (activeBuildProfile)
+                return activeBuildProfile.scriptingDefines is null
+                    ? string.Empty
+                    : string.Join(";", activeBuildProfile.scriptingDefines);
+
+            var currentBuildTarget =
+                NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            return PlayerSettings.GetScriptingDefineSymbols(currentBuildTarget);
+        }
+
+        private static void SetCurrentDefineSymbols(string updatedDefines)
+        {
+            var activeBuildProfile = BuildProfile.GetActiveBuildProfile();
+            if (activeBuildProfile)
+            {
+                activeBuildProfile.scriptingDefines = updatedDefines.Split(';');
+                EditorUtility.SetDirty(activeBuildProfile);
+                AssetDatabase.SaveAssets();
+                CompilationPipeline.RequestScriptCompilation();
+                Debug.LogWarning($"[{nameof(ScriptingSymbolHandler)}::{nameof(SetCurrentDefineSymbols)}]" +
+                                 $" Updated defines on active build profile '{activeBuildProfile.name}'" +
+                                 " and requested recompilation");
+                return;
+            }
+
+            var currentBuildTarget =
+                NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            PlayerSettings.SetScriptingDefineSymbols(currentBuildTarget, updatedDefines);
+        }
+
         private static void SyncSymbolWithPrefs(string symbolName, string prefsKey)
         {
             var isEnabled = EditorPrefs.GetBool(prefsKey, false);
-            var currentBuildTarget =
-                NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
-
-            var currentDefines = PlayerSettings.GetScriptingDefineSymbols(currentBuildTarget);
+            var currentDefines = GetCurrentDefineSymbols();
             var symbolDefined = currentDefines.Contains(symbolName);
 
             switch (isEnabled)
@@ -72,10 +104,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
             if (string.IsNullOrEmpty(symbolToAdd))
                 return;
 
-            var currentBuildTarget = NamedBuildTarget.FromBuildTargetGroup(
-                EditorUserBuildSettings.selectedBuildTargetGroup);
-
-            var currentDefines = PlayerSettings.GetScriptingDefineSymbols(currentBuildTarget);
+            var currentDefines = GetCurrentDefineSymbols();
 
             if (currentDefines.Contains(symbolToAdd))
                 return;
@@ -84,7 +113,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
                 ? symbolToAdd
                 : currentDefines + ";" + symbolToAdd;
 
-            PlayerSettings.SetScriptingDefineSymbols(currentBuildTarget, updatedDefines);
+            SetCurrentDefineSymbols(updatedDefines);
         }
 
         private static void RemoveDefineSymbol(string symbolToRemove)
@@ -92,10 +121,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
             if (string.IsNullOrEmpty(symbolToRemove))
                 return;
 
-            var currentBuildTarget = NamedBuildTarget.FromBuildTargetGroup(
-                EditorUserBuildSettings.selectedBuildTargetGroup);
-
-            var currentDefines = PlayerSettings.GetScriptingDefineSymbols(currentBuildTarget);
+            var currentDefines = GetCurrentDefineSymbols();
 
             if (!currentDefines.Contains(symbolToRemove))
                 return;
@@ -106,7 +132,7 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.Helpers
                 .Where(defineSymbol => defineSymbol != symbolToRemove)
                 .ToArray());
 
-            PlayerSettings.SetScriptingDefineSymbols(currentBuildTarget, updatedDefines);
+            SetCurrentDefineSymbols(updatedDefines);
         }
     }
 }
