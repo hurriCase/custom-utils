@@ -49,8 +49,6 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             if (currentWindow && !sharedPopupBase.IsInFrontOf(currentWindow))
                 sharedPopupBase.transform.SetAsLastSibling();
 
-            await sharedPopupBase.ShowAsync(token);
-
             if (currentWindow)
             {
                 _previousOpenedPopups.Add(currentWindow);
@@ -60,6 +58,7 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             }
 
             currentWindow = sharedPopupBase;
+            await sharedPopupBase.ShowAsync(token);
             return sharedPopupBase;
         }
 
