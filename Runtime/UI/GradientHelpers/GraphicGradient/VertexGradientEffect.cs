@@ -42,6 +42,9 @@ namespace CustomUtils.Runtime.UI.GradientHelpers.GraphicGradient
         /// </remarks>
         public void SetGradient(Color startColor, Color endColor, GradientDirection direction)
         {
+            if (_startColor == startColor && _endColor == endColor && _direction == direction)
+                return;
+
             _startColor = startColor;
             _endColor = endColor;
             _direction = direction;

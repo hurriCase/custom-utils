@@ -22,13 +22,19 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers
         {
             base.Awake();
 
-            _graphic = _graphic.AsNullable() ?? GetComponent<Graphic>();
+            if (_graphic)
+                return;
+
+            _graphic = GetComponent<Graphic>();
             this.MarkAsDirty();
         }
 
-        protected override void OnUpdateColor(Color gradient)
+        protected override void OnUpdateColor(Color color)
         {
-            _graphic.color = gradient;
+            if (_graphic.color == color)
+                return;
+
+            _graphic.color = color;
             this.MarkAsDirty();
         }
 

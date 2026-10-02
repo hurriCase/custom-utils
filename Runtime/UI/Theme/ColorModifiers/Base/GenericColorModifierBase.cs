@@ -31,10 +31,14 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.Base
                 || (!isForce && EqualityComparer<TColor>.Default.Equals(color, _currentColor)))
                 return;
 
+            var isColorNameChanged = currentColorName != guid;
+
             OnUpdateColor(color);
             currentColorName = guid;
             _currentColor = color;
-            this.MarkAsDirty();
+
+            if (isColorNameChanged)
+                this.MarkAsDirty();
         }
 
         protected abstract void OnUpdateColor(TColor gradient);
