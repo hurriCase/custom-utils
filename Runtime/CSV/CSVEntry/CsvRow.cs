@@ -14,7 +14,12 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
         private readonly Dictionary<string, int> _columnMap;
         private readonly string[] _values;
 
-        internal CsvRow(string[] values, IReadOnlyList<string> columnNames)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CsvRow"/> struct.
+        /// </summary>
+        /// <param name="values">The field values of the row, ordered by column.</param>
+        /// <param name="columnNames">The header column names, matched case-insensitively on lookup.</param>
+        public CsvRow(string[] values, IReadOnlyList<string> columnNames)
         {
             _values = values;
 
@@ -24,13 +29,12 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
         }
 
         /// <summary>
-        /// Attempts to retrieve the value associated with the specified column name in the current CSV row.
+        /// Attempts to get the value of the specified column in this row.
         /// </summary>
-        /// <param name="columnName">The name of the column to retrieve the value from (case-insensitive).</param>
+        /// <param name="columnName">The column name to look up (case-insensitive).</param>
         /// <param name="value">When this method returns,
-        /// contains the value associated with the specified column if the operation succeeds,
-        /// or an empty string if it fails.</param>
-        /// <returns>true if the value is successfully retrieved; otherwise, false.</returns>
+        /// contains the value of the specified column if it was found; otherwise, an empty string.</param>
+        /// <returns><c>true</c> if the value was found; otherwise, <c>false</c>.</returns>
         public bool TryGetValue(string columnName, out string value)
         {
             value = string.Empty;
@@ -42,10 +46,10 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
         }
 
         /// <summary>
-        /// Gets the value from the specified column by exact name match.
+        /// Gets the value of the specified column in this row.
         /// </summary>
-        /// <param name="columnName">The name of the column to retrieve the value from.</param>
-        /// <returns>The value in the specified column, or empty string if column is not found or index is out of range.</returns>
+        /// <param name="columnName">The column name to look up (case-insensitive).</param>
+        /// <returns>The value of the specified column, or an empty string if the column is not found.</returns>
         public string GetValue(string columnName)
         {
             if (_columnMap.TryGetValue(columnName, out var index) && index < _values.Length)
@@ -55,10 +59,10 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
         }
 
         /// <summary>
-        /// Gets the first value from a column whose name matches the specified regex pattern.
+        /// Gets the value of the first column whose name matches the specified regex pattern.
         /// </summary>
         /// <param name="pattern">The regex pattern to match against column names (case-insensitive).</param>
-        /// <returns>The first matching value, or empty string if no column matches the pattern.</returns>
+        /// <returns>The first matching value, or an empty string if no column matches the pattern.</returns>
         public string GetValueByPattern(string pattern)
         {
             foreach (var (headerName, index) in _columnMap)
@@ -74,10 +78,10 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
         }
 
         /// <summary>
-        /// Gets all values from columns whose names match the specified regex pattern.
+        /// Gets the values of all columns whose names match the specified regex pattern.
         /// </summary>
         /// <param name="pattern">The regex pattern to match against column names (case-insensitive).</param>
-        /// <returns>A list of all values from columns that match the pattern. Only includes valid (non-null, non-empty) values.</returns>
+        /// <returns>The non-empty values of all matching columns; an empty list if none match.</returns>
         public List<string> GetValuesByPattern(string pattern)
         {
             var result = new List<string>();

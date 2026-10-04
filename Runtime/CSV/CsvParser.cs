@@ -2,15 +2,30 @@
 using System.Collections.Generic;
 using CustomUtils.Runtime.CSV.CSVEntry;
 using CustomUtils.Runtime.Formatter;
+using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime.CSV
 {
-    internal static class CsvParser
+    /// <summary>
+    /// Parses comma-separated text into a <see cref="CsvTable"/>.
+    /// Supports quoted fields, escaped quotes (<c>""</c>) and line breaks inside quoted fields.
+    /// </summary>
+    [PublicAPI]
+    public static class CsvParser
     {
         private const char Quote = '"';
         private const char Comma = ',';
 
-        internal static CsvTable Parse(string csvContent)
+        /// <summary>
+        /// Parses CSV content into a <see cref="CsvTable"/>, using the first line as the header.
+        /// </summary>
+        /// <param name="csvContent">The raw CSV text to parse.</param>
+        /// <returns>A <see cref="CsvTable"/> with one <see cref="CsvRow"/> per data line (header excluded).</returns>
+        /// <remarks>
+        /// Line endings are normalized, blank lines are skipped and field values are trimmed.
+        /// Returns an empty table when the content is blank or contains no data lines.
+        /// </remarks>
+        public static CsvTable Parse(string csvContent)
         {
             if (string.IsNullOrWhiteSpace(csvContent))
                 return new CsvTable(Array.Empty<CsvRow>());

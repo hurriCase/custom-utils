@@ -11,9 +11,13 @@ namespace CustomUtils.Runtime.CSV.CSVEntry
         /// <summary>
         /// Gets the collection of rows in this CSV document.
         /// </summary>
-        internal CsvRow[] Rows { get; }
+        public CsvRow[] Rows { get; }
 
-        internal CsvTable(CsvRow[] rows)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CsvTable"/> struct.
+        /// </summary>
+        /// <param name="rows">The data rows of the CSV document.</param>
+        public CsvTable(CsvRow[] rows)
         {
             Rows = rows;
         }
