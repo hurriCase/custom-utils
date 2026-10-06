@@ -73,5 +73,15 @@ namespace CustomUtils.Runtime.Extensions
 
             Object.DestroyImmediate(target);
         }
+
+        /// <summary>
+        /// Destroys the specified object instance if it exists and hasn't been destroyed already.
+        /// </summary>
+        /// <param name="target">The object instance to destroy.</param>
+        public static void TryDestroy(this Object target)
+        {
+            if (target)
+                target.Destroy();
+        }
     }
 }

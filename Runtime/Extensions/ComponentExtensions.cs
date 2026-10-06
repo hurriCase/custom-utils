@@ -61,5 +61,15 @@ namespace CustomUtils.Runtime.Extensions
         /// <returns>The existing component of type T, or the newly added component if it did not exist.</returns>
         public static T GetOrAddComponent<T>(this Component component) where T : Component =>
             component.GetComponent<T>() ? component.GetComponent<T>() : component.gameObject.AddComponent<T>();
+
+        /// <summary>
+        /// Destroys the GameObject of the specified component if the component exists and hasn't been destroyed already.
+        /// </summary>
+        /// <param name="target">The component whose GameObject to destroy.</param>
+        public static void TryDestroyGameObject(this Component target)
+        {
+            if (target)
+                target.gameObject.Destroy();
+        }
     }
 }
