@@ -14,11 +14,11 @@ CBUFFER_START(UnityPerMaterial)
 float4 _MainTex_ST;
 float4 _Color;
 int _Direction;
-int _Rotation;
+float _Rotation;
 float4 _PatternOffset;
 float4 _PatternScale;
 float _PatternOpacity;
-float4 _DotColor;
+float _BlendMode;
 float _PatternRotation;
 CBUFFER_END
 

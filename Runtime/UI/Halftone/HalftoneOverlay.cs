@@ -1,15 +1,24 @@
 ﻿using CustomUtils.Runtime.Attributes;
 using CustomUtils.Runtime.Other;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace CustomUtils.Runtime.UI.Halftone
 {
+    /// <inheritdoc />
+    /// <summary>
+    /// Draws a halftone pattern over a Graphic, blended like a Figma image fill.
+    /// </summary>
+    [PublicAPI]
     [ExecuteAlways]
     [RequireComponent(typeof(Graphic))]
-    internal sealed class HalftoneOverlay : MonoBehaviour
+    public sealed class HalftoneOverlay : MonoBehaviour
     {
-        [SerializeField] private HalftoneProperties _halftoneProperties;
+        /// <summary>
+        /// Gets the halftone pattern settings.
+        /// </summary>
+        [field: SerializeField] public HalftoneProperties HalftoneProperties { get; private set; }
 
         [SerializeField, Self] private Graphic _graphic;
 
@@ -26,12 +35,12 @@ namespace CustomUtils.Runtime.UI.Halftone
                 return;
 
             if (!_instanceMaterial)
-            {
                 _instanceMaterial = new Material(ResourceReferences.Instance.HalftoneMaterial);
-                _graphic.material = _instanceMaterial;
-            }
 
-            _halftoneProperties.ApplyProperties(_instanceMaterial);
+            if (_graphic.material != _instanceMaterial)
+                _graphic.material = _instanceMaterial;
+
+            HalftoneProperties.ApplyProperties(_instanceMaterial);
         }
 
         private void OnDestroy()

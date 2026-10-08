@@ -13,7 +13,7 @@ float4 _Color;
 float4 _PatternOffset;
 float4 _PatternScale;
 float  _PatternOpacity;
-float4 _DotColor;
+float _BlendMode;
 float  _PatternRotation;
 CBUFFER_END
 
