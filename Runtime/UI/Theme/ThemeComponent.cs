@@ -53,9 +53,15 @@ namespace CustomUtils.Runtime.UI.Theme
 
         private void CreateModifier(ColorType colorType)
         {
-            _currentColorModifier.AsNullable()?.Dispose();
-            _currentColorModifier.AsNullable()?.Destroy();
+            var previousModifier = _currentColorModifier;
             _currentColorModifier = ColorModifierFactory.CreateModifier(colorType, gameObject);
+
+            if (previousModifier && previousModifier != _currentColorModifier)
+            {
+                previousModifier.Dispose();
+                previousModifier.Destroy();
+            }
+
             this.MarkAsDirty();
         }
 
