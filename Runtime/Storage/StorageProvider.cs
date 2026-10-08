@@ -1,5 +1,6 @@
 using System;
 using CustomUtils.Runtime.Storage.Base;
+using CustomUtils.Runtime.Storage.Persistent;
 using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime.Storage
@@ -27,12 +28,14 @@ namespace CustomUtils.Runtime.Storage
         public static ICloudStorageProvider Cloud { get; private set; }
 
         /// <summary>
-        /// Sets the storage provider to use for all persistent storage operations.
-        /// Must be called before any <see cref="PersistentReactiveProperty{T}"/> or
-        /// <see cref="PersistentObservableDictionary{TKey,TValue}"/> initialization.
+        /// Sets the storage provider to use for all persistent storage operations and clears
+        /// <see cref="Local"/> and <see cref="Cloud"/>.
+        /// Must be called before creating any <see cref="PersistentReactiveProperty{T}"/>,
+        /// <see cref="PersistentObservableList{TValue}"/> or <see cref="PersistentObservableDictionary{TKey,TValue}"/>.
         /// </summary>
-        /// <returns>A builder to optionally expose the local and cloud providers.</returns>
-        public static Builder SetProvider(IStorageProvider provider)
+        /// <param name="provider">The default provider, e.g. a <see cref="Providers.HybridStorageProvider"/></param>
+        /// <returns>A builder to optionally expose the local and cloud providers</returns>
+        public static Builder SetProvider([NotNull] IStorageProvider provider)
         {
             Provider = provider ?? throw new ArgumentNullException(nameof(provider));
             Local = null;
@@ -40,16 +43,29 @@ namespace CustomUtils.Runtime.Storage
             return default;
         }
 
+        /// <summary>
+        /// Exposes the optional local and cloud providers after <see cref="SetProvider"/>.
+        /// </summary>
         [PublicAPI]
         public readonly struct Builder
         {
-            public Builder WithLocal(IStorageProvider local)
+            /// <summary>
+            /// Sets <see cref="Local"/>.
+            /// </summary>
+            /// <param name="local">Device-only storage provider</param>
+            /// <returns>The same builder for chaining</returns>
+            public Builder WithLocal([NotNull] IStorageProvider local)
             {
                 Local = local ?? throw new ArgumentNullException(nameof(local));
                 return this;
             }
 
-            public Builder WithCloud(ICloudStorageProvider cloud)
+            /// <summary>
+            /// Sets <see cref="Cloud"/>.
+            /// </summary>
+            /// <param name="cloud">Remote storage provider</param>
+            /// <returns>The same builder for chaining</returns>
+            public Builder WithCloud([NotNull] ICloudStorageProvider cloud)
             {
                 Cloud = cloud ?? throw new ArgumentNullException(nameof(cloud));
                 return this;

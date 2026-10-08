@@ -1,5 +1,4 @@
-﻿#if NEWTONSOFT_INSTALLED
-using System.Text;
+﻿using System.Text;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
@@ -14,4 +13,3 @@ namespace CustomUtils.Runtime.Serializer
         public T DeserializeFromString<T>(string data) => JsonConvert.DeserializeObject<T>(data);
     }
 }
-#endif

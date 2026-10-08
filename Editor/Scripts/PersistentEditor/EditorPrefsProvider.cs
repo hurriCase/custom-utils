@@ -1,22 +1,26 @@
-﻿using System.Threading;
+using System.Threading;
 using CustomUtils.Runtime.Serializer;
 using CustomUtils.Runtime.Storage.Base;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
-using UnityEngine;
+using UnityEditor;
 
-namespace CustomUtils.Runtime.Storage.Providers
+namespace CustomUtils.Editor.Scripts.PersistentEditor
 {
     /// <inheritdoc />
     /// <summary>
-    /// Stores data using Unity's <see cref="T:UnityEngine.PlayerPrefs">UnityEngine.PlayerPrefs</see>. Suitable for editor and mobile platforms.
+    /// Stores data using Unity's <see cref="EditorPrefs"/>. Editor only; every operation completes synchronously.
     /// </summary>
     [PublicAPI]
-    public sealed class PlayerPrefsProvider : StorageProviderBase<string>
+    public sealed class EditorPrefsProvider : StorageProviderBase<string>
     {
         private readonly IStringSerializer _serializer;
 
-        public PlayerPrefsProvider(IStringSerializer serializer)
+        /// <summary>
+        /// Creates a provider that serializes values with <paramref name="serializer"/>.
+        /// </summary>
+        /// <param name="serializer">Serializer used to convert values to and from strings</param>
+        public EditorPrefsProvider(IStringSerializer serializer)
         {
             _serializer = serializer;
         }
@@ -26,29 +30,24 @@ namespace CustomUtils.Runtime.Storage.Providers
 
         protected override UniTask PlatformSaveAsync(string key, string data)
         {
-            PlayerPrefs.SetString(key, data);
-            PlayerPrefs.Save();
+            EditorPrefs.SetString(key, data);
             return UniTask.CompletedTask;
         }
 
         protected override UniTask<string> PlatformLoadAsync(string key, CancellationToken token)
-            => UniTask.FromResult(PlayerPrefs.GetString(key, null));
+            => UniTask.FromResult(EditorPrefs.HasKey(key) ? EditorPrefs.GetString(key, null) : null);
 
         protected override UniTask<bool> PlatformHasKeyAsync(string key, CancellationToken token)
-            => UniTask.FromResult(PlayerPrefs.HasKey(key));
+            => UniTask.FromResult(EditorPrefs.HasKey(key));
 
         protected override UniTask PlatformDeleteKeyAsync(string key, CancellationToken token)
         {
-            PlayerPrefs.DeleteKey(key);
-            PlayerPrefs.Save();
+            EditorPrefs.DeleteKey(key);
             return UniTask.CompletedTask;
         }
 
+        // EditorPrefs are shared by every project on this machine, so deleting all of them isn't supported
         protected override UniTask<bool> PlatformTryDeleteAllAsync(CancellationToken token)
-        {
-            PlayerPrefs.DeleteAll();
-            PlayerPrefs.Save();
-            return UniTask.FromResult(true);
-        }
+            => UniTask.FromResult(false);
     }
 }

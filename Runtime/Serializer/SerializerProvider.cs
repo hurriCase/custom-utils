@@ -10,12 +10,9 @@ namespace CustomUtils.Runtime.Serializer
 #if MEMORY_PACK_INSTALLED
             BytesSerializer = new MemoryPackSerializer();
             StringSerializer = new MemoryPackSerializer();
-#elif NEWTONSOFT_INSTALLED
+#else
             BytesSerializer = new NewtonsoftSerializer();
             StringSerializer = new NewtonsoftSerializer();
-#else
-            BytesSerializer = new SystemTextJsonSerializer();
-            StringSerializer = new SystemTextJsonSerializer();
 #endif
         }
 

@@ -7,6 +7,7 @@ using CustomUtils.Runtime.Storage.Base;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using Unity.Services.CloudSave;
+using UnityEngine.Pool;
 using DeleteOptions = Unity.Services.CloudSave.Models.Data.Player.DeleteOptions;
 
 namespace CustomUtils.Runtime.Storage.Providers
@@ -19,7 +20,6 @@ namespace CustomUtils.Runtime.Storage.Providers
     public sealed class CloudSaveStorageProvider : CloudStorageProviderBase<string>
     {
         private readonly IStringSerializer _serializer;
-        private readonly Dictionary<string, object> _saveBuffer = new(capacity: 1);
 
         public CloudSaveStorageProvider(IStringSerializer serializer, TimeSpan debounceDelay) : base(debounceDelay)
         {
@@ -31,9 +31,17 @@ namespace CustomUtils.Runtime.Storage.Providers
 
         protected override async UniTask PlatformSaveAsync(string key, string data)
         {
-            _saveBuffer[key] = data;
-            await CloudSaveService.Instance.Data.Player.SaveAsync(_saveBuffer);
-            _saveBuffer.Clear();
+            var saveData = DictionaryPool<string, object>.Get();
+
+            try
+            {
+                saveData[key] = data;
+                await CloudSaveService.Instance.Data.Player.SaveAsync(saveData);
+            }
+            finally
+            {
+                DictionaryPool<string, object>.Release(saveData);
+            }
         }
 
         protected override async UniTask<string> PlatformLoadAsync(string key, CancellationToken token)

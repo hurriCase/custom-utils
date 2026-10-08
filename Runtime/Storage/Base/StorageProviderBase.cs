@@ -21,33 +21,36 @@ namespace CustomUtils.Runtime.Storage.Base
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
+                _cache.Remove(key);
+
                 Logger.LogException(exception);
                 Logger.LogError($"[{GetType().Name}::TrySaveAsync] Error during saving data: {exception.Message}");
                 return false;
             }
         }
 
-        public async UniTask<TData> LoadAsync<TData>(string key, CancellationToken token)
+        public async UniTask<LoadResult<TData>> TryLoadAsync<TData>(string key, CancellationToken token)
         {
             try
             {
                 if (_cache.TryGetValue(key, out var cached))
-                    return Deserialize<TData>(cached);
+                    return LoadResult<TData>.Loaded(Deserialize<TData>(cached));
 
                 var raw = await PlatformLoadAsync(key, token);
                 if (raw == null)
-                    return default;
+                    return LoadResult<TData>.NotFound;
 
-                _cache[key] = raw;
                 var data = Deserialize<TData>(raw);
-                Logger.Log($"[{GetType().Name}::LoadAsync] Loaded data for key '{key}'");
-                return data;
+                _cache[key] = raw;
+                Logger.Log($"[{GetType().Name}::{nameof(TryLoadAsync)}] Loaded data for key '{key}'");
+                return LoadResult<TData>.Loaded(data);
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
                 Logger.LogException(exception);
-                Logger.LogError($"[{GetType().Name}::LoadAsync] Error loading data: {exception.Message}");
-                return default;
+                Logger.LogError($"[{GetType().Name}::{nameof(TryLoadAsync)}] " +
+                                $"Error loading data for key '{key}': {exception.Message}");
+                return LoadResult<TData>.Failed;
             }
         }
 

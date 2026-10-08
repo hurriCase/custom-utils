@@ -4,7 +4,6 @@ using System.Threading;
 using CustomUtils.Runtime.Serializer;
 using CustomUtils.Runtime.Storage.Base;
 using Cysharp.Threading.Tasks;
-using Firebase.Extensions;
 using Firebase.Storage;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -63,16 +62,23 @@ namespace CustomUtils.Runtime.Storage.Providers
         {
             try
             {
-                return await GetFileReference(key)
+                await GetFileReference(key)
                     .GetMetadataAsync()
-                    .ContinueWithOnMainThread(static task => !task.IsFaulted && !task.IsCanceled)
                     .AsUniTask()
                     .AttachExternalCancellation(token);
+
+                return true;
             }
-            catch
+            catch (Exception exception) when (IsObjectNotFound(exception))
             {
                 return false;
             }
+        }
+
+        private bool IsObjectNotFound(Exception exception)
+        {
+            var baseException = exception is AggregateException ? exception.GetBaseException() : exception;
+            return baseException is StorageException { ErrorCode: StorageException.ErrorObjectNotFound };
         }
 
         protected override async UniTask PlatformDeleteKeyAsync(string key, CancellationToken token)

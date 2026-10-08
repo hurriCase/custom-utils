@@ -15,8 +15,11 @@ namespace CustomUtils.Runtime.Storage.Base
         UniTask<bool> TrySaveAsync<T>(string key, T data, bool isForce = false);
 
         /// <summary>Loads data of type <typeparamref name="T"/> for the specified key.</summary>
-        /// <returns>The loaded value, or default if not found.</returns>
-        UniTask<T> LoadAsync<T>(string key, CancellationToken token = default);
+        /// <returns>
+        /// <see cref="LoadStatus.Loaded"/> with the data, <see cref="LoadStatus.NotFound"/> if nothing is stored,
+        /// or <see cref="LoadStatus.Failed"/> if stored data couldn't be read. Only throws on cancellation.
+        /// </returns>
+        UniTask<LoadResult<T>> TryLoadAsync<T>(string key, CancellationToken token = default);
 
         /// <summary>Checks whether the specified key exists in storage.</summary>
         UniTask<bool> HasKeyAsync(string key, CancellationToken token = default);

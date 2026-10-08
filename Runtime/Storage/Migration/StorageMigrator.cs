@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using CustomUtils.Runtime.Storage.Base;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
@@ -13,55 +12,48 @@ namespace CustomUtils.Runtime.Storage.Migration
     public static class StorageMigrator
     {
         /// <summary>
-        /// Copies the specified keys from one provider to another.
+        /// Copies one key from one provider to another.
+        /// The type is required because serializers like MemoryPack can only read data as its exact type.
         /// </summary>
-        /// <param name="fromProvider">Source provider to read from.</param>
-        /// <param name="toProvider">Destination provider to write to.</param>
-        /// <param name="keys">Keys to migrate.</param>
-        /// <param name="deleteFromSource">If true, deletes each key from the source after a successful migration.</param>
-        /// <returns>The number of successfully migrated keys.</returns>
-        public static async UniTask<int> MigrateAsync(
+        /// <typeparam name="TData">The type the value was saved as</typeparam>
+        /// <param name="fromProvider">Source provider to read from</param>
+        /// <param name="toProvider">Destination provider to write to</param>
+        /// <param name="key">Key to migrate</param>
+        /// <param name="deleteFromSource">If true, deletes the key from the source after a successful migration</param>
+        /// <returns>True if the key was migrated, false if it wasn't found or couldn't be loaded or saved</returns>
+        public static async UniTask<bool> MigrateAsync<TData>(
             IStorageProvider fromProvider,
             IStorageProvider toProvider,
-            IReadOnlyList<string> keys,
+            string key,
             bool deleteFromSource = false)
         {
-            var migratedCount = 0;
-
-            foreach (var key in keys)
+            try
             {
-                try
+                var loadResult = await fromProvider.TryLoadAsync<TData>(key);
+
+                if (loadResult.Status == LoadStatus.NotFound)
                 {
-                    if (!await fromProvider.HasKeyAsync(key))
-                    {
-                        Logger.LogWarning($"[StorageMigrator::MigrateAsync] Key '{key}' not found in source provider");
-                        continue;
-                    }
-
-                    var data = await fromProvider.LoadAsync<object>(key);
-                    if (data == null)
-                        continue;
-
-                    var success = await toProvider.TrySaveAsync(key, data);
-                    if (!success)
-                        continue;
-
-                    if (deleteFromSource)
-                        await fromProvider.TryDeleteKeyAsync(key);
-
-                    migratedCount++;
-                    Logger.LogWarning($"[StorageMigrator::MigrateAsync] Migrated key: {key}");
+                    Logger.LogWarning($"[{nameof(StorageMigrator)}::{nameof(MigrateAsync)}] " +
+                                      $"Key '{key}' not found in source provider");
+                    return false;
                 }
-                catch (Exception ex)
-                {
-                    Logger.LogError($"[StorageMigrator::MigrateAsync] Failed to migrate key '{key}': {ex.Message}");
-                }
+
+                if (loadResult.Status == LoadStatus.Failed || !await toProvider.TrySaveAsync(key, loadResult.Data))
+                    return false;
+
+                if (deleteFromSource)
+                    await fromProvider.TryDeleteKeyAsync(key);
+
+                Logger.Log($"[{nameof(StorageMigrator)}::{nameof(MigrateAsync)}] Migrated key '{key}'");
+                return true;
             }
-
-            Logger.Log("[StorageMigrator::MigrateAsync] " +
-                       $"Migration complete: {migratedCount}/{keys.Count} keys migrated");
-
-            return migratedCount;
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                Logger.LogException(exception);
+                Logger.LogError($"[{nameof(StorageMigrator)}::{nameof(MigrateAsync)}] " +
+                                $"Failed to migrate key '{key}': {exception.Message}");
+                return false;
+            }
         }
     }
 }
