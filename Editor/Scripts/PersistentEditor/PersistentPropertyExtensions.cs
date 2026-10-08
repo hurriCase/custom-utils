@@ -31,11 +31,14 @@ namespace CustomUtils.Editor.Scripts.PersistentEditor
                 ? target.GetObjectUniqueKey(key) ?? key
                 : key;
 
-            // EditorPrefsProvider completes synchronously, so the result is available without awaiting
-            return PersistentReactiveProperty<TProperty>
-                .CreateAsync(uniqueKey, defaultValue: defaultValue, provider: _editorPrefsProvider)
+            var property = new PersistentReactiveProperty<TProperty>();
+
+            // EditorPrefsProvider completes synchronously, so the value is loaded without awaiting
+            property.InitializeAsync(uniqueKey, defaultValue: defaultValue, provider: _editorPrefsProvider)
                 .GetAwaiter()
                 .GetResult();
+
+            return property;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace CustomUtils.Runtime.Storage.Persistent
 {
     /// <summary>
     /// A reactive property that automatically persists its value to storage.
-    /// Created via <see cref="CreateAsync"/>, which loads the saved value before returning.
+    /// Call <see cref="InitializeAsync"/> to load the saved value.
     /// </summary>
     /// <typeparam name="TProperty">The type of the property value</typeparam>
     [PublicAPI]
@@ -20,7 +20,7 @@ namespace CustomUtils.Runtime.Storage.Persistent
         /// </summary>
         public ReactiveProperty<TProperty> Property { get; }
 
-        private readonly StorageEntry<TProperty> _entry;
+        private StorageEntry<TProperty> _entry;
         private readonly IDisposable _subscription;
 
         /// <summary>
@@ -57,39 +57,39 @@ namespace CustomUtils.Runtime.Storage.Persistent
         /// <returns>An observable that emits the current value and every change</returns>
         public Observable<TProperty> AsObservable() => Property.AsObservable();
 
-        private PersistentReactiveProperty(string key, IStorageProvider provider, TProperty defaultValue)
+        /// <summary>
+        /// Creates the property with a default value. Call <see cref="InitializeAsync"/> to load the saved value.
+        /// </summary>
+        public PersistentReactiveProperty()
         {
-            _entry = new StorageEntry<TProperty>(key, provider);
-            Property = new ReactiveProperty<TProperty>(defaultValue);
-            _subscription = Property.Subscribe(this, static (value, self) => self._entry.SaveIfEnabled(value));
+            Property = new ReactiveProperty<TProperty>();
+            _subscription = Property.Subscribe(this, static (value, self) => self._entry?.SaveIfEnabled(value));
         }
 
         /// <summary>
-        /// Creates the property and loads its saved value from storage.
+        /// Loads the saved value from storage and starts saving changes.
+        /// Saving stays disabled if loading fails, so stored data isn't overwritten.
         /// </summary>
         /// <param name="key">Unique storage key for this property</param>
         /// <param name="token">Cancellation token</param>
         /// <param name="defaultValue">Value to use when no saved data exists for the given key</param>
         /// <param name="provider">Storage provider to use instead of <see cref="StorageProvider.Provider"/>,
         /// e.g. <see cref="StorageProvider.Local"/> to keep the value on device only</param>
-        /// <returns>The property holding the saved value, or <paramref name="defaultValue"/> if none exists</returns>
-        public static async UniTask<PersistentReactiveProperty<TProperty>> CreateAsync(
+        public async UniTask InitializeAsync(
             string key,
             CancellationToken token = default,
             TProperty defaultValue = default,
             IStorageProvider provider = null)
         {
-            var property = new PersistentReactiveProperty<TProperty>(key, provider, defaultValue);
+            _entry = new StorageEntry<TProperty>(key, provider);
 
-            var result = await property._entry.LoadAsync(token);
+            var result = await _entry.LoadAsync(token);
+            Value = result.Status == LoadStatus.Loaded ? result.Data : defaultValue;
+
             if (result.Status == LoadStatus.Failed)
-                return property;
+                return;
 
-            if (result.Status == LoadStatus.Loaded)
-                property.Value = result.Data;
-
-            property._entry.EnableSaving();
-            return property;
+            _entry.EnableSaving();
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace CustomUtils.Runtime.Storage.Persistent
         public void Dispose()
         {
             _subscription.Dispose();
-            _entry.Dispose();
+            _entry?.Dispose();
             Property.Dispose();
         }
     }

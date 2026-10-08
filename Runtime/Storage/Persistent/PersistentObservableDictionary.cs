@@ -12,53 +12,53 @@ namespace CustomUtils.Runtime.Storage.Persistent
 {
     /// <summary>
     /// An observable dictionary that automatically persists its contents to storage.
-    /// Created via <see cref="CreateAsync"/>, which loads saved values before returning.
+    /// Call <see cref="InitializeAsync"/> to load the saved values.
     /// </summary>
     /// <typeparam name="TKey">The type of keys in the dictionary</typeparam>
     /// <typeparam name="TValue">The type of values in the dictionary</typeparam>
     [PublicAPI]
     public sealed class PersistentObservableDictionary<TKey, TValue> : ObservableDictionary<TKey, TValue>, IDisposable
     {
-        private readonly StorageEntry<Dictionary<TKey, TValue>> _entry;
+        private StorageEntry<Dictionary<TKey, TValue>> _entry;
         private readonly IDisposable _subscription;
         private readonly Dictionary<TKey, TValue> _serializationBuffer = new();
 
-        private PersistentObservableDictionary(string key, IStorageProvider provider)
+        /// <summary>
+        /// Creates an empty dictionary. Call <see cref="InitializeAsync"/> to load the saved values.
+        /// </summary>
+        public PersistentObservableDictionary()
         {
-            _entry = new StorageEntry<Dictionary<TKey, TValue>>(key, provider);
-
             _subscription = this.ObserveChanged()
                 .Subscribe(this, static (changedEvent, self) => self.HandleCollectionChanged(changedEvent));
         }
 
         /// <summary>
-        /// Creates the dictionary and loads any saved values from storage.
+        /// Loads any saved values from storage and starts saving changes.
+        /// Saving stays disabled if loading fails, so stored data isn't overwritten.
         /// </summary>
         /// <param name="key">Unique storage key for this dictionary</param>
         /// <param name="token">Cancellation token</param>
         /// <param name="defaultValues">Initial values to populate the dictionary when no saved data exists for the given key</param>
         /// <param name="provider">Storage provider to use instead of <see cref="StorageProvider.Provider"/>,
         /// e.g. <see cref="StorageProvider.Local"/> to keep the value on device only</param>
-        /// <returns>The dictionary populated with saved values, or with <paramref name="defaultValues"/> if none exist</returns>
-        public static async UniTask<PersistentObservableDictionary<TKey, TValue>> CreateAsync(
+        public async UniTask InitializeAsync(
             string key,
             CancellationToken token,
             Dictionary<TKey, TValue> defaultValues = null,
             IStorageProvider provider = null)
         {
-            var dictionary = new PersistentObservableDictionary<TKey, TValue>(key, provider);
+            _entry = new StorageEntry<Dictionary<TKey, TValue>>(key, provider);
 
-            var result = await dictionary._entry.LoadAsync(token);
+            var result = await _entry.LoadAsync(token);
             if (result.Status == LoadStatus.Failed)
-                return dictionary;
+                return;
 
             var entries = result.Status == LoadStatus.Loaded ? result.Data : defaultValues;
             if (entries != null)
                 foreach (var (entryKey, entryValue) in entries)
-                    dictionary.Add(entryKey, entryValue);
+                    Add(entryKey, entryValue);
 
-            dictionary._entry.EnableSaving();
-            return dictionary;
+            _entry.EnableSaving();
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace CustomUtils.Runtime.Storage.Persistent
         private void HandleCollectionChanged(CollectionChangedEvent<KeyValuePair<TKey, TValue>> changedEvent)
         {
             ApplyChangeToBuffer(changedEvent);
-            _entry.SaveIfEnabled(_serializationBuffer);
+            _entry?.SaveIfEnabled(_serializationBuffer);
         }
 
         private void ApplyChangeToBuffer(CollectionChangedEvent<KeyValuePair<TKey, TValue>> changedEvent)
@@ -111,7 +111,7 @@ namespace CustomUtils.Runtime.Storage.Persistent
         public void Dispose()
         {
             _subscription.Dispose();
-            _entry.Dispose();
+            _entry?.Dispose();
         }
     }
 }

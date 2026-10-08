@@ -12,51 +12,51 @@ namespace CustomUtils.Runtime.Storage.Persistent
 {
     /// <summary>
     /// An observable list that automatically persists its contents to storage.
-    /// Created via <see cref="CreateAsync"/>, which loads saved values before returning.
+    /// Call <see cref="InitializeAsync"/> to load the saved values.
     /// </summary>
     /// <typeparam name="TValue">The type of elements in the list</typeparam>
     [PublicAPI]
     public sealed class PersistentObservableList<TValue> : ObservableList<TValue>, IDisposable
     {
-        private readonly StorageEntry<List<TValue>> _entry;
+        private StorageEntry<List<TValue>> _entry;
         private readonly IDisposable _subscription;
         private readonly List<TValue> _serializationBuffer = new();
 
-        private PersistentObservableList(string key, IStorageProvider provider)
+        /// <summary>
+        /// Creates an empty list. Call <see cref="InitializeAsync"/> to load the saved values.
+        /// </summary>
+        public PersistentObservableList()
         {
-            _entry = new StorageEntry<List<TValue>>(key, provider);
-
             _subscription = this.ObserveChanged()
                 .Subscribe(this, static (changedEvent, self) => self.HandleCollectionChanged(changedEvent));
         }
 
         /// <summary>
-        /// Creates the list and loads any saved values from storage.
+        /// Loads any saved values from storage and starts saving changes.
+        /// Saving stays disabled if loading fails, so stored data isn't overwritten.
         /// </summary>
         /// <param name="key">Unique storage key for this list</param>
         /// <param name="token">Cancellation token</param>
         /// <param name="defaultValues">Initial values to populate the list when no saved data exists for the given key</param>
         /// <param name="provider">Storage provider to use instead of <see cref="StorageProvider.Provider"/>,
         /// e.g. <see cref="StorageProvider.Local"/> to keep the value on device only</param>
-        /// <returns>The list populated with saved values, or with <paramref name="defaultValues"/> if none exist</returns>
-        public static async UniTask<PersistentObservableList<TValue>> CreateAsync(
+        public async UniTask InitializeAsync(
             string key,
             CancellationToken token,
             IReadOnlyList<TValue> defaultValues = null,
             IStorageProvider provider = null)
         {
-            var list = new PersistentObservableList<TValue>(key, provider);
+            _entry = new StorageEntry<List<TValue>>(key, provider);
 
-            var result = await list._entry.LoadAsync(token);
+            var result = await _entry.LoadAsync(token);
             if (result.Status == LoadStatus.Failed)
-                return list;
+                return;
 
             IEnumerable<TValue> values = result.Status == LoadStatus.Loaded ? result.Data : defaultValues;
             if (values != null)
-                list.AddRange(values);
+                AddRange(values);
 
-            list._entry.EnableSaving();
-            return list;
+            _entry.EnableSaving();
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace CustomUtils.Runtime.Storage.Persistent
         private void HandleCollectionChanged(CollectionChangedEvent<TValue> changedEvent)
         {
             ApplyChangeToBuffer(changedEvent);
-            _entry.SaveIfEnabled(_serializationBuffer);
+            _entry?.SaveIfEnabled(_serializationBuffer);
         }
 
         private void ApplyChangeToBuffer(CollectionChangedEvent<TValue> changedEvent)
@@ -115,7 +115,7 @@ namespace CustomUtils.Runtime.Storage.Persistent
         public void Dispose()
         {
             _subscription.Dispose();
-            _entry.Dispose();
+            _entry?.Dispose();
         }
     }
 }
