@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.Pool;
 using UnityEngine.Scripting;
 
 namespace CustomUtils.Runtime.Audio
@@ -14,8 +15,8 @@ namespace CustomUtils.Runtime.Audio
     [Preserve]
     public sealed class AudioVolumeController : IAudioVolumeController, IDisposable
     {
-        public PersistentReactiveProperty<float> SfxVolume { get; private set; }
-        public PersistentReactiveProperty<float> MusicVolume { get; private set; }
+        public PersistentReactiveProperty<float> SfxVolume { get; } = new();
+        public PersistentReactiveProperty<float> MusicVolume { get; } = new();
 
         public bool SfxEnabled => SfxVolume.Value > 0;
         public bool MusicEnabled => MusicVolume.Value > 0;
@@ -47,9 +48,13 @@ namespace CustomUtils.Runtime.Audio
         {
             _audioMixer = await _addressablesLoader.LoadAsync<AudioMixer>(_audioConfig.AudioMixerReference, token);
 
-            (SfxVolume, MusicVolume) = await UniTask.WhenAll(
-                PersistentReactiveProperty<float>.CreateAsync(SfxVolumeKey, token, DefaultSfxVolume),
-                PersistentReactiveProperty<float>.CreateAsync(MusicVolumeKey, token, DefaultMusicVolume));
+            var initTasks = new[]
+            {
+                SfxVolume.InitializeAsync(SfxVolumeKey, token, DefaultSfxVolume),
+                MusicVolume.InitializeAsync(MusicVolumeKey, token, DefaultMusicVolume)
+            };
+
+            await UniTask.WhenAll(initTasks);
 
             var sfxSubscription = SfxVolume.Subscribe(this,
                 static (volume, self) => self.SetSfxVolume(volume));
@@ -74,8 +79,8 @@ namespace CustomUtils.Runtime.Audio
         public void Dispose()
         {
             _volumeSubscriptions?.Dispose();
-            SfxVolume?.Dispose();
-            MusicVolume?.Dispose();
+            SfxVolume.Dispose();
+            MusicVolume.Dispose();
         }
     }
 }

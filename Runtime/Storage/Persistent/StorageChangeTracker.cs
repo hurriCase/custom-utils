@@ -44,6 +44,5 @@ namespace CustomUtils.Runtime.Storage.Persistent
             Object.DontDestroyOnLoad(gameObject);
             _lifecycle = gameObject.AddComponent<StorageLifecycle>();
         }
-
     }
 }
