@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using CustomUtils.Runtime.Storage.Base;
 using Cysharp.Threading.Tasks;
@@ -10,61 +9,14 @@ namespace CustomUtils.Runtime.Storage.Persistent
     /// <summary>
     /// A reactive property that automatically persists its value to storage.
     /// Call <see cref="InitializeAsync"/> to load the saved value.
+    /// After changing data inside the stored value, call <see cref="ReactiveProperty{T}.ForceNotify"/>
+    /// to notify subscribers and save it.
     /// </summary>
     /// <typeparam name="TProperty">The type of the property value</typeparam>
     [PublicAPI]
-    public sealed class PersistentReactiveProperty<TProperty> : IDisposable
+    public sealed class PersistentReactiveProperty<TProperty> : ReactiveProperty<TProperty>
     {
-        /// <summary>
-        /// Gets the underlying reactive property.
-        /// </summary>
-        public ReactiveProperty<TProperty> Property { get; }
-
         private StorageEntry<TProperty> _entry;
-        private readonly IDisposable _subscription;
-
-        /// <summary>
-        /// Gets or sets the current value. Setting it automatically saves the value to storage.
-        /// </summary>
-        public TProperty Value
-        {
-            get => Property.Value;
-            set => Property.Value = value;
-        }
-
-        /// <summary>
-        /// Subscribes to value changes, passing <paramref name="target"/> to avoid a closure allocation.
-        /// </summary>
-        /// <typeparam name="TTarget">The type of the state passed to <paramref name="onNext"/></typeparam>
-        /// <param name="target">State passed to <paramref name="onNext"/> on every change</param>
-        /// <param name="onNext">Callback invoked with the current value and <paramref name="target"/></param>
-        /// <returns>A subscription that stops the callbacks when disposed</returns>
-        public IDisposable Subscribe<TTarget>(TTarget target, Action<TProperty, TTarget> onNext)
-            => Property.Subscribe((target, onNext),
-                static (property, tuple) => tuple.onNext(property, tuple.target));
-
-        /// <summary>
-        /// Subscribes to value changes.
-        /// </summary>
-        /// <param name="onNext">Callback invoked with the current value on every change</param>
-        /// <returns>A subscription that stops the callbacks when disposed</returns>
-        public IDisposable Subscribe(Action<TProperty> onNext)
-            => Property.Subscribe(onNext, static (property, action) => action(property));
-
-        /// <summary>
-        /// Exposes the property as an observable of its values.
-        /// </summary>
-        /// <returns>An observable that emits the current value and every change</returns>
-        public Observable<TProperty> AsObservable() => Property.AsObservable();
-
-        /// <summary>
-        /// Creates the property with a default value. Call <see cref="InitializeAsync"/> to load the saved value.
-        /// </summary>
-        public PersistentReactiveProperty()
-        {
-            Property = new ReactiveProperty<TProperty>();
-            _subscription = Property.Subscribe(this, static (value, self) => self._entry?.SaveIfEnabled(value));
-        }
 
         /// <summary>
         /// Loads the saved value from storage and starts saving changes.
@@ -99,18 +51,19 @@ namespace CustomUtils.Runtime.Storage.Persistent
         /// <param name="isForce">Save immediately, bypassing the cloud provider's debounce</param>
         public async UniTask SaveAsync(bool isForce = false)
         {
-            await _entry.SaveAsync(Property.Value, isForce);
+            await _entry.SaveAsync(Value, isForce);
         }
 
-        /// <summary>
-        /// Disposes the property and stops automatic saving.
-        /// This should be called when the property is no longer needed to prevent memory leaks.
-        /// </summary>
-        public void Dispose()
+        protected override void OnNextCore(TProperty value)
         {
-            _subscription.Dispose();
+            _entry?.SaveIfEnabled(value);
+            base.OnNextCore(value);
+        }
+
+        protected override void DisposeCore()
+        {
             _entry?.Dispose();
-            Property.Dispose();
+            base.DisposeCore();
         }
     }
 }
