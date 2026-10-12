@@ -32,7 +32,7 @@ namespace CustomUtils.Runtime.Storage.Providers
         }
 
         protected override UniTask<string> PlatformLoadAsync(string key, CancellationToken token)
-            => UniTask.FromResult(PlayerPrefs.GetString(key, null));
+            => UniTask.FromResult(PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : null);
 
         protected override UniTask<bool> PlatformHasKeyAsync(string key, CancellationToken token)
             => UniTask.FromResult(PlayerPrefs.HasKey(key));
