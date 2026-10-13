@@ -1,12 +1,11 @@
 ﻿using System;
-using CustomUtils.Editor.Scripts.FigmaBridge.Clipboard;
 using CustomUtils.Runtime.UI.Halftone;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace CustomUtils.Editor.Scripts.FigmaBridge.Halftone
+namespace CustomUtils.Editor.Scripts.FigmaBridge.Colors.Data
 {
-    internal sealed class HalftoneFigmaClipboardData : FigmaClipboardData
+    internal sealed class FigmaHalftoneData
     {
         [JsonProperty("scaleX")] internal float ScaleX { get; private set; }
         [JsonProperty("scaleY")] internal float ScaleY { get; private set; }
@@ -15,8 +14,6 @@ namespace CustomUtils.Editor.Scripts.FigmaBridge.Halftone
         [JsonProperty("patternRotation")] internal float PatternRotation { get; private set; }
         [JsonProperty("opacity")] internal float Opacity { get; private set; }
         [JsonProperty("blendMode")] internal string FigmaBlendMode { get; private set; }
-
-        internal const string BridgeSource = "FigmaHalftoneBridge";
 
         private const string BlendModeWordSeparator = "_";
 

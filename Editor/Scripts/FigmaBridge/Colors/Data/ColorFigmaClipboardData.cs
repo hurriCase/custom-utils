@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using CustomUtils.Editor.Scripts.FigmaBridge.Clipboard;
-using CustomUtils.Editor.Scripts.FigmaBridge.Halftone;
 using CustomUtils.Runtime.UI.Theme;
 using CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier.ShaderGradient;
 using Newtonsoft.Json;
@@ -16,6 +15,6 @@ namespace CustomUtils.Editor.Scripts.FigmaBridge.Colors.Data
         [JsonProperty("rotation")] internal float Rotation { get; private set; }
         [JsonProperty("color")] internal FigmaColorData Color { get; private set; }
         [JsonProperty("stops")] internal List<FigmaGradientStopData> Stops { get; private set; }
-        [JsonProperty("halftone")] internal HalftoneFigmaClipboardData Halftone { get; private set; }
+        [JsonProperty("halftone")] internal FigmaHalftoneData Halftone { get; private set; }
     }
 }
