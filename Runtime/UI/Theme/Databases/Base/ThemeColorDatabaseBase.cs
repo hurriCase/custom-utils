@@ -44,25 +44,19 @@ namespace CustomUtils.Runtime.UI.Theme.Databases.Base
                 if (colorItem.Guid != guid)
                     continue;
 
-#if MULTI_THEME
-                color = colorItem.Colors[ThemeHandler.CurrentThemeType.Value];
-#else
-                color = colorItem.Color;
-#endif
+                color = GetColor(colorItem);
                 return true;
             }
 
             return false;
         }
 
-        public bool TryGetColorByName(string name, out TColor color)
-        {
-            color = default;
-
-            var guid = Colors?.Find(color => color.Name == name)?.Guid;
-            TryGetColorByGuid(guid, out color);
-            return guid != null;
-        }
+        internal TColor GetColor(TTheme themeColor)
+#if MULTI_THEME
+            => themeColor.Colors[ThemeHandler.CurrentThemeType.Value];
+#else
+            => themeColor.Color;
+#endif
 
 #if UNITY_EDITOR
         protected virtual void OnValidate()

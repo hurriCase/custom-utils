@@ -41,9 +41,27 @@ namespace CustomUtils.Runtime.UI.Halftone
         private static readonly int _patternOpacityId = Shader.PropertyToID("_PatternOpacity");
         private static readonly int _blendModeId = Shader.PropertyToID("_BlendMode");
         private static readonly int _patternRotationId = Shader.PropertyToID("_PatternRotation");
+        private static readonly int _aspectRatioId = Shader.PropertyToID("_AspectRatio");
 
-        internal void ApplyProperties(Material material)
+        internal static HalftoneProperties Create(
+            Vector2 patternOffset,
+            Vector2 patternScale,
+            float patternOpacity,
+            HalftoneBlendMode blendMode,
+            float patternRotation)
+            => new()
+            {
+                PatternOffset = patternOffset,
+                PatternScale = patternScale,
+                PatternOpacity = patternOpacity,
+                BlendMode = blendMode,
+                PatternRotation = patternRotation
+            };
+
+        internal void ApplyProperties(Material material, Vector2 elementSize)
         {
+            var aspectRatio = elementSize.y > 0f ? elementSize.x / elementSize.y : 1f;
+            material.SetFloat(_aspectRatioId, aspectRatio);
             material.SetVector(_patternOffsetId, new Vector4(PatternOffset.x, PatternOffset.y, 0f, 0f));
             material.SetVector(_patternScaleId, new Vector4(PatternScale.x, PatternScale.y, 0f, 0f));
             material.SetFloat(_patternOpacityId, PatternOpacity);

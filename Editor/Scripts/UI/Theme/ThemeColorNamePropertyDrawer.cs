@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using CustomUtils.Editor.Scripts.CustomEditorUtilities;
+﻿using CustomUtils.Editor.Scripts.CustomEditorUtilities;
 using CustomUtils.Editor.Scripts.Extensions;
+using CustomUtils.Editor.Scripts.UI.Theme.Databases;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Formatter;
 using CustomUtils.Runtime.UI.Theme;
@@ -39,7 +39,11 @@ namespace CustomUtils.Editor.Scripts.UI.Theme
             if (colorType == ColorType.None)
                 return;
 
-            if (!TryGetColorNamesForType(colorType, out var colorNames, out var colorGuids))
+            var database = ThemeDatabaseConfig.Instance.GetDatabase(colorType);
+            var colorNames = database.GetColorNames();
+            var colorGuids = database.GetColorGuids();
+
+            if (colorNames.IsNullOrEmpty() || colorGuids.IsNullOrEmpty())
             {
                 var message = StringFormatter.Format("No {0} colors found in database.", colorType);
                 EditorVisualControls.WarningBox(position, message);
@@ -47,49 +51,11 @@ namespace CustomUtils.Editor.Scripts.UI.Theme
             }
 
             var colorTypeRect = GetRowRect(position, 0);
-            var (colorName, _) = _editorStateControls.Dropdown(property, colorNames, colorGuids, colorTypeRect);
+            var (_, colorGuid) = _editorStateControls.Dropdown(property, colorNames, colorGuids, colorTypeRect);
 
             var previewRect = GetRowRect(position, 1);
-            DrawColorPreview(colorName, colorType, previewRect);
-        }
-
-        private void DrawColorPreview(string colorName, ColorType colorType, Rect rect)
-        {
-            switch (colorType)
-            {
-                case ColorType.Solid:
-                    if (SolidColorDatabase.Instance.TryGetColorByName(colorName, out var previewColor))
-                        EditorVisualControls.ColorField(rect, "Preview", previewColor);
-                    break;
-
-                case ColorType.VertexGraphicGradient
-                    or ColorType.TextGradient
-                    or ColorType.ShaderGraphicGradient:
-                    if (GradientColorDatabase.Instance.TryGetColorByName(colorName, out var gradient))
-                        EditorVisualControls.GradientField(rect, "Preview", gradient);
-                    break;
-            }
-        }
-
-        private bool TryGetColorNamesForType(
-            ColorType colorType,
-            out List<string> colorNames,
-            out List<string> colorGuids)
-        {
-            (colorNames, colorGuids) = colorType switch
-            {
-                ColorType.Solid => (
-                    SolidColorDatabase.Instance.GetColorNames(),
-                    SolidColorDatabase.Instance.GetColorGuids()),
-                ColorType.VertexGraphicGradient
-                    or ColorType.TextGradient
-                    or ColorType.ShaderGraphicGradient => (
-                        GradientColorDatabase.Instance.GetColorNames(),
-                        GradientColorDatabase.Instance.GetColorGuids()),
-                _ => (null, null)
-            };
-
-            return !colorNames.IsNullOrEmpty() && !colorGuids.IsNullOrEmpty();
+            var databaseEditor = ThemeDatabaseEditorConfig.Instance.Editors[colorType];
+            databaseEditor.DrawPreview(previewRect, colorGuid);
         }
 
         private static Rect GetRowRect(Rect position, int rowIndex) => new(

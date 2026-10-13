@@ -25,6 +25,8 @@ SAMPLER(sampler_HalftoneTex);
 #define HALFTONE_BLEND_LUMINOSITY 17
 
 static const float HalftoneEpsilon = 1e-4;
+// Half precision and sRGB round trips land near, not exactly on, 0 and 1; within half an 8-bit step counts as equal.
+static const float HalftoneChannelTolerance = 0.5 / 255.0;
 static const float HalftoneMidGray = 0.5;
 static const float HalftoneSoftLightDarkThreshold = 0.25;
 static const float3 HalftoneLuminanceWeights = float3(0.3, 0.59, 0.11);
@@ -52,15 +54,15 @@ float3 HalftoneBlendHardLight(float3 baseColor, float3 patternColor)
 float3 HalftoneBlendColorDodge(float3 baseColor, float3 patternColor)
 {
     float3 result = min(1.0, baseColor / max(1.0 - patternColor, HalftoneEpsilon));
-    result = lerp(result, 1.0, step(1.0, patternColor));
-    return lerp(result, 0.0, step(baseColor, 0.0));
+    result = lerp(result, 1.0, step(1.0 - HalftoneChannelTolerance, patternColor));
+    return lerp(result, 0.0, step(baseColor, HalftoneChannelTolerance));
 }
 
 float3 HalftoneBlendColorBurn(float3 baseColor, float3 patternColor)
 {
     float3 result = 1.0 - min(1.0, (1.0 - baseColor) / max(patternColor, HalftoneEpsilon));
-    result = lerp(result, 0.0, step(patternColor, 0.0));
-    return lerp(result, 1.0, step(1.0, baseColor));
+    result = lerp(result, 0.0, step(patternColor, HalftoneChannelTolerance));
+    return lerp(result, 1.0, step(1.0 - HalftoneChannelTolerance, baseColor));
 }
 
 float3 HalftoneBlendSoftLight(float3 baseColor, float3 patternColor)
@@ -126,16 +128,12 @@ float3 HalftoneBlend(float3 baseColor, float3 patternColor, int blendMode)
             return HalftoneBlendMultiply(baseColor, patternColor);
         case HALFTONE_BLEND_COLOR_BURN:
             return HalftoneBlendColorBurn(baseColor, patternColor);
-        case HALFTONE_BLEND_LINEAR_BURN:
-            return max(baseColor + patternColor - 1.0, 0.0);
         case HALFTONE_BLEND_LIGHTEN:
             return max(baseColor, patternColor);
         case HALFTONE_BLEND_SCREEN:
             return HalftoneBlendScreen(baseColor, patternColor);
         case HALFTONE_BLEND_COLOR_DODGE:
             return HalftoneBlendColorDodge(baseColor, patternColor);
-        case HALFTONE_BLEND_LINEAR_DODGE:
-            return min(baseColor + patternColor, 1.0);
         // Overlay is Hard Light with the two colors swapped.
         case HALFTONE_BLEND_OVERLAY:
             return HalftoneBlendHardLight(patternColor, baseColor);
@@ -160,6 +158,22 @@ float3 HalftoneBlend(float3 baseColor, float3 patternColor, int blendMode)
     }
 }
 
+// Figma's Plus darker and Plus lighter are compositing operators, not blend modes: the pattern is
+// added or subtracted scaled by its alpha instead of the blended result being faded in by alpha.
+float3 HalftoneComposite(float3 baseColor, float3 patternColor, float patternAlpha, int blendMode)
+{
+    switch (blendMode)
+    {
+        case HALFTONE_BLEND_LINEAR_BURN:
+            return max(baseColor - (1.0 - patternColor) * patternAlpha, 0.0);
+        case HALFTONE_BLEND_LINEAR_DODGE:
+            return min(baseColor + patternColor * patternAlpha, 1.0);
+    }
+
+    float3 blendedColor = saturate(HalftoneBlend(baseColor, patternColor, blendMode));
+    return lerp(baseColor, blendedColor, patternAlpha);
+}
+
 // Figma blends in sRGB, so in a Linear project the math runs in gamma space.
 float3 HalftoneToBlendSpace(float3 color)
 {
@@ -181,14 +195,17 @@ float3 HalftoneFromBlendSpace(float3 color)
 
 half4 ApplyHalftone(half4 baseColor, float2 uv)
 {
-    float2 centeredUV = uv - HalftoneUVCenter;
+    // Rotation happens in pixel proportions; in raw UVs a non-square element would shear the pattern.
+    float2 aspectScale = float2(_AspectRatio, 1.0);
+    float2 centeredUV = (uv - HalftoneUVCenter) * aspectScale;
     float rotationSin, rotationCos;
-    float rotationRadians = DegToRad(_PatternRotation);
+    // Negated: rotating the UVs by +angle turns the pattern clockwise, but positive should be counter-clockwise.
+    float rotationRadians = DegToRad(-_PatternRotation);
     sincos(rotationRadians, rotationSin, rotationCos);
     float2 rotatedUV = float2(
         rotationCos * centeredUV.x - rotationSin * centeredUV.y,
         rotationSin * centeredUV.x + rotationCos * centeredUV.y
-    );
+    ) / aspectScale;
     float2 patternUV = (rotatedUV + HalftoneUVCenter) * _PatternScale.xy + _PatternOffset.xy;
 
     float2 withinBounds = step(0.0, patternUV) * step(patternUV, 1.0);
@@ -199,8 +216,7 @@ half4 ApplyHalftone(half4 baseColor, float2 uv)
     float patternAlpha = pattern.a * insidePattern * _PatternOpacity;
     float3 baseColorBlend = HalftoneToBlendSpace(baseColor.rgb);
     float3 patternColorBlend = HalftoneToBlendSpace(pattern.rgb);
-    float3 blendedColor = saturate(HalftoneBlend(baseColorBlend, patternColorBlend, (int)_BlendMode));
-    float3 finalColor = lerp(baseColorBlend, blendedColor, patternAlpha);
+    float3 finalColor = HalftoneComposite(baseColorBlend, patternColorBlend, patternAlpha, (int)_BlendMode);
 
     return half4(HalftoneFromBlendSpace(finalColor), baseColor.a);
 }

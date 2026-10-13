@@ -19,21 +19,8 @@ namespace CustomUtils.Runtime.UI.Theme
         Solid = 1,
 
         /// <summary>
-        /// Gradient color that applies a gradient effect to graphic UI elements
-        /// using <see cref="CustomUtils.Runtime.UI.GradientHelpers.GraphicGradient.VertexGradientEffect"/>
-        /// by modifying vertex colors.
+        /// Gradient color. Text and simple gradients use vertex colors, every other gradient uses the gradient shader.
         /// </summary>
-        VertexGraphicGradient = 2,
-
-        /// <summary>
-        /// Gradient color specifically designed for text UI elements using TextMeshPro.
-        /// </summary>
-        TextGradient = 3,
-
-        /// <summary>
-        /// Gradient color that applies a gradient effect to graphic UI elements using shaders
-        /// and support more interesting variations like diamond, multi gradients.
-        /// </summary>
-        ShaderGraphicGradient = 4
+        Gradient = 2
     }
 }

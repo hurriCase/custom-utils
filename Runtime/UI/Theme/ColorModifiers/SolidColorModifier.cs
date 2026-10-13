@@ -16,7 +16,7 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers
     {
         [SerializeField, InspectorReadOnly] private Graphic _graphic;
 
-        protected override IThemeDatabase<Color> ThemeDatabase => SolidColorDatabase.Instance;
+        protected override IThemeDatabase<Color> ThemeDatabase => ThemeDatabaseConfig.Instance.Solid;
 
         protected override void Awake()
         {

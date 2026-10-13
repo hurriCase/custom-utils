@@ -4,10 +4,13 @@
     {
         internal const string CustomMenuResourcePath = "CustomMenu";
         internal const string CustomMenuSettingsAssetName = "CustomMenuSettings";
+        internal const string FigmaColorConverterConfigAssetName = "FigmaColorConverterConfig";
+        internal const string ThemeDatabaseEditorConfigAssetName = "ThemeDatabaseEditorConfig";
 
         internal const string ThemeFullPath = ResourcesPath + "/" + ThemeResourcePath;
         internal const string SolidColorDatabaseAssetName = "SolidColorDatabase";
         internal const string GradientColorDatabaseAssetName = "GradientColorDatabase";
+        internal const string ThemeDatabaseConfigAssetName = "ThemeDatabaseConfig";
         internal const string ThemeResourcePath = "Theme";
 
         internal const string ImagePixelPerUnitFullPath = ResourcesPath + "/" + ImagePixelPerUnitResourcePath;

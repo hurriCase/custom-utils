@@ -1,7 +1,11 @@
 ﻿using CustomUtils.Runtime.Attributes;
+using CustomUtils.Runtime.Attributes.ShowIf;
 using CustomUtils.Runtime.Extensions;
+using CustomUtils.Runtime.Other;
+using CustomUtils.Runtime.UI.Halftone;
 using CustomUtils.Runtime.UI.Theme.Base;
 using CustomUtils.Runtime.UI.Theme.ColorModifiers.Base;
+using CustomUtils.Runtime.UI.Theme.Materials;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
@@ -18,17 +22,35 @@ namespace CustomUtils.Runtime.UI.Theme
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Graphic))]
     [PublicAPI]
-    public sealed class ThemeComponent : MonoBehaviour
+    public sealed class ThemeComponent : MonoBehaviour, IMaterialModifier, IMeshModifier
     {
-        [SerializeField] private ColorData _colorData;
+        /// <summary>
+        /// Gets the theme color type and guid applied to the graphic.
+        /// </summary>
+        [field: SerializeField] public ColorData ColorData { get; private set; }
 
-        [SerializeField, InspectorReadOnly] private ColorModifierBase _currentColorModifier;
+        [field: SerializeField] internal bool UseHalftone { get; private set; }
+
+        [field: SerializeField, ShowIf(nameof(UseHalftone))]
+        internal HalftoneProperties HalftoneProperties { get; private set; }
+
+        [field: SerializeField, InspectorReadOnly]
+        internal ColorModifierBase CurrentColorModifier { get; private set; }
+
+        [SerializeField, Self] private Graphic _graphic;
 
 #if UNITY_EDITOR // to prevent OnValidate from updating the color
         [SerializeField, HideInInspector] private ColorData _previousColorData;
 #endif
 
-        public ColorData ColorData => _colorData;
+        private readonly HalftoneMaterial _halftoneMaterial = new();
+        private readonly ThemeVertexWriter _vertexWriter = new();
+
+        private void OnEnable()
+        {
+            _graphic = _graphic.AsNullable() ?? GetComponent<Graphic>();
+            _graphic.SetAllDirty();
+        }
 
         /// <summary>
         /// Updates the color data for this theme component and applies the corresponding color modifier.
@@ -36,33 +58,93 @@ namespace CustomUtils.Runtime.UI.Theme
         /// <param name="colorData">The new color data to apply.</param>
         public void UpdateColorData(ColorData colorData)
         {
-            if (_colorData == colorData)
+            if (ColorData == colorData)
                 return;
 
-            ApplyColorData(colorData, ref _colorData);
+            var previousColorType = ColorData.ColorType;
+            ColorData = colorData;
+#if UNITY_EDITOR
+            _previousColorData = colorData;
+#endif
+            ApplyModifier(previousColorType);
         }
 
-        private void ApplyColorData(ColorData newColorData, ref ColorData currentColorData)
-        {
-            if (!_currentColorModifier || currentColorData.ColorType != newColorData.ColorType)
-                CreateModifier(newColorData.ColorType);
+        internal GradientVertexData GetGradientVertexData()
+            => CurrentColorModifier ? CurrentColorModifier.GetGradientVertexData() : default;
 
-            currentColorData = newColorData;
-            _currentColorModifier.AsNullable()?.UpdateColor(newColorData.Guid);
+        internal void SetHalftone(HalftoneProperties halftoneProperties)
+        {
+            UseHalftone = true;
+            HalftoneProperties = halftoneProperties;
+            RefreshHalftone();
+        }
+
+        internal void DisableHalftone()
+        {
+            UseHalftone = false;
+            RefreshHalftone();
+        }
+
+        Material IMaterialModifier.GetModifiedMaterial(Material baseMaterial)
+        {
+            var themeShader = ResourceReferences.Instance.GetThemeShader(baseMaterial.shader);
+            if (!isActiveAndEnabled || !themeShader)
+                return baseMaterial;
+
+            var colorMaterial = CurrentColorModifier
+                ? CurrentColorModifier.ModifyMaterial(baseMaterial)
+                : baseMaterial;
+
+            return UseHalftone
+                ? _halftoneMaterial.Get(colorMaterial, HalftoneProperties, _graphic.rectTransform.rect.size)
+                : colorMaterial;
+        }
+
+        void IMeshModifier.ModifyMesh(VertexHelper vertexHelper)
+        {
+            if (!isActiveAndEnabled)
+                return;
+
+            var gradientVertexData = GetGradientVertexData();
+            _vertexWriter.Write(vertexHelper, _graphic, gradientVertexData);
+        }
+
+#if !UGUI_7_OR_NEWER
+        void IMeshModifier.ModifyMesh(Mesh mesh) { }
+#endif
+
+        private void ApplyModifier(ColorType previousColorType)
+        {
+            if (!CurrentColorModifier || previousColorType != ColorData.ColorType)
+                CreateModifier(ColorData.ColorType);
+
+            CurrentColorModifier.AsNullable()?.UpdateColor(ColorData.Guid);
         }
 
         private void CreateModifier(ColorType colorType)
         {
-            var previousModifier = _currentColorModifier;
-            _currentColorModifier = ColorModifierFactory.CreateModifier(colorType, gameObject);
+            var previousModifier = CurrentColorModifier;
+            CurrentColorModifier = ColorModifierFactory.CreateModifier(colorType, gameObject);
 
-            if (previousModifier && previousModifier != _currentColorModifier)
+            if (previousModifier && previousModifier != CurrentColorModifier)
             {
                 previousModifier.Dispose();
                 previousModifier.Destroy();
             }
 
             this.MarkAsDirty();
+        }
+
+        private void RefreshHalftone()
+        {
+            if (_graphic)
+                _graphic.SetMaterialDirty();
+        }
+
+        private void OnRectTransformDimensionsChange()
+        {
+            if (UseHalftone)
+                RefreshHalftone();
         }
 
 #if UNITY_EDITOR
@@ -74,10 +156,29 @@ namespace CustomUtils.Runtime.UI.Theme
             // We can't destroy an object during OnValidate
             EditorApplication.delayCall += () =>
             {
-                if (this && _colorData != _previousColorData)
-                    ApplyColorData(_colorData, ref _previousColorData);
+                if (!this)
+                    return;
+
+                RefreshHalftone();
+
+                if (ColorData == _previousColorData)
+                    return;
+
+                var previousColorType = _previousColorData.ColorType;
+                _previousColorData = ColorData;
+                ApplyModifier(previousColorType);
             };
         }
 #endif
+
+        private void OnDisable()
+        {
+            _graphic.SetAllDirty();
+        }
+
+        private void OnDestroy()
+        {
+            _halftoneMaterial.Release();
+        }
     }
 }

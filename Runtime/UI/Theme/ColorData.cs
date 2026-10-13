@@ -22,6 +22,12 @@ namespace CustomUtils.Runtime.UI.Theme
         /// </summary>
         [field: SerializeField, ThemeColorName] public string Guid { get; private set; }
 
+        internal ColorData(ColorType colorType, string guid)
+        {
+            ColorType = colorType;
+            Guid = guid;
+        }
+
         public bool Equals(ColorData other) => ColorType == other.ColorType && Guid == other.Guid;
         public override bool Equals(object obj) => obj is ColorData other && Equals(other);
         public readonly override int GetHashCode() => HashCode.Combine((int)ColorType, Guid);

@@ -63,6 +63,11 @@
             "name": "com.alexeytaranov.serializereferencedropdown",
             "expression": "",
             "define": "SERIALIZE_REFERENCE_DROPDOWN_INSTALLED"
+        },
+        {
+            "name": "com.unity.ugui",
+            "expression": "7.0.0",
+            "define": "UGUI_7_OR_NEWER"
         }
     ],
     "noEngineReferences": false

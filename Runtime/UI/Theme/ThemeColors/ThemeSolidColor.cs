@@ -20,6 +20,14 @@ namespace CustomUtils.Runtime.UI.Theme.ThemeColors
 #endif
 
 #if UNITY_EDITOR
+#if MULTI_THEME
+        internal static ThemeSolidColor Create(string name, Color color) => new() { Name = name, Colors = new(color) };
+#else
+        internal static ThemeSolidColor Create(string name, Color color) => new() { Name = name, Color = color };
+#endif
+#endif
+
+#if UNITY_EDITOR
         public bool TrySetGuid(bool forceRegenerate)
         {
             if (!forceRegenerate && !string.IsNullOrEmpty(Guid))

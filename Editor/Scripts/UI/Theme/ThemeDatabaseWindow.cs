@@ -1,4 +1,5 @@
 ﻿using CustomUtils.Runtime.Extensions;
+using CustomUtils.Runtime.UI.Theme;
 using CustomUtils.Runtime.UI.Theme.Databases;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -9,10 +10,6 @@ namespace CustomUtils.Editor.Scripts.UI.Theme
 {
     internal sealed class ThemeDatabaseWindow : EditorWindow
     {
-        private static readonly string[] _tabNames = { "Solid", "Gradient" };
-
-        private int _selectedTab;
-
         [MenuItem(MenuItemNames.ThemeDatabasesMenuName)]
         private static void OpenWindow()
         {
@@ -23,35 +20,21 @@ namespace CustomUtils.Editor.Scripts.UI.Theme
         {
             var toolbar = new Toolbar();
 
-            for (var i = 0; i < _tabNames.Length; i++)
-            {
-                var index = i;
-                var button = new ToolbarButton(() => ShowTab(index))
-                {
-                    text = _tabNames[index]
-                };
-
-                toolbar.Add(button);
-            }
+            var config = ThemeDatabaseConfig.Instance;
+            toolbar.Add(new ToolbarButton(() => ShowDatabase(config.Solid)) { text = nameof(ColorType.Solid) });
+            toolbar.Add(new ToolbarButton(() => ShowDatabase(config.Gradient)) { text = nameof(ColorType.Gradient) });
 
             rootVisualElement.Add(toolbar);
             rootVisualElement.Add(new ScrollView { name = "tab-content" });
 
-            ShowTab(0);
+            ShowDatabase(config.Solid);
         }
 
-        private void ShowTab(int index)
+        private void ShowDatabase(Object database)
         {
-            _selectedTab = index;
-
             var scrollView = rootVisualElement.Q<ScrollView>("tab-content");
             scrollView.Clear();
-
-            Object target = _selectedTab == 0
-                ? SolidColorDatabase.Instance
-                : GradientColorDatabase.Instance;
-
-            scrollView.Add(new InspectorElement(target));
+            scrollView.Add(new InspectorElement(database));
         }
     }
 }

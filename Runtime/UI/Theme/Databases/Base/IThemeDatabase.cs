@@ -1,7 +1,10 @@
-﻿namespace CustomUtils.Runtime.UI.Theme.Databases.Base
+﻿using System.Collections.Generic;
+
+namespace CustomUtils.Runtime.UI.Theme.Databases.Base
 {
-    internal interface IThemeDatabase<TColor>
+    internal interface IThemeDatabase
     {
-        bool TryGetColorByGuid(string guid, out TColor color);
+        List<string> GetColorNames();
+        List<string> GetColorGuids();
     }
 }

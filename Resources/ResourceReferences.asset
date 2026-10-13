@@ -16,5 +16,13 @@ MonoBehaviour:
   <EmptySprite>k__BackingField: {fileID: 21300000, guid: 3f91331724a9da84197e9b6d94f0483c, type: 3}
   <ProceduralImageMaterial>k__BackingField: {fileID: 2100000, guid: ce2ab5b3a5815d34e8b74341ebb644cf, type: 2}
   <ProceduralImageGlowMaterial>k__BackingField: {fileID: 2100000, guid: 7c21cb7d4f32461bbec1fdf5f7403c50, type: 2}
-  <GradientMaterial>k__BackingField: {fileID: 2100000, guid: 07b53358eca78b24985770ec19fc2898, type: 2}
-  <HalftoneMaterial>k__BackingField: {fileID: 2100000, guid: 5ecd29b9df9be004ba734d97d51e2ea2, type: 2}
+  <HalftoneTexture>k__BackingField: {fileID: 2800000, guid: 947627061399afa44859a0c20256d72b, type: 3}
+  <ThemeShaders>k__BackingField:
+  - <BaseShader>k__BackingField: {fileID: 10770, guid: 0000000000000000f000000000000000, type: 0}
+    <ThemeShader>k__BackingField: {fileID: 4800000, guid: b6e863d044cb6994d95c216012e65f33, type: 3}
+  - <BaseShader>k__BackingField: {fileID: 4800000, guid: b6e863d044cb6994d95c216012e65f33, type: 3}
+    <ThemeShader>k__BackingField: {fileID: 4800000, guid: b6e863d044cb6994d95c216012e65f33, type: 3}
+  - <BaseShader>k__BackingField: {fileID: 4800000, guid: 68e6db2ebdc24f95958faec2be5558d6, type: 3}
+    <ThemeShader>k__BackingField: {fileID: 4800000, guid: d6651e803aa94ee180b1b32f948047b9, type: 3}
+  - <BaseShader>k__BackingField: {fileID: 4800000, guid: d6651e803aa94ee180b1b32f948047b9, type: 3}
+    <ThemeShader>k__BackingField: {fileID: 4800000, guid: d6651e803aa94ee180b1b32f948047b9, type: 3}
