@@ -14,10 +14,12 @@ namespace CustomUtils.Runtime.CSV
     public sealed class CsvBinarySerializer
     {
         /// <summary>
-        /// Converts a CSV file to binary format by parsing it with the specified converter and serializing the result.
+        /// Converts a CSV file to binary format: parses it with <see cref="CsvParser.Parse"/>,
+        /// converts the rows with <paramref name="csvConverter"/>
+        /// and serializes the result with <see cref="SerializerProvider.BytesSerializer"/>.
         /// </summary>
         /// <typeparam name="T">The type of objects to convert CSV rows into.</typeparam>
-        /// <param name="csvConverter">The converter that maps CSV rows to objects of type T.</param>
+        /// <param name="csvConverter">The converter that maps CSV rows to <typeparamref name="T"/> objects.</param>
         /// <param name="csvFilePath">The file path to the CSV file to convert.</param>
         /// <param name="binaryOutputPath">The file path where the binary output will be saved.</param>
         public void ConvertCSVToBinary<T>(ICsvConverter<T> csvConverter, string csvFilePath, string binaryOutputPath)

@@ -4,6 +4,11 @@ using JetBrains.Annotations;
 namespace CustomUtils.Runtime.CSV.Base
 {
     /// <inheritdoc />
+    /// <summary>
+    /// Base <see cref="T:CustomUtils.Runtime.CSV.Base.ICsvConverter`1">ICsvConverter{T}</see>
+    /// that converts a table row by row via <see cref="M:CustomUtils.Runtime.CSV.Base.CsvConverterBase`1.ConvertRow(CustomUtils.Runtime.CSV.CSVEntry.CsvRow)">ConvertRow</see>.
+    /// </summary>
+    /// <typeparam name="T">The type of objects to convert CSV rows into.</typeparam>
     [PublicAPI]
     public abstract class CsvConverterBase<T> : ICsvConverter<T>
     {
@@ -19,11 +24,10 @@ namespace CustomUtils.Runtime.CSV.Base
         }
 
         /// <summary>
-        /// Converts a single CSV row to an object of type T.
-        /// This method must be implemented by derived classes to define the conversion logic.
+        /// Converts a single <see cref="CsvRow"/> into a <typeparamref name="T"/> object.
         /// </summary>
         /// <param name="row">The CSV row to convert.</param>
-        /// <returns>An object of type T created from the row data.</returns>
+        /// <returns>A <typeparamref name="T"/> object created from the row data.</returns>
         protected abstract T ConvertRow(CsvRow row);
     }
 }
