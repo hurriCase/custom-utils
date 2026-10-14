@@ -1,4 +1,5 @@
 ﻿using System;
+using CustomUtils.Collections.Scripts;
 using CustomUtils.Runtime.UI.Theme;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -12,11 +13,10 @@ namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles.Mappings
     {
         [SerializeField] private Selectable.Transition _transitionType;
 
-        [SerializeField] private ThemeComponent _themeComponent;
-        [SerializeField] private ToggleColorMapping _colorMapping;
+        [SerializeField] private ThemeStateMapping<ToggleStateType> _colorMapping;
 
         [SerializeField] private Image _targetImage;
-        [SerializeField] private ToggleSpriteMapping _spriteMapping;
+        [SerializeField] private EnumArray<ToggleStateType, Sprite> _sprites;
 
         public void ApplyState(ToggleStateType state)
         {
@@ -34,18 +34,12 @@ namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles.Mappings
 
         private readonly void ApplyColorTransition(ToggleStateType state)
         {
-            if (!_colorMapping || !_themeComponent)
-                return;
-
-            _colorMapping.SetComponentForState(state, _themeComponent);
+            _colorMapping.SetState(state);
         }
 
         private readonly void ApplySpriteTransition(ToggleStateType state)
         {
-            if (!_targetImage || !_spriteMapping)
-                return;
-
-            _targetImage.overrideSprite = _spriteMapping.GetSpriteForState(state);
+            _targetImage.overrideSprite = _sprites[state];
         }
     }
 }

@@ -16,5 +16,7 @@ namespace CustomUtils.Editor.Scripts.FigmaBridge.Colors.Data
         [JsonProperty("color")] internal FigmaColorData Color { get; private set; }
         [JsonProperty("stops")] internal List<FigmaGradientStopData> Stops { get; private set; }
         [JsonProperty("halftone")] internal FigmaHalftoneData Halftone { get; private set; }
+
+        internal const string ExpectedSource = "FigmaColorBridge";
     }
 }

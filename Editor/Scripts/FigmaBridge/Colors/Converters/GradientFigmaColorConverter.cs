@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using CustomUtils.Editor.Scripts.FigmaBridge.Colors.Data;
 using CustomUtils.Editor.Scripts.UI.Theme.Databases;
-using CustomUtils.Runtime.UI.Theme.ColorModifiers.Base;
 using UnityEngine;
 
 namespace CustomUtils.Editor.Scripts.FigmaBridge.Colors.Converters
@@ -18,11 +17,6 @@ namespace CustomUtils.Editor.Scripts.FigmaBridge.Colors.Converters
         {
             var gradient = CreateGradient(clipboardData.Stops);
             return _databaseEditor.GetOrAdd(gradient, clipboardData.Name);
-        }
-
-        internal override void ApplyTo(ColorModifierBase modifier, ColorFigmaClipboardData clipboardData)
-        {
-            modifier.ApplyGradientSettings(clipboardData.GradientType, clipboardData.Rotation);
         }
 
         private Gradient CreateGradient(IReadOnlyList<FigmaGradientStopData> stops)

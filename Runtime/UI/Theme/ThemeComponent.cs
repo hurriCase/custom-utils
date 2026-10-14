@@ -1,5 +1,4 @@
-﻿using CustomUtils.Runtime.Attributes;
-using CustomUtils.Runtime.Attributes.ShowIf;
+using CustomUtils.Runtime.Attributes;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Other;
 using CustomUtils.Runtime.UI.Halftone;
@@ -15,7 +14,7 @@ namespace CustomUtils.Runtime.UI.Theme
 {
     /// <inheritdoc />
     /// <summary>
-    /// Component responsible for applying theme colors to UI graphics.
+    /// Component responsible for applying a theme style (color, gradient direction, halftone) to UI graphics.
     /// Automatically creates and manages appropriate color modifiers based on the color type.
     /// </summary>
     [ExecuteAlways]
@@ -25,14 +24,9 @@ namespace CustomUtils.Runtime.UI.Theme
     public sealed class ThemeComponent : MonoBehaviour, IMaterialModifier, IMeshModifier
     {
         /// <summary>
-        /// Gets the theme color type and guid applied to the graphic.
+        /// Gets the style applied to the graphic.
         /// </summary>
-        [field: SerializeField] public ColorData ColorData { get; private set; }
-
-        [field: SerializeField] internal bool UseHalftone { get; private set; }
-
-        [field: SerializeField, ShowIf(nameof(UseHalftone))]
-        internal HalftoneProperties HalftoneProperties { get; private set; }
+        [field: SerializeField] public ThemeStyle Style { get; private set; }
 
         [field: SerializeField, InspectorReadOnly]
         internal ColorModifierBase CurrentColorModifier { get; private set; }
@@ -48,42 +42,28 @@ namespace CustomUtils.Runtime.UI.Theme
 
         private void OnEnable()
         {
-            _graphic = _graphic.AsNullable() ?? GetComponent<Graphic>();
-            _graphic.SetAllDirty();
+            Refresh();
         }
 
         /// <summary>
-        /// Updates the color data for this theme component and applies the corresponding color modifier.
+        /// Applies the full style: theme color, gradient direction and halftone pattern.
         /// </summary>
-        /// <param name="colorData">The new color data to apply.</param>
-        public void UpdateColorData(ColorData colorData)
+        /// <param name="style">The style to apply.</param>
+        public void UpdateStyle(ThemeStyle style)
         {
-            if (ColorData == colorData)
-                return;
-
-            var previousColorType = ColorData.ColorType;
-            ColorData = colorData;
+            var previousColorData = Style.ColorData;
+            Style = style;
 #if UNITY_EDITOR
-            _previousColorData = colorData;
+            _previousColorData = style.ColorData;
 #endif
-            ApplyModifier(previousColorType);
+            if (previousColorData != style.ColorData)
+                ApplyModifier(previousColorData.ColorType);
+
+            Refresh();
         }
 
         internal GradientVertexData GetGradientVertexData()
-            => CurrentColorModifier ? CurrentColorModifier.GetGradientVertexData() : default;
-
-        internal void SetHalftone(HalftoneProperties halftoneProperties)
-        {
-            UseHalftone = true;
-            HalftoneProperties = halftoneProperties;
-            RefreshHalftone();
-        }
-
-        internal void DisableHalftone()
-        {
-            UseHalftone = false;
-            RefreshHalftone();
-        }
+            => CurrentColorModifier ? CurrentColorModifier.GetGradientVertexData(Style) : default;
 
         Material IMaterialModifier.GetModifiedMaterial(Material baseMaterial)
         {
@@ -95,8 +75,8 @@ namespace CustomUtils.Runtime.UI.Theme
                 ? CurrentColorModifier.ModifyMaterial(baseMaterial)
                 : baseMaterial;
 
-            return UseHalftone
-                ? _halftoneMaterial.Get(colorMaterial, HalftoneProperties, _graphic.rectTransform.rect.size)
+            return Style.UseHalftone
+                ? _halftoneMaterial.Get(colorMaterial, Style.HalftoneProperties, _graphic.rectTransform.rect.size)
                 : colorMaterial;
         }
 
@@ -115,10 +95,11 @@ namespace CustomUtils.Runtime.UI.Theme
 
         private void ApplyModifier(ColorType previousColorType)
         {
-            if (!CurrentColorModifier || previousColorType != ColorData.ColorType)
-                CreateModifier(ColorData.ColorType);
+            var colorData = Style.ColorData;
+            if (!CurrentColorModifier || previousColorType != colorData.ColorType)
+                CreateModifier(colorData.ColorType);
 
-            CurrentColorModifier.AsNullable()?.UpdateColor(ColorData.Guid);
+            CurrentColorModifier.AsNullable()?.UpdateColor(colorData.Guid);
         }
 
         private void CreateModifier(ColorType colorType)
@@ -135,16 +116,16 @@ namespace CustomUtils.Runtime.UI.Theme
             this.MarkAsDirty();
         }
 
-        private void RefreshHalftone()
+        private void Refresh()
         {
-            if (_graphic)
-                _graphic.SetMaterialDirty();
+            _graphic = _graphic.AsNullable() ?? GetComponent<Graphic>();
+            _graphic.SetAllDirty();
         }
 
         private void OnRectTransformDimensionsChange()
         {
-            if (UseHalftone)
-                RefreshHalftone();
+            if (Style.UseHalftone && _graphic)
+                _graphic.SetMaterialDirty();
         }
 
 #if UNITY_EDITOR
@@ -159,13 +140,14 @@ namespace CustomUtils.Runtime.UI.Theme
                 if (!this)
                     return;
 
-                RefreshHalftone();
+                Refresh();
 
-                if (ColorData == _previousColorData)
+                var colorData = Style.ColorData;
+                if (colorData == _previousColorData)
                     return;
 
                 var previousColorType = _previousColorData.ColorType;
-                _previousColorData = ColorData;
+                _previousColorData = colorData;
                 ApplyModifier(previousColorType);
             };
         }

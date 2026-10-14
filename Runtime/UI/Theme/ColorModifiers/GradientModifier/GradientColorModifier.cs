@@ -1,8 +1,6 @@
 ﻿using CustomUtils.Runtime.Attributes;
-using CustomUtils.Runtime.Attributes.ShowIf;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.UI.Theme.ColorModifiers.Base;
-using CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier.ShaderGradient;
 using CustomUtils.Runtime.UI.Theme.Databases;
 using CustomUtils.Runtime.UI.Theme.Databases.Base;
 using CustomUtils.Runtime.UI.Theme.Materials;
@@ -17,14 +15,6 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
     [ColorModifier(ColorType.Gradient)]
     internal sealed class GradientColorModifier : GenericColorModifierBase<Gradient>
     {
-        [field: SerializeField] internal GradientType GradientType { get; private set; }
-
-        [field: SerializeField, ShowIf(nameof(GradientType), GradientType.Linear, GradientType.Angular)]
-        internal float GradientRotation { get; private set; }
-
-        [field: SerializeField, ShowIf(nameof(GradientType), GradientType.Diamond)]
-        internal DiamondGradientDirection DiamondDirection { get; private set; }
-
         [SerializeField, Self] private Graphic _graphic;
 
         protected override IThemeDatabase<Gradient> ThemeDatabase => ThemeDatabaseConfig.Instance.Gradient;
@@ -44,20 +34,13 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
             Refresh();
         }
 
-        internal override void ApplyGradientSettings(GradientType gradientType, float gradientRotation)
-        {
-            GradientType = gradientType;
-            GradientRotation = gradientRotation;
-            Refresh();
-        }
-
         internal override Material ModifyMaterial(Material baseMaterial)
             => isActiveAndEnabled ? SharedGradientMaterials.Get(baseMaterial) : baseMaterial;
 
-        internal override GradientVertexData GetGradientVertexData()
+        internal override GradientVertexData GetGradientVertexData(ThemeStyle style)
         {
             var atlasRow = ThemeDatabaseConfig.Instance.Gradient.GetAtlasRow(currentColorName);
-            return new GradientVertexData(atlasRow, GradientType, GradientRotation, DiamondDirection);
+            return new GradientVertexData(atlasRow, style.GradientType, style.GradientRotation, style.DiamondDirection);
         }
 
         protected override void OnUpdateColor(Gradient gradient)

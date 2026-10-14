@@ -1,5 +1,4 @@
 ﻿using System;
-using CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier.ShaderGradient;
 using CustomUtils.Runtime.UI.Theme.Materials;
 using UnityEngine;
 
@@ -11,9 +10,7 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.Base
 
         internal virtual Material ModifyMaterial(Material baseMaterial) => baseMaterial;
 
-        internal virtual GradientVertexData GetGradientVertexData() => default;
-
-        internal virtual void ApplyGradientSettings(GradientType gradientType, float gradientRotation) { }
+        internal virtual GradientVertexData GetGradientVertexData(ThemeStyle style) => default;
 
         public abstract void Dispose();
     }

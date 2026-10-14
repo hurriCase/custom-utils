@@ -32,8 +32,6 @@
         internal const string LoggerSettingsFullPath = ResourcesPath + LoggerSettingsResourcesPath;
         internal const string LoggerSettingsAssetName = "LogCollectorSettings";
 
-        internal const string MappingsPath = "Mappings/";
-
         private const string ResourcesPath = "Assets/Resources";
     }
 }
