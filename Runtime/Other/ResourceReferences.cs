@@ -15,11 +15,12 @@ namespace CustomUtils.Runtime.Other
         [field: SerializeField] internal Texture2D HalftoneTexture { get; private set; }
         [field: SerializeField] internal ThemeShaderMapping[] ThemeShaders { get; private set; }
 
+        // Asset bundles carry their own copy of a shader, so on device the same shader can be a different object.
         internal Shader GetThemeShader(Shader baseShader)
         {
             foreach (var mapping in ThemeShaders)
             {
-                if (mapping.BaseShader == baseShader)
+                if (mapping.BaseShader && mapping.BaseShader.name == baseShader.name)
                     return mapping.ThemeShader;
             }
 

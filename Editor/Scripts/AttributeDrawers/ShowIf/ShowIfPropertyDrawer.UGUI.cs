@@ -16,7 +16,9 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers.ShowIf
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             var showIfAttribute = (ShowIfAttribute)attribute;
-            if (!TryGetProperty(property, out var sourceProperty) || !ShouldShow(sourceProperty, showIfAttribute))
+
+            // Must match OnGUI: a missing condition field shows the property.
+            if (TryGetProperty(property, out var sourceProperty) && !ShouldShow(sourceProperty, showIfAttribute))
                 return -EditorGUIUtility.standardVerticalSpacing;
 
             return EditorGUI.GetPropertyHeight(property, label);

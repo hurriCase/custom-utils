@@ -1,7 +1,12 @@
-using CustomUtils.Runtime.Extensions;
+﻿using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Other;
+using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Corners;
+using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Effects;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers.Base;
+using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Rendering;
+using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Shape;
+using CustomUtils.Runtime.UI.Theme;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,146 +18,38 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
     [AddComponentMenu("UI/Procedural Image")]
     public class ProceduralImage : Image
     {
-        [field: SerializeField] public bool UseCustomMaterial { get; set; }
-        [field: SerializeField] public Vector2 CornerOffsetTopLeft { get; set; }
-        [field: SerializeField] public Vector2 CornerOffsetTopRight { get; set; }
-        [field: SerializeField] public Vector2 CornerOffsetBottomRight { get; set; }
-        [field: SerializeField] public Vector2 CornerOffsetBottomLeft { get; set; }
+        [field: SerializeField] public bool UseCustomMaterial { get; private set; }
+        [field: SerializeField] public CornerOffsets CornerOffsets { get; private set; }
+        [field: SerializeField] public ProceduralOutline Outline { get; private set; }
+        [field: SerializeField] public ProceduralShadow Shadow { get; private set; }
 
-        [SerializeField] private CornerOffsetMode _cornerOffsetMode;
-        [SerializeField, Min(0)] private float _borderWidth;
-        [SerializeField, Min(0)] private float _falloffDistance;
-
-        internal const string CornerOffsetModeFieldName = nameof(_cornerOffsetMode);
-        internal const string BorderWidthFieldName = nameof(_borderWidth);
-        internal const string FalloffDistanceFieldName = nameof(_falloffDistance);
-
-        private const float MinEdgeLength = 0.001f;
-
-        public CornerOffsetMode CornerOffsetMode
-        {
-            get => _cornerOffsetMode;
-            set
-            {
-                if (_cornerOffsetMode == value)
-                    return;
-
-                _cornerOffsetMode = value;
-                SetVerticesDirty();
-            }
-        }
-
-        public float BorderWidth
-        {
-            get => _borderWidth;
-            set
-            {
-                if (Mathf.Approximately(_borderWidth, value))
-                    return;
-
-                _borderWidth = Mathf.Max(0, value);
-                SetVerticesDirty();
-            }
-        }
-
-        public float FalloffDistance
-        {
-            get => _falloffDistance;
-            set
-            {
-                if (Mathf.Approximately(_falloffDistance, value))
-                    return;
-
-                _falloffDistance = Mathf.Max(0, value);
-                SetVerticesDirty();
-            }
-        }
+        [field: SerializeField, Min(0)] public float BorderWidth { get; private set; }
+        [field: SerializeField] public ProceduralImage ShapeSource { get; private set; }
 
         public override Material material
         {
-            get => !m_Material ? ResourceReferences.ProceduralImageMaterial : base.material;
+            get => !m_Material ? ResourceReferences.Instance.ProceduralImageMaterial : base.material;
             set => base.material = value;
         }
 
-        private ResourceReferences ResourceReferences => ResourceReferences.Instance;
+        internal ShapeSourceLink ShapeLink { get; } = new();
 
-        private ModifierBase _modifierBase;
+        private ModifierBase Modifier => _modifier ? _modifier : _modifier = GetComponent<ModifierBase>();
 
-        private ModifierBase ModifierBase
-        {
-            get
-            {
-                if (!_modifierBase)
-                    _modifierBase = TryGetComponent<ModifierBase>(out var existingModifier)
-                        ? existingModifier
-                        : AddNewModifier(typeof(UniformCornerModifier));
+        internal const AdditionalCanvasShaderChannels RequiredShaderChannels =
+            AdditionalCanvasShaderChannels.TexCoord1 |
+            AdditionalCanvasShaderChannels.TexCoord2 |
+            AdditionalCanvasShaderChannels.TexCoord3 |
+            AdditionalCanvasShaderChannels.Normal |
+            AdditionalCanvasShaderChannels.Tangent;
 
-                return _modifierBase;
-            }
-        }
+        // Clipped children reach this far under the source's outline, so their antialiased edge lies on solid outline.
+        private const float ShapeSourceOutlineOverlap = 1f;
 
-        public bool SetModifierType(System.Type modifierType)
-        {
-            if (TryGetComponent<ModifierBase>(out var currentModifier)
-                && currentModifier.GetType() == modifierType)
-                return true;
+        private readonly ProceduralVertexEncoder _encoder = new();
 
-            DestroyImmediate(currentModifier);
-            _modifierBase = null;
-
-            AddNewModifier(modifierType);
-
-            SetAllDirty();
-
-            return true;
-        }
-
-        public void SetCornerOffsetMode(CornerOffsetMode mode, bool preserveShape = true)
-        {
-            if (_cornerOffsetMode == mode)
-                return;
-
-            if (preserveShape)
-            {
-                var size = GetPixelAdjustedRect().size;
-                CornerOffsetTopLeft = ConvertOffset(ResolveOffset(CornerOffsetTopLeft, size), size, mode);
-                CornerOffsetTopRight = ConvertOffset(ResolveOffset(CornerOffsetTopRight, size), size, mode);
-                CornerOffsetBottomRight = ConvertOffset(ResolveOffset(CornerOffsetBottomRight, size), size, mode);
-                CornerOffsetBottomLeft = ConvertOffset(ResolveOffset(CornerOffsetBottomLeft, size), size, mode);
-            }
-
-            CornerOffsetMode = mode;
-        }
-
-        public Vector2 StoredOffsetToPixels(Vector2 storedOffset)
-        {
-            var pixelAdjustedRect = GetPixelAdjustedRect();
-            return ResolveOffset(storedOffset, pixelAdjustedRect.size);
-        }
-
-        public Vector2 PixelsToStoredOffset(Vector2 pixelOffset)
-        {
-            var pixelAdjustedRect = GetPixelAdjustedRect();
-            return ConvertOffset(pixelOffset, pixelAdjustedRect.size, _cornerOffsetMode);
-        }
-
-        private Vector2 ResolveOffset(Vector2 storedOffset, Vector2 size)
-            => _cornerOffsetMode == CornerOffsetMode.Relative ? Vector2.Scale(storedOffset, size) : storedOffset;
-
-        private static Vector2 ConvertOffset(Vector2 pixelOffset, Vector2 size, CornerOffsetMode targetMode)
-            => targetMode == CornerOffsetMode.Relative
-                ? new Vector2(SafeDivide(pixelOffset.x, size.x), SafeDivide(pixelOffset.y, size.y))
-                : pixelOffset;
-
-        private static float SafeDivide(float value, float divisor)
-            => Mathf.Approximately(divisor, 0f) ? 0f : value / divisor;
-
-        private ModifierBase AddNewModifier(System.Type modifierType)
-        {
-            gameObject.AddComponent(modifierType);
-            _modifierBase = GetComponent<ModifierBase>();
-            return _modifierBase;
-        }
+        private ThemeStyle? _fillStyle;
+        private ModifierBase _modifier;
 
         protected override void OnEnable()
         {
@@ -161,34 +58,104 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             FixTexCoordsInCanvas();
 
             m_OnDirtyVertsCallback += OnVerticesDirty;
-            preserveAspect = false;
+
+            // Adding a component dirties the graphic, so the default modifier must never be added during a rebuild.
+            if (!Modifier)
+                AddModifier(typeof(UniformCornerModifier));
 
             if (!UseCustomMaterial)
                 material = null;
 
-            if (!sprite)
-                sprite = ResourceReferences.EmptySprite;
+            OnVerticesDirty();
+            UpdateShapeSource();
         }
 
-        private void OnVerticesDirty()
+        public void SetModifierType(System.Type modifierType)
         {
-            if (!sprite)
-                sprite = ResourceReferences.EmptySprite;
+            if (TryGetComponent<ModifierBase>(out var currentModifier) && currentModifier.GetType() == modifierType)
+                return;
+
+            DestroyImmediate(currentModifier);
+            AddModifier(modifierType);
+            SetAllDirty();
         }
 
-        private void FixTexCoordsInCanvas()
+        public void SetBorderWidth(float width)
         {
-            if (canvas)
-                canvas.additionalShaderChannels |= AdditionalCanvasShaderChannels.TexCoord1 |
-                                                   AdditionalCanvasShaderChannels.TexCoord2 |
-                                                   AdditionalCanvasShaderChannels.TexCoord3;
+            BorderWidth = Mathf.Max(0f, width);
+            SetVerticesDirty();
+        }
+
+        public void SetOutline(ProceduralOutline outline)
+        {
+            Outline = outline;
+            SetVerticesDirty();
+        }
+
+        public void SetShadow(ProceduralShadow shadow)
+        {
+            Shadow = shadow;
+            SetVerticesDirty();
+        }
+
+        // Offsets in any mode are stored in this image's current mode.
+        public void SetCornerOffsets(CornerOffsets offsets)
+        {
+            var size = GetPixelAdjustedRect().size;
+            CornerOffsets = offsets.ConvertTo(CornerOffsets.Mode, size);
+            SetVerticesDirty();
+        }
+
+        public void SetCornerOffsetMode(CornerOffsetMode mode)
+        {
+            var size = GetPixelAdjustedRect().size;
+            CornerOffsets = CornerOffsets.ConvertTo(mode, size);
+            SetVerticesDirty();
+        }
+
+        public CornerOffsets GetCornerOffsetsInPixels()
+        {
+            var size = GetPixelAdjustedRect().size;
+            return CornerOffsets.ConvertTo(CornerOffsetMode.Absolute, size);
+        }
+
+        public override void SetVerticesDirty()
+        {
+            base.SetVerticesDirty();
+
+            ShapeLink.DirtyDependents();
+        }
+
+        internal void SetFillStyle(ThemeStyle style)
+        {
+            _fillStyle = style;
+            SetVerticesDirty();
+        }
+
+        internal void ClearFillStyle()
+        {
+            _fillStyle = null;
+            SetVerticesDirty();
+        }
+
+        internal ProceduralShape GetShape()
+        {
+            var rect = GetPixelAdjustedRect();
+            var radii = CalculateRadii(rect);
+            return new ProceduralShape(rect, CornerOffsets, radii);
         }
 
         protected override void OnPopulateMesh(VertexHelper toFill)
         {
             base.OnPopulateMesh(toFill);
 
-            EncodeAllInfoIntoVertices(toFill);
+            var rect = GetPixelAdjustedRect();
+            var margin = QuadBuilder.IsSimpleQuad(toFill) ? _encoder.CalculateMargin(Outline, Shadow) : 0f;
+            var source = ShapeLink.Source;
+            var shape = source ? GetSourceShape(source) : GetShape();
+
+            QuadBuilder.Build(toFill, rect, shape, margin, source);
+            _encoder.Encode(toFill, rect, shape, _fillStyle, Outline, Shadow, BorderWidth);
         }
 
         protected override void OnTransformParentChanged()
@@ -198,105 +165,67 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             FixTexCoordsInCanvas();
         }
 
-        private void EncodeAllInfoIntoVertices(VertexHelper vertexHelper)
+        // A canvas added at runtime (e.g. to lift an element above an overlay) starts without the extra channels.
+        protected override void OnCanvasHierarchyChanged()
         {
-            var imageRect = GetPixelAdjustedRect();
-            var size = imageRect.size;
-            var shape = GetShape();
+            base.OnCanvasHierarchyChanged();
 
-            var topLeft = imageRect.center + shape.TopLeft;
-            var topRight = imageRect.center + shape.TopRight;
-            var bottomRight = imageRect.center + shape.BottomRight;
-            var bottomLeft = imageRect.center + shape.BottomLeft;
-
-            var orientation = CalculateOrientation(topLeft, topRight, bottomRight, bottomLeft);
-            var topNormal = CalculateEdgeNormal(topLeft, topRight, orientation);
-            var rightNormal = CalculateEdgeNormal(topRight, bottomRight, orientation);
-            var bottomNormal = CalculateEdgeNormal(bottomRight, bottomLeft, orientation);
-            var leftNormal = CalculateEdgeNormal(bottomLeft, topLeft, orientation);
-
-            var lineWeight = BorderWidth > 0f ? BorderWidth : -1f;
-            var pixelScale = 1f / Mathf.Max(0.0001f, FalloffDistance);
-
-            var vert = new UIVertex();
-            for (var i = 0; i < vertexHelper.currentVertCount; i++)
-            {
-                vertexHelper.PopulateUIVertex(ref vert, i);
-
-                vert.position += (Vector3)ResolveOffset(GetCornerOffset(vert.uv0), size);
-
-                var position = (Vector2)vert.position;
-
-                vert.uv0 = new Vector4(vert.uv0.x, vert.uv0.y, lineWeight, pixelScale);
-                vert.uv1 = new Vector4(
-                    Vector2.Dot(position - topLeft, topNormal),
-                    Vector2.Dot(position - topRight, rightNormal),
-                    Vector2.Dot(position - bottomRight, bottomNormal),
-                    Vector2.Dot(position - bottomLeft, leftNormal));
-                vert.uv2 = shape.Radii;
-
-                vertexHelper.SetUIVertex(vert, i);
-            }
+            FixTexCoordsInCanvas();
         }
 
-        private static float CalculateOrientation(
-            Vector2 topLeft,
-            Vector2 topRight,
-            Vector2 bottomRight,
-            Vector2 bottomLeft)
+        private void AddModifier(System.Type modifierType)
         {
-            var doubleArea = Cross(topLeft, topRight) + Cross(topRight, bottomRight) +
-                             Cross(bottomRight, bottomLeft) + Cross(bottomLeft, topLeft);
-            return doubleArea < 0f ? 1f : -1f;
+            gameObject.AddComponent(modifierType);
+            _modifier = GetComponent<ModifierBase>();
         }
 
-        private static Vector2 CalculateEdgeNormal(Vector2 start, Vector2 end, float orientation)
+        private Vector4 CalculateRadii(Rect rect)
         {
-            var edge = end - start;
-            var direction = edge / Mathf.Max(edge.magnitude, MinEdgeLength);
-            return new Vector2(-direction.y, direction.x) * orientation;
-        }
+            if (!Modifier)
+                return Vector4.zero;
 
-        private static float Cross(Vector2 left, Vector2 right) => left.x * right.y - left.y * right.x;
-
-        internal ProceduralShape GetShape()
-        {
-            var imageRect = GetPixelAdjustedRect();
-            var size = imageRect.size;
-            var halfSize = size * 0.5f;
-
-            return new ProceduralShape(
-                new Vector2(-halfSize.x, halfSize.y) + ResolveOffset(CornerOffsetTopLeft, size),
-                new Vector2(halfSize.x, halfSize.y) + ResolveOffset(CornerOffsetTopRight, size),
-                new Vector2(halfSize.x, -halfSize.y) + ResolveOffset(CornerOffsetBottomRight, size),
-                new Vector2(-halfSize.x, -halfSize.y) + ResolveOffset(CornerOffsetBottomLeft, size),
-                CalculateRadius(imageRect),
-                FalloffDistance);
-        }
-
-        private Vector4 CalculateRadius(Rect imageRect)
-        {
-            var cornerRadius = ModifierBase.CalculateRadius(imageRect).ClampToPositive();
+            var cornerRadius = Modifier.CalculateRadius(rect).ClampToPositive();
             var scaleFactor = rectTransform.rect.CalculateScaleFactorForBounds(cornerRadius);
             return cornerRadius * scaleFactor;
         }
 
-        private Vector2 GetCornerOffset(Vector2 uv) => (uv.y > 0.9f, uv.x > 0.9f) switch
+        private ProceduralShape GetSourceShape(ProceduralImage source)
         {
-            (true, false) => CornerOffsetTopLeft,
-            (true, true) => CornerOffsetTopRight,
-            (false, true) => CornerOffsetBottomRight,
-            (false, false) => CornerOffsetBottomLeft,
-        };
+            var sourceOutline = source.Outline;
+            var outlineInsideWidth = sourceOutline.Width * (1f - sourceOutline.OutsideFraction);
+            var inset = sourceOutline.IsVisible ? Mathf.Max(outlineInsideWidth - ShapeSourceOutlineOverlap, 0f) : 0f;
 
-        protected override void OnDisable()
+            return source.GetShape()
+                .Shrink(inset)
+                .Transform(source.rectTransform, rectTransform);
+        }
+
+        private void UpdateShapeSource()
         {
-            base.OnDisable();
+            var source = isActiveAndEnabled && ShapeSource != this ? ShapeSource : null;
+            ShapeLink.Follow(this, source);
+        }
 
-            m_OnDirtyVertsCallback -= OnVerticesDirty;
+        private void OnVerticesDirty()
+        {
+            if (!sprite)
+                sprite = ResourceReferences.Instance.EmptySprite;
+        }
+
+        private void FixTexCoordsInCanvas()
+        {
+            if (canvas)
+                canvas.additionalShaderChannels |= RequiredShaderChannels;
         }
 
 #if UNITY_EDITOR
+        protected override void OnValidate()
+        {
+            base.OnValidate();
+
+            UpdateShapeSource();
+        }
+
         protected override void Reset()
         {
             base.Reset();
@@ -304,5 +233,15 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             OnEnable();
         }
 #endif
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            m_OnDirtyVertsCallback -= OnVerticesDirty;
+
+            UpdateShapeSource();
+            _encoder.Clear();
+        }
     }
 }

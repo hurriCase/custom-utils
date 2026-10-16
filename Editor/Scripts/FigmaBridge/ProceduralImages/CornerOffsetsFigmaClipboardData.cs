@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using CustomUtils.Editor.Scripts.FigmaBridge.Clipboard;
 
-namespace CustomUtils.Editor.Scripts.FigmaBridge.CornerOffsets
+namespace CustomUtils.Editor.Scripts.FigmaBridge.ProceduralImages
 {
     internal sealed class CornerOffsetsFigmaClipboardData : FigmaClipboardData
     {

@@ -1,4 +1,4 @@
-using CustomUtils.Runtime.Other;
+﻿using CustomUtils.Runtime.Other;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
@@ -72,13 +72,13 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Glow
             if (!Source)
                 return;
 
-            var shape = Source.GetShape();
-            var center = GetPixelAdjustedRect().center;
+            var centerOffset = GetPixelAdjustedRect().center - Source.GetPixelAdjustedRect().center;
+            var shape = Source.GetShape().Translate(centerOffset);
 
-            var topLeft = center + shape.TopLeft;
-            var topRight = center + shape.TopRight;
-            var bottomRight = center + shape.BottomRight;
-            var bottomLeft = center + shape.BottomLeft;
+            var topLeft = shape.TopLeft;
+            var topRight = shape.TopRight;
+            var bottomRight = shape.BottomRight;
+            var bottomLeft = shape.BottomLeft;
 
             var sigma = Mathf.Max(MinSigma, Blur * BlurToSigma);
             var margin = Mathf.Ceil(sigma * CoverageSigmas + Mathf.Max(0, Spread) + ExtraMargin);
@@ -88,7 +88,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Glow
             var max = Vector2.Max(Vector2.Max(topLeft, topRight), Vector2.Max(bottomRight, bottomLeft)) +
                       Vector2.one * margin;
 
-            var maskFalloff = ShowBehindTransparentAreas ? -1f : shape.FalloffDistance;
+            var maskFalloff = ShowBehindTransparentAreas ? -1f : 0f;
             var uv0 = new Vector4(sigma, Spread, maskFalloff, 0f);
 
             var vertex = new UIVertex

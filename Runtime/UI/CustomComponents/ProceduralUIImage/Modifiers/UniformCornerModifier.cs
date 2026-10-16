@@ -10,6 +10,14 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers
     {
         [field: SerializeField] public float Radius { get; private set; }
 
+        public void SetRadius(float radius)
+        {
+            Radius = Mathf.Max(0f, radius);
+
+            if (TryGetComponent<ProceduralImage>(out var proceduralImage))
+                proceduralImage.SetVerticesDirty();
+        }
+
         public override Vector4 CalculateRadius(Rect imageRect)
         {
             var minSide = Mathf.Min(imageRect.width, imageRect.height);

@@ -1,6 +1,7 @@
 ﻿using System;
 using CustomUtils.Editor.Scripts.Extensions;
 using CustomUtils.Runtime.Attributes.ShowIf;
+using CustomUtils.Runtime.Extensions;
 using UnityEditor;
 
 namespace CustomUtils.Editor.Scripts.AttributeDrawers.ShowIf
@@ -26,8 +27,9 @@ namespace CustomUtils.Editor.Scripts.AttributeDrawers.ShowIf
                 return false;
 
             var parentPath = propertyPath[..lastDot];
+            var backingFieldName = fieldName.ConvertToBackingField();
             serializedProperty = property.serializedObject.FindProperty($"{parentPath}.{fieldName}")
-                                 ?? property.serializedObject.FindField($"{parentPath}.{fieldName}");
+                                 ?? property.serializedObject.FindProperty($"{parentPath}.{backingFieldName}");
 
             return serializedProperty != null;
         }

@@ -1,10 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using CustomUtils.Editor.Scripts.CustomEditorUtilities;
 using CustomUtils.Editor.Scripts.Extensions;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Attributes;
+using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Corners;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers.Base;
 using UnityEditor;
 using UnityEditor.UI;
@@ -20,6 +19,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
     {
         private static List<ModifierIDAttribute> _attributes;
 
+        private const string PreserveAspectPropertyName = "m_PreserveAspect";
         private const string RelativeOffsetTooltip =
             "Shown in pixels at the current rect size. Stored as a fraction of the size, " +
             "so the offset scales with the rect (x by width, y by height).";
@@ -28,9 +28,15 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             "Absolute: offsets are pixels and don't change on resize.\n" +
             "Relative: offsets scale with the rect size. Switching keeps the current shape.");
 
+        private static readonly Corner[] _corners =
+            { Corner.TopLeft, Corner.TopRight, Corner.BottomRight, Corner.BottomLeft };
+
         private SerializedProperty _useCustomMaterial;
+        private SerializedProperty _preserveAspect;
         private SerializedProperty _borderWidth;
-        private SerializedProperty _falloffDistance;
+        private SerializedProperty _shapeSource;
+        private SerializedProperty _outline;
+        private SerializedProperty _shadow;
         private SerializedProperty _cornerOffsetTopLeft;
         private SerializedProperty _cornerOffsetTopRight;
         private SerializedProperty _cornerOffsetBottomRight;
@@ -52,14 +58,18 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             _attributes = ModifierUtility.GetAttributeList();
 
             _useCustomMaterial = serializedObject.FindField(nameof(ProceduralImage.UseCustomMaterial));
+            _preserveAspect = serializedObject.FindProperty(PreserveAspectPropertyName);
 
-            _borderWidth = serializedObject.FindProperty(ProceduralImage.BorderWidthFieldName);
-            _falloffDistance = serializedObject.FindProperty(ProceduralImage.FalloffDistanceFieldName);
+            _borderWidth = serializedObject.FindField(nameof(ProceduralImage.BorderWidth));
+            _shapeSource = serializedObject.FindField(nameof(ProceduralImage.ShapeSource));
+            _outline = serializedObject.FindField(nameof(ProceduralImage.Outline));
+            _shadow = serializedObject.FindField(nameof(ProceduralImage.Shadow));
 
-            _cornerOffsetTopLeft = serializedObject.FindField(nameof(ProceduralImage.CornerOffsetTopLeft));
-            _cornerOffsetTopRight = serializedObject.FindField(nameof(ProceduralImage.CornerOffsetTopRight));
-            _cornerOffsetBottomRight = serializedObject.FindField(nameof(ProceduralImage.CornerOffsetBottomRight));
-            _cornerOffsetBottomLeft = serializedObject.FindField(nameof(ProceduralImage.CornerOffsetBottomLeft));
+            var cornerOffsets = serializedObject.FindField(nameof(ProceduralImage.CornerOffsets));
+            _cornerOffsetTopLeft = cornerOffsets.FindFieldRelative(nameof(CornerOffsets.TopLeft));
+            _cornerOffsetTopRight = cornerOffsets.FindFieldRelative(nameof(CornerOffsets.TopRight));
+            _cornerOffsetBottomRight = cornerOffsets.FindFieldRelative(nameof(CornerOffsets.BottomRight));
+            _cornerOffsetBottomLeft = cornerOffsets.FindFieldRelative(nameof(CornerOffsets.BottomLeft));
 
             _proceduralImage = (ProceduralImage)target;
             _targetComponent = (Component)target;
@@ -83,6 +93,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             _editorStateControls.PropertyField(m_Color);
             _editorStateControls.PropertyField(_useCustomMaterial);
             _editorStateControls.PropertyField(m_Maskable);
+            _editorStateControls.PropertyField(_preserveAspect);
 
             if (_useCustomMaterial.boolValue)
                 _editorStateControls.PropertyField(m_Material);
@@ -94,7 +105,9 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             ModifierGUI();
 
             _editorStateControls.PropertyField(_borderWidth);
-            _editorStateControls.PropertyField(_falloffDistance);
+            _editorStateControls.PropertyField(_shapeSource);
+            _editorStateControls.PropertyField(_outline, true);
+            _editorStateControls.PropertyField(_shadow, true);
 
             serializedObject.ApplyModifiedProperties();
 
@@ -117,13 +130,13 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
         }
 
         private bool HasOnlyAbsoluteOffsets()
-            => targets.All(static item => ((ProceduralImage)item).CornerOffsetMode == CornerOffsetMode.Absolute);
+            => targets.All(static item => ((ProceduralImage)item).CornerOffsets.Mode == CornerOffsetMode.Absolute);
 
         private void CornerOffsetModeGUI()
         {
-            var mode = _proceduralImage.CornerOffsetMode;
+            var mode = _proceduralImage.CornerOffsets.Mode;
 
-            EditorGUI.showMixedValue = targets.Any(item => ((ProceduralImage)item).CornerOffsetMode != mode);
+            EditorGUI.showMixedValue = targets.Any(item => ((ProceduralImage)item).CornerOffsets.Mode != mode);
             EditorGUI.BeginChangeCheck();
 
             var newMode = (CornerOffsetMode)EditorGUILayout.EnumPopup(_cornerOffsetModeContent, mode);
@@ -144,42 +157,24 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
 
         private void RelativeCornerOffsetsGUI()
         {
-            RelativeCornerOffsetField(
-                "Corner Offset Top Left",
-                static image => image.CornerOffsetTopLeft,
-                static (image, value) => image.CornerOffsetTopLeft = value);
-
-            RelativeCornerOffsetField(
-                "Corner Offset Top Right",
-                static image => image.CornerOffsetTopRight,
-                static (image, value) => image.CornerOffsetTopRight = value);
-
-            RelativeCornerOffsetField(
-                "Corner Offset Bottom Right",
-                static image => image.CornerOffsetBottomRight,
-                static (image, value) => image.CornerOffsetBottomRight = value);
-
-            RelativeCornerOffsetField(
-                "Corner Offset Bottom Left",
-                static image => image.CornerOffsetBottomLeft,
-                static (image, value) => image.CornerOffsetBottomLeft = value);
+            foreach (var corner in _corners)
+                RelativeCornerOffsetField(corner);
         }
 
-        private void RelativeCornerOffsetField(
-            string label,
-            Func<ProceduralImage, Vector2> getOffset,
-            Action<ProceduralImage, Vector2> setOffset)
+        private void RelativeCornerOffsetField(Corner corner)
         {
-            var pixels = _proceduralImage.StoredOffsetToPixels(getOffset(_proceduralImage));
+            var pixelOffsets = _proceduralImage.GetCornerOffsetsInPixels();
+            var pixels = pixelOffsets[corner];
 
             EditorGUI.showMixedValue = targets.Any(item =>
             {
-                var proceduralImage = (ProceduralImage)item;
-                return proceduralImage.StoredOffsetToPixels(getOffset(proceduralImage)) != pixels;
+                var itemOffsets = ((ProceduralImage)item).GetCornerOffsetsInPixels();
+                return itemOffsets[corner] != pixels;
             });
             EditorGUI.BeginChangeCheck();
 
-            var content = new GUIContent($"{label} (px)", RelativeOffsetTooltip);
+            var label = $"Corner Offset {ObjectNames.NicifyVariableName(corner.ToString())} (px)";
+            var content = new GUIContent(label, RelativeOffsetTooltip);
             var newPixels = EditorGUILayout.Vector2Field(content, pixels);
 
             EditorGUI.showMixedValue = false;
@@ -191,14 +186,15 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             foreach (var item in targets)
             {
                 var proceduralImage = (ProceduralImage)item;
-                var currentPixels = proceduralImage.StoredOffsetToPixels(getOffset(proceduralImage));
+                var currentOffsets = proceduralImage.GetCornerOffsetsInPixels();
+                var currentPixels = currentOffsets[corner];
 
                 var resultPixels = new Vector2(
                     Mathf.Approximately(newPixels.x, pixels.x) ? currentPixels.x : newPixels.x,
                     Mathf.Approximately(newPixels.y, pixels.y) ? currentPixels.y : newPixels.y);
 
-                setOffset(proceduralImage, proceduralImage.PixelsToStoredOffset(resultPixels));
-                proceduralImage.SetVerticesDirty();
+                var resultOffsets = currentOffsets.With(corner, resultPixels);
+                proceduralImage.SetCornerOffsets(resultOffsets);
                 MarkModified(proceduralImage);
             }
         }
@@ -217,23 +213,19 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
                 return;
             }
 
-            if ((_canvas.additionalShaderChannels
-                 | AdditionalCanvasShaderChannels.TexCoord1
-                 | AdditionalCanvasShaderChannels.TexCoord2
-                 | AdditionalCanvasShaderChannels.TexCoord3) == _canvas.additionalShaderChannels)
+            var channels = _canvas.additionalShaderChannels;
+            if ((channels | ProceduralImage.RequiredShaderChannels) == channels)
                 return;
 
             EditorVisualControls.WarningBox(
-                "TexCoord1,2,3 are not enabled as an additional shader channel in parent canvas." +
+                "TexCoord1,2,3, Normal and Tangent are not enabled as additional shader channels in parent canvas." +
                 " Procedural Image will not work properly");
 
-            if (!EditorVisualControls.Button("Fix: Enable TexCoord1,2,3 in Canvas: " + _canvas.name))
+            if (!EditorVisualControls.Button("Fix: Enable the shader channels in Canvas: " + _canvas.name))
                 return;
 
-            Undo.RecordObject(_canvas, "enable TexCoord1,2,3 as additional shader channels");
-            _canvas.additionalShaderChannels |= AdditionalCanvasShaderChannels.TexCoord1 |
-                                                AdditionalCanvasShaderChannels.TexCoord2 |
-                                                AdditionalCanvasShaderChannels.TexCoord3;
+            Undo.RecordObject(_canvas, "enable Procedural Image shader channels");
+            _canvas.additionalShaderChannels |= ProceduralImage.RequiredShaderChannels;
         }
 
         private void ModifierGUI()

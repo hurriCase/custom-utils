@@ -1,6 +1,7 @@
-using CustomUtils.Runtime.Attributes;
+﻿using CustomUtils.Runtime.Attributes;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Other;
+using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage;
 using CustomUtils.Runtime.UI.Halftone;
 using CustomUtils.Runtime.UI.Theme.Base;
 using CustomUtils.Runtime.UI.Theme.ColorModifiers.Base;
@@ -82,7 +83,8 @@ namespace CustomUtils.Runtime.UI.Theme
 
         void IMeshModifier.ModifyMesh(VertexHelper vertexHelper)
         {
-            if (!isActiveAndEnabled)
+            // A procedural image encodes its style itself, and its shape data uses the same vertex channels.
+            if (!isActiveAndEnabled || _graphic is ProceduralImage)
                 return;
 
             var gradientVertexData = GetGradientVertexData();
@@ -119,6 +121,10 @@ namespace CustomUtils.Runtime.UI.Theme
         private void Refresh()
         {
             _graphic = _graphic.AsNullable() ?? GetComponent<Graphic>();
+
+            if (_graphic is ProceduralImage proceduralImage)
+                proceduralImage.SetFillStyle(Style);
+
             _graphic.SetAllDirty();
         }
 
@@ -155,6 +161,9 @@ namespace CustomUtils.Runtime.UI.Theme
 
         private void OnDisable()
         {
+            if (_graphic is ProceduralImage proceduralImage)
+                proceduralImage.ClearFillStyle();
+
             _graphic.SetAllDirty();
         }
 

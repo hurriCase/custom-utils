@@ -193,32 +193,49 @@ float3 HalftoneFromBlendSpace(float3 color)
     #endif
 }
 
-half4 ApplyHalftone(half4 baseColor, float2 uv)
+half4 ApplyHalftonePattern(
+    half4 baseColor,
+    float2 uv,
+    float aspectRatio,
+    float2 patternOffset,
+    float2 patternScale,
+    float patternOpacity,
+    int blendMode,
+    float patternRotation)
 {
     // Rotation happens in pixel proportions; in raw UVs a non-square element would shear the pattern.
-    float2 aspectScale = float2(_AspectRatio, 1.0);
+    float2 aspectScale = float2(aspectRatio, 1.0);
     float2 centeredUV = (uv - HalftoneUVCenter) * aspectScale;
     float rotationSin, rotationCos;
     // Negated: rotating the UVs by +angle turns the pattern clockwise, but positive should be counter-clockwise.
-    float rotationRadians = DegToRad(-_PatternRotation);
+    float rotationRadians = DegToRad(-patternRotation);
     sincos(rotationRadians, rotationSin, rotationCos);
     float2 rotatedUV = float2(
         rotationCos * centeredUV.x - rotationSin * centeredUV.y,
         rotationSin * centeredUV.x + rotationCos * centeredUV.y
     ) / aspectScale;
-    float2 patternUV = (rotatedUV + HalftoneUVCenter) * _PatternScale.xy + _PatternOffset.xy;
+    float2 patternUV = (rotatedUV + HalftoneUVCenter) * patternScale + patternOffset;
 
     float2 withinBounds = step(0.0, patternUV) * step(patternUV, 1.0);
     float insidePattern = withinBounds.x * withinBounds.y;
 
     half4 pattern = SAMPLE_TEXTURE2D(_HalftoneTex, sampler_HalftoneTex, patternUV);
 
-    float patternAlpha = pattern.a * insidePattern * _PatternOpacity;
+    float patternAlpha = pattern.a * insidePattern * patternOpacity;
     float3 baseColorBlend = HalftoneToBlendSpace(baseColor.rgb);
     float3 patternColorBlend = HalftoneToBlendSpace(pattern.rgb);
-    float3 finalColor = HalftoneComposite(baseColorBlend, patternColorBlend, patternAlpha, (int)_BlendMode);
+    float3 finalColor = HalftoneComposite(baseColorBlend, patternColorBlend, patternAlpha, blendMode);
 
     return half4(HalftoneFromBlendSpace(finalColor), baseColor.a);
 }
+
+// Graphics with their own halftone material read the settings from material properties.
+#ifndef HALFTONE_EXTERNAL_PARAMS
+half4 ApplyHalftone(half4 baseColor, float2 uv)
+{
+    return ApplyHalftonePattern(baseColor, uv, _AspectRatio, _PatternOffset.xy, _PatternScale.xy,
+        _PatternOpacity, (int)_BlendMode, _PatternRotation);
+}
+#endif
 
 #endif

@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
+namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Corners
 {
     [PublicAPI]
     public enum CornerOffsetMode
