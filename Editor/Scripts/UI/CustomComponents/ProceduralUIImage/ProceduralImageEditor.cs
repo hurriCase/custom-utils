@@ -34,7 +34,6 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
         private SerializedProperty _useCustomMaterial;
         private SerializedProperty _preserveAspect;
         private SerializedProperty _borderWidth;
-        private SerializedProperty _shapeSource;
         private SerializedProperty _outline;
         private SerializedProperty _shadow;
         private SerializedProperty _cornerOffsetTopLeft;
@@ -61,7 +60,6 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             _preserveAspect = serializedObject.FindProperty(PreserveAspectPropertyName);
 
             _borderWidth = serializedObject.FindField(nameof(ProceduralImage.BorderWidth));
-            _shapeSource = serializedObject.FindField(nameof(ProceduralImage.ShapeSource));
             _outline = serializedObject.FindField(nameof(ProceduralImage.Outline));
             _shadow = serializedObject.FindField(nameof(ProceduralImage.Shadow));
 
@@ -105,7 +103,6 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.ProceduralUIImage
             ModifierGUI();
 
             _editorStateControls.PropertyField(_borderWidth);
-            _editorStateControls.PropertyField(_shapeSource);
             _editorStateControls.PropertyField(_outline, true);
             _editorStateControls.PropertyField(_shadow, true);
 

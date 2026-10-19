@@ -1,7 +1,7 @@
 ﻿using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Corners;
 using UnityEngine;
 
-namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Shape
+namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Rendering
 {
     // Edge distances are negative inside the shape.
     internal readonly struct ProceduralShape
@@ -12,21 +12,8 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Shape
         internal Vector2 BottomLeft { get; }
         internal Vector4 Radii { get; }
 
-        internal Vector4 InsetRadii => Vector4.Max(Radii - Vector4.one * _inset, Vector4.zero);
-
-        internal Rect Bounds
-        {
-            get
-            {
-                var min = Vector2.Min(Vector2.Min(TopLeft, TopRight), Vector2.Min(BottomRight, BottomLeft));
-                var max = Vector2.Max(Vector2.Max(TopLeft, TopRight), Vector2.Max(BottomRight, BottomLeft));
-                return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
-            }
-        }
-
         private const float MinEdgeLength = 0.001f;
 
-        private readonly float _inset;
         private readonly Vector2 _topNormal;
         private readonly Vector2 _rightNormal;
         private readonly Vector2 _bottomNormal;
@@ -41,8 +28,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Shape
                 new Vector2(rect.xMax, rect.yMax) + pixelOffsets.TopRight,
                 new Vector2(rect.xMax, rect.yMin) + pixelOffsets.BottomRight,
                 new Vector2(rect.xMin, rect.yMin) + pixelOffsets.BottomLeft,
-                radii,
-                0f);
+                radii);
         }
 
         private ProceduralShape(
@@ -50,15 +36,13 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Shape
             Vector2 topRight,
             Vector2 bottomRight,
             Vector2 bottomLeft,
-            Vector4 radii,
-            float inset) : this()
+            Vector4 radii) : this()
         {
             TopLeft = topLeft;
             TopRight = topRight;
             BottomRight = bottomRight;
             BottomLeft = bottomLeft;
             Radii = radii;
-            _inset = inset;
 
             var orientation = CalculateOrientation();
             _topNormal = CalculateEdgeNormal(topLeft, topRight, orientation);
@@ -68,32 +52,14 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Shape
         }
 
         internal ProceduralShape Translate(Vector2 offset)
-            => new(TopLeft + offset, TopRight + offset, BottomRight + offset, BottomLeft + offset, Radii, _inset);
-
-        // Pulls every edge inwards; the radii shrink with it so the corners stay concentric.
-        internal ProceduralShape Shrink(float inset)
-            => new(TopLeft, TopRight, BottomRight, BottomLeft, Radii, _inset + inset);
-
-        internal ProceduralShape Transform(Transform from, Transform to)
-        {
-            var unit = from.TransformVector(Vector3.right);
-            var scale = to.InverseTransformVector(unit).magnitude;
-
-            return new ProceduralShape(
-                MapPoint(from, to, TopLeft),
-                MapPoint(from, to, TopRight),
-                MapPoint(from, to, BottomRight),
-                MapPoint(from, to, BottomLeft),
-                Radii * scale,
-                _inset * scale);
-        }
+            => new(TopLeft + offset, TopRight + offset, BottomRight + offset, BottomLeft + offset, Radii);
 
         internal Vector4 EdgeDistances(Vector2 position)
             => new Vector4(
                 Vector2.Dot(position - TopLeft, _topNormal),
                 Vector2.Dot(position - TopRight, _rightNormal),
                 Vector2.Dot(position - BottomRight, _bottomNormal),
-                Vector2.Dot(position - BottomLeft, _leftNormal)) + Vector4.one * _inset;
+                Vector2.Dot(position - BottomLeft, _leftNormal));
 
         // Moving the shape by an offset shifts every edge distance by a constant.
         internal Vector4 EdgeShift(Vector2 offset)
@@ -119,11 +85,5 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Shape
         }
 
         private float Cross(Vector2 left, Vector2 right) => left.x * right.y - left.y * right.x;
-
-        private Vector2 MapPoint(Transform from, Transform to, Vector2 point)
-        {
-            var worldPoint = from.TransformPoint(point);
-            return to.InverseTransformPoint(worldPoint);
-        }
     }
 }

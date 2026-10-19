@@ -5,7 +5,6 @@ using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Effects;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Modifiers.Base;
 using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Rendering;
-using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Shape;
 using CustomUtils.Runtime.UI.Theme;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -24,15 +23,12 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
         [field: SerializeField] public ProceduralShadow Shadow { get; private set; }
 
         [field: SerializeField, Min(0)] public float BorderWidth { get; private set; }
-        [field: SerializeField] public ProceduralImage ShapeSource { get; private set; }
 
         public override Material material
         {
             get => !m_Material ? ResourceReferences.Instance.ProceduralImageMaterial : base.material;
             set => base.material = value;
         }
-
-        internal ShapeSourceLink ShapeLink { get; } = new();
 
         private ModifierBase Modifier => _modifier ? _modifier : _modifier = GetComponent<ModifierBase>();
 
@@ -42,9 +38,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             AdditionalCanvasShaderChannels.TexCoord3 |
             AdditionalCanvasShaderChannels.Normal |
             AdditionalCanvasShaderChannels.Tangent;
-
-        // Clipped children reach this far under the source's outline, so their antialiased edge lies on solid outline.
-        private const float ShapeSourceOutlineOverlap = 1f;
 
         private readonly ProceduralVertexEncoder _encoder = new();
 
@@ -67,7 +60,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
                 material = null;
 
             OnVerticesDirty();
-            UpdateShapeSource();
         }
 
         public void SetModifierType(System.Type modifierType)
@@ -119,13 +111,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             return CornerOffsets.ConvertTo(CornerOffsetMode.Absolute, size);
         }
 
-        public override void SetVerticesDirty()
-        {
-            base.SetVerticesDirty();
-
-            ShapeLink.DirtyDependents();
-        }
-
         internal void SetFillStyle(ThemeStyle style)
         {
             _fillStyle = style;
@@ -151,10 +136,9 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 
             var rect = GetPixelAdjustedRect();
             var margin = QuadBuilder.IsSimpleQuad(toFill) ? _encoder.CalculateMargin(Outline, Shadow) : 0f;
-            var source = ShapeLink.Source;
-            var shape = source ? GetSourceShape(source) : GetShape();
+            var shape = GetShape();
 
-            QuadBuilder.Build(toFill, rect, shape, margin, source);
+            QuadBuilder.FitToShape(toFill, rect, shape, margin);
             _encoder.Encode(toFill, rect, shape, _fillStyle, Outline, Shadow, BorderWidth);
         }
 
@@ -189,23 +173,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             return cornerRadius * scaleFactor;
         }
 
-        private ProceduralShape GetSourceShape(ProceduralImage source)
-        {
-            var sourceOutline = source.Outline;
-            var outlineInsideWidth = sourceOutline.Width * (1f - sourceOutline.OutsideFraction);
-            var inset = sourceOutline.IsVisible ? Mathf.Max(outlineInsideWidth - ShapeSourceOutlineOverlap, 0f) : 0f;
-
-            return source.GetShape()
-                .Shrink(inset)
-                .Transform(source.rectTransform, rectTransform);
-        }
-
-        private void UpdateShapeSource()
-        {
-            var source = isActiveAndEnabled && ShapeSource != this ? ShapeSource : null;
-            ShapeLink.Follow(this, source);
-        }
-
         private void OnVerticesDirty()
         {
             if (!sprite)
@@ -219,13 +186,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
         }
 
 #if UNITY_EDITOR
-        protected override void OnValidate()
-        {
-            base.OnValidate();
-
-            UpdateShapeSource();
-        }
-
         protected override void Reset()
         {
             base.Reset();
@@ -240,7 +200,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
 
             m_OnDirtyVertsCallback -= OnVerticesDirty;
 
-            UpdateShapeSource();
             _encoder.Clear();
         }
     }

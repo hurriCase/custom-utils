@@ -1,5 +1,4 @@
 ﻿using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Effects;
-using CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Shape;
 using CustomUtils.Runtime.UI.Theme;
 using CustomUtils.Runtime.UI.Theme.StyleData;
 using UnityEngine;
@@ -43,7 +42,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Rendering
             var shadowOffset = shadow.IsEnabled ? shadow.Offset : Vector2.zero;
             var shadowShift = shape.EdgeShift(shadowOffset);
             var effectData = CalculateEffectData(outline, borderWidth);
-            var radii = shape.InsetRadii;
+            var radii = shape.Radii;
             var vertex = new UIVertex();
 
             for (var i = 0; i < vertexHelper.currentVertCount; i++)

@@ -13,7 +13,6 @@ CBUFFER_START(UnityPerMaterial)
     float4 _Color;
     float4 _MainTex_ST;
     float4 _TextureSampleAdd;
-    float _Saturation;
 CBUFFER_END
 
 // Halftone settings come per element from the style data texture instead of material properties.
@@ -32,7 +31,6 @@ TEXTURE2D(_ThemeStyleData);
 
 #define MIN_COVERAGE_WIDTH 1e-4f
 #define MIN_ALPHA 1e-4h
-#define LUMINANCE_WEIGHTS half3(0.2126h, 0.7152h, 0.0722h)
 
 float4 _ClipRect;
 int _UIVertexColorAlwaysGammaSpace;
@@ -192,9 +190,6 @@ float4 Fragment(Varyings input) : SV_Target
         shadow.a *= shadowCoverage * tintAlpha;
         result = BlendOver(result, shadow);
     }
-
-    half luminance = dot(result.rgb, LUMINANCE_WEIGHTS);
-    result.rgb = lerp(half3(luminance, luminance, luminance), result.rgb, (half)_Saturation);
 
     #ifdef UNITY_UI_CLIP_RECT
     result.a *= UnityGet2DClipping(input.worldPosition.xy, _ClipRect);
