@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace CustomUtils.Runtime.Extensions
@@ -45,20 +46,7 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="fallback">The index to return if no entry matches the roll.</param>
         /// <returns>A randomly selected index weighted by chance, or <paramref name="fallback"/> if none matched.</returns>
         public static int PickIndexByChance(this IList<float> chancePerEntry, int fallback = -1)
-        {
-            var totalChance = chancePerEntry.Sum();
-            var roll = UnityEngine.Random.value * totalChance;
-            var accumulatedChance = 0f;
-
-            for (var i = 0; i < chancePerEntry.Count; i++)
-            {
-                accumulatedChance += chancePerEntry[i];
-                if (roll <= accumulatedChance)
-                    return i;
-            }
-
-            return fallback;
-        }
+            => PickIndexByChance(chancePerEntry, static chance => chance, fallback);
 
         /// <summary>
         /// Selects a random index from the list based on weighted chances at each position.
@@ -68,14 +56,27 @@ namespace CustomUtils.Runtime.Extensions
         /// <param name="fallback">The index to return if no entry matches the roll.</param>
         /// <returns>A randomly selected index weighted by chance, or <paramref name="fallback"/> if none matched.</returns>
         public static int PickIndexByChance(this IList<int> chancePerEntry, int fallback = -1)
+            => PickIndexByChance(chancePerEntry, static chance => chance, fallback);
+
+        private static int PickIndexByChance<TChance>(
+            IList<TChance> chancePerEntry,
+            Func<TChance, float> toWeight,
+            int fallback)
         {
-            var totalChance = chancePerEntry.Sum();
+            var totalChance = 0f;
+            foreach (var chance in chancePerEntry)
+                totalChance += toWeight(chance);
+
             var roll = UnityEngine.Random.value * totalChance;
             var accumulatedChance = 0f;
 
             for (var i = 0; i < chancePerEntry.Count; i++)
             {
-                accumulatedChance += chancePerEntry[i];
+                var weight = toWeight(chancePerEntry[i]);
+                if (weight <= 0f)
+                    continue;
+
+                accumulatedChance += weight;
                 if (roll <= accumulatedChance)
                     return i;
             }
