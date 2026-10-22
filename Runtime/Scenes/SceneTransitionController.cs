@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using CustomUtils.Runtime.Scenes.Base;
 using Cysharp.Threading.Tasks;
 using Eflatun.SceneReference;
@@ -13,10 +14,10 @@ namespace CustomUtils.Runtime.Scenes
     [Preserve]
     public sealed class SceneTransitionController : ISceneTransitionController
     {
-        public bool IsLoading { get; private set; }
+        private const string TransitionSceneName = "Transition";
 
         private Scene _initialScene;
-        private SceneInstance _transitionScene;
+        private Scene _transitionScene;
         private SceneInstance _currentScene;
 
         private readonly ISceneLoader _sceneLoader;
@@ -28,67 +29,28 @@ namespace CustomUtils.Runtime.Scenes
             _initialScene = SceneManager.GetActiveScene();
         }
 
-        public async UniTask ShowTransitionSceneAsync(SceneReference transitionScene, CancellationToken token)
+        // Unity can't unload the last loaded scene, so an empty scene stays loaded and active between scenes.
+        // Whatever is created mid-transition lands there instead of in a scene that's about to unload.
+        public async UniTask UnloadCurrentSceneAsync()
         {
-            IsLoading = true;
+            if (!_transitionScene.IsValid())
+                _transitionScene = SceneManager.CreateScene(TransitionSceneName);
 
-            _transitionScene = await _sceneLoader.LoadSceneAsync(
-                transitionScene.Address,
-                token,
-                LoadSceneMode.Additive);
-        }
-
-        public async UniTask CompleteTransitionAsync(
-            SceneReference destinationScene,
-            CancellationToken token,
-            bool isEndAfterTransition = true)
-        {
-            if (_initialScene.isLoaded)
-                SceneManager.UnloadSceneAsync(_initialScene);
-
-            if (_currentScene.Scene.IsValid())
-                _sceneLoader.TryUnloadScene(_currentScene);
-
-            _currentScene = await _sceneLoader.LoadSceneAsync(destinationScene.Address, token, LoadSceneMode.Additive);
-
-            IsLoading = false;
-
-            if (isEndAfterTransition)
-                EndTransition().Forget();
-        }
-
-        public async UniTask StartTransition(
-            SceneReference transitionScene,
-            SceneReference destinationScene,
-            CancellationToken token,
-            bool isEndAfterTransition = true)
-        {
-            IsLoading = true;
-
-            _transitionScene = await _sceneLoader.LoadSceneAsync(
-                transitionScene.Address,
-                token,
-                LoadSceneMode.Additive);
+            SceneManager.SetActiveScene(_transitionScene);
 
             if (_initialScene.isLoaded)
-                SceneManager.UnloadSceneAsync(_initialScene);
+            {
+                var unloadOperation = SceneManager.UnloadSceneAsync(_initialScene);
+                await UniTask.WaitUntil(unloadOperation, static operation => operation.isDone);
+            }
 
-            if (_currentScene.Scene.IsValid())
-                _sceneLoader.TryUnloadScene(_currentScene);
-
-            _currentScene = await _sceneLoader.LoadSceneAsync(destinationScene.Address, token, LoadSceneMode.Additive);
-
-            IsLoading = false;
-
-            if (isEndAfterTransition)
-                EndTransition().Forget();
+            await _sceneLoader.UnloadSceneAsync(_currentScene);
         }
 
-        public async UniTask EndTransition()
+        public async UniTask LoadSceneAsync(SceneReference scene, IProgress<float> progress, CancellationToken token)
         {
-            await UniTask.WaitUntil(this, static self => !self.IsLoading);
-
-            _sceneLoader.TryUnloadScene(_transitionScene);
+            _currentScene = await _sceneLoader.LoadSceneAsync(scene.Address, token, LoadSceneMode.Additive, progress);
+            SceneManager.SetActiveScene(_currentScene.Scene);
         }
     }
 }

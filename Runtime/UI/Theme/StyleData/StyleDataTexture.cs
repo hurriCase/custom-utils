@@ -16,6 +16,10 @@ namespace CustomUtils.Runtime.UI.Theme.StyleData
     {
         internal const int NoRow = -1;
 
+        // Procedural images pack three rows into one vertex float, one digit each, shifted by one for NoRow.
+        internal const int PackedRowBase = 256;
+
+        private const int MaxPackedRow = PackedRowBase - 2;
         private const int TexelsPerRow = 4;
         private const int InitialCapacity = 16;
 
@@ -99,6 +103,10 @@ namespace CustomUtils.Runtime.UI.Theme.StyleData
             var row = _keys.Count;
             _keys.Add(default);
             _referenceCounts.Add(0);
+
+            if (row > MaxPackedRow)
+                Debug.LogError($"[{nameof(StyleDataTexture)}::{nameof(AddRow)}] Style row {row} exceeds {MaxPackedRow}, " +
+                               "procedural images will read wrong styles");
 
             if (row < _texture.height)
                 return row;

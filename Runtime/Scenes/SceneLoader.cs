@@ -21,7 +21,8 @@ namespace CustomUtils.Runtime.Scenes
         public async UniTask<SceneInstance> LoadSceneAsync(
             string sceneAddress,
             CancellationToken token,
-            LoadSceneMode loadMode = LoadSceneMode.Single)
+            LoadSceneMode loadMode = LoadSceneMode.Single,
+            IProgress<float> progress = null)
         {
             try
             {
@@ -31,7 +32,16 @@ namespace CustomUtils.Runtime.Scenes
 
                 AddressablesLogger.Log($"[SceneLoader::LoadSceneAsync] Start loading scene: {sceneAddress}");
 
-                var currentScene = await Addressables.LoadSceneAsync(sceneAddress, loadMode).WithCancellation(token);
+                var loadHandle = Addressables.LoadSceneAsync(sceneAddress, loadMode);
+
+                while (!loadHandle.IsDone)
+                {
+                    progress?.Report(loadHandle.PercentComplete);
+                    await UniTask.Yield(PlayerLoopTiming.Update, token);
+                }
+
+                var currentScene = await loadHandle.WithCancellation(token);
+                progress?.Report(1f);
 
                 AddressablesLogger.Log($"[SceneLoader::LoadSceneAsync] Scene loaded successfully: {sceneAddress}");
 
@@ -44,16 +54,16 @@ namespace CustomUtils.Runtime.Scenes
             }
         }
 
-        public void TryUnloadScene(SceneInstance sceneInstance)
+        public async UniTask UnloadSceneAsync(SceneInstance sceneInstance)
         {
             if (!sceneInstance.Scene.IsValid())
                 return;
 
-            AddressablesLogger.Log($"[SceneLoader::TryUnloadScene] Start unloading scene: {sceneInstance.Scene.name}");
+            AddressablesLogger.Log($"[SceneLoader::UnloadSceneAsync] Start unloading scene: {sceneInstance.Scene.name}");
 
-            Addressables.UnloadSceneAsync(sceneInstance);
+            await Addressables.UnloadSceneAsync(sceneInstance).Task;
 
-            AddressablesLogger.Log($"[SceneLoader::TryUnloadScene] Scene unloaded: {sceneInstance.Scene.name}");
+            AddressablesLogger.Log($"[SceneLoader::UnloadSceneAsync] Scene unloaded: {sceneInstance.Scene.name}");
         }
     }
 }
