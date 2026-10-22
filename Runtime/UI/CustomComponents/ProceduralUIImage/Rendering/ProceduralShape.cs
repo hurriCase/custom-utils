@@ -61,14 +61,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage.Rendering
                 Vector2.Dot(position - BottomRight, _bottomNormal),
                 Vector2.Dot(position - BottomLeft, _leftNormal));
 
-        // Moving the shape by an offset shifts every edge distance by a constant.
-        internal Vector4 EdgeShift(Vector2 offset)
-            => new(
-                Vector2.Dot(offset, _topNormal),
-                Vector2.Dot(offset, _rightNormal),
-                Vector2.Dot(offset, _bottomNormal),
-                Vector2.Dot(offset, _leftNormal));
-
         // 1 when the corners run counterclockwise, -1 when clockwise, so edge normals always point outwards.
         private float CalculateOrientation()
         {

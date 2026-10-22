@@ -36,7 +36,6 @@ namespace CustomUtils.Runtime.UI.CustomComponents.ProceduralUIImage
             AdditionalCanvasShaderChannels.TexCoord1 |
             AdditionalCanvasShaderChannels.TexCoord2 |
             AdditionalCanvasShaderChannels.TexCoord3 |
-            AdditionalCanvasShaderChannels.Normal |
             AdditionalCanvasShaderChannels.Tangent;
 
         private readonly ProceduralVertexEncoder _encoder = new();
