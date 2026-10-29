@@ -30,6 +30,12 @@ namespace CustomUtils.Runtime.Animations.Base
                 return default;
             }
 
+            // PrimeTween applies the start value in its LateUpdate, so a tween created after it (e.g. from an async
+            // continuation) renders one frame at the previous value: a popup shown this way flashed before fading in
+            var tweenSettings = currentState.TweenSettings;
+            if (!tweenSettings.startFromCurrent)
+                SetValueInstant(tweenSettings.startValue);
+
             return CreateTween(currentState);
         }
 
