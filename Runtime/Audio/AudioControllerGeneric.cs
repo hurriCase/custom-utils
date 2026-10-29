@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using CustomUtils.Runtime.Audio.Data;
+using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Pools.Objects;
 using CustomUtils.Unmanaged;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace CustomUtils.Runtime.Audio
 {
@@ -26,6 +29,8 @@ namespace CustomUtils.Runtime.Audio
         private readonly List<AliveAudioData<TSfxType>> _audiosToRemove = new();
 
         private Pool<AudioSource> _sfxPool;
+        private CancellationTokenSource _playlistSource;
+        private bool _isMusicPaused;
 
         public virtual void Initialize()
         {
@@ -103,8 +108,28 @@ namespace CustomUtils.Runtime.Audio
             return _musicSource;
         }
 
+        public void PlayPlaylist(IReadOnlyList<TMusicType> playlist)
+        {
+            var token = CancellationExtensions.GetFreshToken(ref _playlistSource);
+            PlayPlaylistAsync(playlist, token).Forget();
+        }
+
+        public void SetMusicPaused(bool isPaused)
+        {
+            _isMusicPaused = isPaused;
+
+            if (isPaused)
+            {
+                _musicSource.Pause();
+                return;
+            }
+
+            _musicSource.UnPause();
+        }
+
         public virtual void StopMusic()
         {
+            CancellationExtensions.DisposeToken(ref _playlistSource);
             _musicSource.Stop();
         }
 
@@ -140,12 +165,32 @@ namespace CustomUtils.Runtime.Audio
                    !(Time.unscaledTime < lastTime + soundData.Cooldown);
         }
 
+        private async UniTaskVoid PlayPlaylistAsync(IReadOnlyList<TMusicType> playlist, CancellationToken token)
+        {
+            var trackIndex = Random.Range(0, playlist.Count);
+
+            while (!token.IsCancellationRequested)
+            {
+                PlayMusic(playlist[trackIndex]);
+                await UniTask.WaitWhile(this,
+                    static self => self._isMusicPaused || self._musicSource.isPlaying,
+                    cancellationToken: token);
+
+                trackIndex = (trackIndex + 1) % playlist.Count;
+            }
+        }
+
         private async UniTask PlaySfxInternal(AliveAudioData<TSfxType> aliveData)
         {
-            await UniTask.WaitForSeconds(aliveData.AudioSource.clip.length);
+            await UniTask.WaitForSeconds(aliveData.AudioSource.clip.length, cancellationToken: destroyCancellationToken);
 
             _sfxPool.Release(aliveData.AudioSource);
             _aliveAudios.Remove(aliveData);
+        }
+
+        protected virtual void OnDestroy()
+        {
+            CancellationExtensions.DisposeToken(ref _playlistSource);
         }
     }
 }
