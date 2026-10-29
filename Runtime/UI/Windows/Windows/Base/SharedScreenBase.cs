@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Threading;
-using CustomUtils.Runtime.Extensions;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using R3;
@@ -22,14 +21,14 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 
         public override UniTask ShowAsync(CancellationToken token)
         {
-            canvasGroup.Show();
+            SetVisible(true);
             _shown.OnNext(Unit.Default);
             return UniTask.CompletedTask;
         }
 
         public override UniTask HideAsync(CancellationToken token)
         {
-            canvasGroup.Hide();
+            SetVisible(false);
             _hidden.OnNext(Unit.Default);
             return UniTask.CompletedTask;
         }

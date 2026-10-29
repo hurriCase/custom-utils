@@ -23,6 +23,7 @@ namespace CustomUtils.Runtime.UI.Windows
     {
         [SerializeField] private List<AssetReferenceT<GameObject>> _screenReferences;
         [SerializeField] private List<AssetReferenceT<GameObject>> _popupReferences;
+        [SerializeField] private List<LazyWindowReference> _lazyPopupReferences;
 
         [SerializeField] private Transform _screensContainer;
         [SerializeField] private Transform _popupsContainer;
@@ -50,7 +51,7 @@ namespace CustomUtils.Runtime.UI.Windows
         {
             var sourceWithDestroy = token.CreateLinkedTokenSourceWithDestroy(this);
 
-            if (_popupReferences.Count > 0)
+            if (_popupReferences.Count > 0 || _lazyPopupReferences.Count > 0)
             {
                 _popupRegistry = new PopupRegistry(
                     _currentPopupType,
@@ -59,6 +60,7 @@ namespace CustomUtils.Runtime.UI.Windows
                     _addressablesLoader,
                     destroyCancellationToken);
 
+                _popupRegistry.RegisterLazy(_lazyPopupReferences);
                 await _popupRegistry.LoadAsync(_popupReferences, sourceWithDestroy.Token);
             }
 
@@ -131,5 +133,13 @@ namespace CustomUtils.Runtime.UI.Windows
                     AwaitOperation.Drop)
                 .RegisterTo(component.destroyCancellationToken);
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            foreach (var reference in _lazyPopupReferences)
+                reference.UpdateWindowType();
+        }
+#endif
     }
 }

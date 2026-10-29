@@ -45,7 +45,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 
         public override async UniTask ShowAsync(CancellationToken token)
         {
-            canvasGroup.Show();
+            SetVisible(true);
 
 #if PRIMETWEEN_INSTALLED
             await _visibilityHandler.ShowAsync(token);
@@ -60,7 +60,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
             await _visibilityHandler.HideAsync(token);
 #endif
 
-            canvasGroup.Hide();
+            SetVisible(false);
 
             _hidden.OnNext(this);
         }
@@ -71,7 +71,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
             _visibilityHandler.HideImmediately();
 #endif
 
-            canvasGroup.Hide();
+            SetVisible(false);
 
             if (!isSilent)
                 _hidden.OnNext(this);

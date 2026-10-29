@@ -15,8 +15,6 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
     [PublicAPI]
     internal sealed class ScreenRegistry : WindowRegistry<SharedScreenBase>
     {
-        private CancellationToken _controllerCancellationToken;
-
         internal ScreenRegistry(
             ReactiveProperty<Type> currentScreenType,
             IAddressablesLoader addressablesLoader,
@@ -24,10 +22,8 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             PopupRegistry popupRegistry,
             Transform container,
             CancellationToken token)
-            : base(currentScreenType, container, objectResolver, addressablesLoader)
+            : base(currentScreenType, container, objectResolver, addressablesLoader, token)
         {
-            _controllerCancellationToken = token;
-
             popupRegistry?.OnAllPopupClosed
                 .SubscribeSelf(this, token, static (token, self) => self.currentWindow.AsNullable()?.ShowAsync(token)
                     .Forget())
@@ -40,7 +36,7 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
             {
                 SetCurrentType(sharedScreenBase.GetType());
                 currentWindow = sharedScreenBase;
-                sharedScreenBase.ShowAsync(_controllerCancellationToken).Forget();
+                sharedScreenBase.ShowAsync(lifetimeToken).Forget();
                 return;
             }
 

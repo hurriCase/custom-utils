@@ -1,9 +1,11 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using CustomUtils.Runtime.Formatter;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.Scripting;
 using UnityEngine.UI;
 
@@ -13,6 +15,10 @@ namespace CustomUtils.Runtime.AddressableSystem
     [Preserve]
     public sealed class AddressablesLoader : IAddressablesLoader
     {
+        // Addressables.Release(Object) misses assets that completed synchronously (Asset Database play mode)
+        // until the end of the frame, so assets are released through their own handles instead
+        private readonly Dictionary<Object, Stack<AsyncOperationHandle>> _handles = new();
+
         public async UniTask<T> LoadAsync<T>(AssetReference assetReference, CancellationToken token)
             where T : Object =>
             await LoadAsync<T>(assetReference.AssetGUID, token);
@@ -24,8 +30,9 @@ namespace CustomUtils.Runtime.AddressableSystem
 #if ADDRESSABLES_LOG_ALL
             using var stopWatchScope = AddressablesLogger.LogWithTimePast("[PrefabLoader::LoadAsync]");
 #endif
-            var asset = await Addressables.LoadAssetAsync<T>(assetGuid)
-                .WithCancellation(token, autoReleaseWhenCanceled: true);
+            var handle = Addressables.LoadAssetAsync<T>(assetGuid);
+            var asset = await handle.WithCancellation(token, autoReleaseWhenCanceled: true);
+            TrackHandle(asset, handle);
 
             AddressablesLogger.Log($"[PrefabLoader::LoadAsync] Loaded '{asset.name}' ({typeof(T).Name})");
             return asset;
@@ -42,9 +49,9 @@ namespace CustomUtils.Runtime.AddressableSystem
 #if ADDRESSABLES_LOG_ALL
             using var stopWatchScope = AddressablesLogger.LogWithTimePast("[PrefabLoader::LoadAsync]");
 #endif
-            var asset =
-                await Addressables.LoadAssetAsync<GameObject>(assetReference)
-                    .WithCancellation(token, autoReleaseWhenCanceled: true);
+            var handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
+            var asset = await handle.WithCancellation(token, autoReleaseWhenCanceled: true);
+            TrackHandle(asset, handle);
 
             AddressablesLogger.Log(StringFormatter.Format("[PrefabLoader::LoadAsync] Loaded '{0}' ({0})",
                 asset.name,
@@ -72,7 +79,28 @@ namespace CustomUtils.Runtime.AddressableSystem
             if (!asset)
                 return;
 
-            Addressables.Release(asset);
+            if (!_handles.TryGetValue(asset, out var handles))
+            {
+                Addressables.Release(asset);
+                return;
+            }
+
+            var handle = handles.Pop();
+            if (handles.Count == 0)
+                _handles.Remove(asset);
+
+            Addressables.Release(handle);
+        }
+
+        private void TrackHandle(Object asset, AsyncOperationHandle handle)
+        {
+            if (!_handles.TryGetValue(asset, out var handles))
+            {
+                handles = new Stack<AsyncOperationHandle>();
+                _handles.Add(asset, handles);
+            }
+
+            handles.Push(handle);
         }
     }
 }

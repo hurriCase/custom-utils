@@ -6,16 +6,18 @@ using CustomUtils.Runtime.Extensions;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 {
     [PublicAPI]
     [Serializable]
-    [RequireComponent(typeof(CanvasGroup))]
+    [RequireComponent(typeof(CanvasGroup), typeof(Canvas), typeof(GraphicRaycaster))]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class WindowBase : MonoBehaviour
     {
         [SerializeField, Self] protected CanvasGroup canvasGroup;
+        [SerializeField, Self] private Canvas _canvas;
 
         public virtual void BaseInitialize() { }
 
@@ -37,7 +39,13 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 
         public virtual void HideImmediately(bool isSilent = false)
         {
-            canvasGroup.Hide();
+            SetVisible(false);
+        }
+
+        protected void SetVisible(bool isVisible)
+        {
+            _canvas.enabled = isVisible;
+            canvasGroup.SetVisible(isVisible);
         }
     }
 }

@@ -21,25 +21,20 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
 
         private readonly List<SharedPopupBase> _previousOpenedPopups = new();
 
-        private CancellationToken _token;
-
         internal PopupRegistry(
             ReactiveProperty<Type> currentPopupType,
             Transform container,
             IObjectResolver objectResolver,
             IAddressablesLoader addressablesLoader,
             CancellationToken token)
-            : base(currentPopupType, container, objectResolver, addressablesLoader)
-        {
-            _token = token;
-        }
+            : base(currentPopupType, container, objectResolver, addressablesLoader, token) { }
 
         protected override void OnRegistered(SharedPopupBase sharedPopupBase)
         {
             sharedPopupBase.HideImmediately();
             sharedPopupBase.OnHidden
                 .SubscribeSelf(this, static (popup, self) => self.HandlePopupHide(popup))
-                .RegisterTo(_token);
+                .RegisterTo(lifetimeToken);
         }
 
         protected override async UniTask<SharedPopupBase> OpenWindow(
@@ -54,11 +49,13 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
                 _previousOpenedPopups.Add(currentWindow);
 
                 if (sharedPopupBase.IsSingle)
-                    currentWindow.HideImmediately();
+                    currentWindow.HideImmediately(isSilent: true);
             }
 
             currentWindow = sharedPopupBase;
-            await sharedPopupBase.ShowAsync(token);
+
+            await sharedPopupBase.ShowAsync(sharedPopupBase.destroyCancellationToken)
+                .AttachExternalCancellation(token);
             return sharedPopupBase;
         }
 
@@ -76,6 +73,9 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
 
         private void HandlePopupHide(SharedPopupBase popup)
         {
+            if (IsLazy(popup))
+                UnloadWhenUnusedAsync(popup).Forget();
+
             if (popup != currentWindow)
             {
                 _previousOpenedPopups.Remove(popup);
@@ -99,6 +99,16 @@ namespace CustomUtils.Runtime.UI.Windows.Registries
 
             if (needShow)
                 currentWindow.ShowAsync(currentWindow.destroyCancellationToken).Forget();
+        }
+
+        private async UniTaskVoid UnloadWhenUnusedAsync(SharedPopupBase popup)
+        {
+            await UniTask.NextFrame(lifetimeToken);
+
+            if (!popup || popup == currentWindow || _previousOpenedPopups.Contains(popup))
+                return;
+
+            Unload(popup);
         }
     }
 }
