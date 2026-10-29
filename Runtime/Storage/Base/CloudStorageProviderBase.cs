@@ -11,7 +11,7 @@ namespace CustomUtils.Runtime.Storage.Base
         private readonly Dictionary<string, CancellationTokenSource> _pendingTokens = new();
         private readonly TimeSpan _debounceDelay;
 
-        private readonly Dictionary<string, SemaphoreSlim> _uploadLocks = new();
+        private readonly SemaphoreSlim _uploadLock = new(1, 1);
         private readonly Dictionary<string, int> _saveSequences = new();
         private readonly Dictionary<string, int> _uploadedSequences = new();
 
@@ -43,12 +43,12 @@ namespace CustomUtils.Runtime.Storage.Base
             return false;
         }
 
-        // Uploads of one key run one at a time, and an upload is skipped once a newer save of that key
-        // has been uploaded. Otherwise a slow older upload could finish last and leave an outdated value in the cloud.
+        // Uploads run one at a time across all keys: the cloud backend (e.g. Unity Cloud Save) rejects overlapping
+        // writes for the same player with 409 Conflict. An upload is skipped once a newer save of its key
+        // has been uploaded, otherwise a slow older upload could finish last and leave an outdated value in the cloud.
         private async UniTask<bool> UploadAsync<TData>(string key, TData data, int sequence)
         {
-            var uploadLock = GetUploadLock(key);
-            await uploadLock.WaitAsync();
+            await _uploadLock.WaitAsync();
 
             try
             {
@@ -63,16 +63,8 @@ namespace CustomUtils.Runtime.Storage.Base
             }
             finally
             {
-                uploadLock.Release();
+                _uploadLock.Release();
             }
-        }
-
-        private SemaphoreSlim GetUploadLock(string key)
-        {
-            if (!_uploadLocks.TryGetValue(key, out var uploadLock))
-                _uploadLocks[key] = uploadLock = new SemaphoreSlim(1, 1);
-
-            return uploadLock;
         }
 
         private async UniTaskVoid DeleteKeyAfterDelayAsync(

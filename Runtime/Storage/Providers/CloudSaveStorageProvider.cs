@@ -8,7 +8,10 @@ using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using Unity.Services.CloudSave;
 using UnityEngine.Pool;
+using DeleteAllOptions = Unity.Services.CloudSave.Models.Data.Player.DeleteAllOptions;
 using DeleteOptions = Unity.Services.CloudSave.Models.Data.Player.DeleteOptions;
+using LoadOptions = Unity.Services.CloudSave.Models.Data.Player.LoadOptions;
+using SaveOptions = Unity.Services.CloudSave.Models.Data.Player.SaveOptions;
 
 namespace CustomUtils.Runtime.Storage.Providers
 {
@@ -36,7 +39,7 @@ namespace CustomUtils.Runtime.Storage.Providers
             try
             {
                 saveData[key] = data;
-                await CloudSaveService.Instance.Data.Player.SaveAsync(saveData);
+                await CloudSaveService.Instance.Data.Player.SaveAsync(saveData, new SaveOptions());
             }
             finally
             {
@@ -47,7 +50,8 @@ namespace CustomUtils.Runtime.Storage.Providers
         protected override async UniTask<string> PlatformLoadAsync(string key, CancellationToken token)
         {
             var result = await CloudSaveService.Instance.Data.Player.LoadAsync(
-                new HashSet<string> { key });
+                new HashSet<string> { key },
+                new LoadOptions());
 
             return result.TryGetValue(key, out var item) ? item.Value.GetAsString() : null;
         }
@@ -55,7 +59,8 @@ namespace CustomUtils.Runtime.Storage.Providers
         protected override async UniTask<bool> PlatformHasKeyAsync(string key, CancellationToken token)
         {
             var result = await CloudSaveService.Instance.Data.Player.LoadAsync(
-                new HashSet<string> { key });
+                new HashSet<string> { key },
+                new LoadOptions());
 
             return result.ContainsKey(key);
         }
@@ -65,10 +70,7 @@ namespace CustomUtils.Runtime.Storage.Providers
 
         protected override async UniTask<bool> PlatformTryDeleteAllAsync(CancellationToken token)
         {
-            var keys = await CloudSaveService.Instance.Data.Player.ListAllKeysAsync();
-            foreach (var keyItem in keys)
-                await CloudSaveService.Instance.Data.Player.DeleteAsync(keyItem.Key, new DeleteOptions());
-
+            await CloudSaveService.Instance.Data.Player.DeleteAllAsync(new DeleteAllOptions());
             return true;
         }
     }
