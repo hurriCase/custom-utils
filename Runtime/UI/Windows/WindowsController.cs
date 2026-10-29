@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Threading;
 using CustomUtils.Runtime.AddressableSystem;
 using CustomUtils.Runtime.Extensions;
-using CustomUtils.Runtime.UI.Windows.Registries;
 using CustomUtils.Runtime.UI.Windows.Windows.Base;
 using CustomUtils.Runtime.UI.Windows.Windows.Parameterized;
-using CustomUtils.Runtime.UI.Windows.Windows.Plain;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using R3;
@@ -21,12 +19,8 @@ namespace CustomUtils.Runtime.UI.Windows
     [PublicAPI]
     public class WindowsController : MonoBehaviour
     {
-        [SerializeField] private List<AssetReferenceT<GameObject>> _screenReferences;
-        [SerializeField] private List<AssetReferenceT<GameObject>> _popupReferences;
-        [SerializeField] private List<LazyWindowReference> _lazyPopupReferences;
-
-        [SerializeField] private Transform _screensContainer;
-        [SerializeField] private Transform _popupsContainer;
+        [SerializeField] private List<AssetReferenceT<GameObject>> _windowReferences;
+        [SerializeField] private List<LazyWindowReference> _lazyWindowReferences;
 
         public ReadOnlyReactiveProperty<Type> CurrentScreenType => _currentScreenType;
         public ReadOnlyReactiveProperty<Type> CurrentPopupType => _currentPopupType;
@@ -34,8 +28,7 @@ namespace CustomUtils.Runtime.UI.Windows
         private readonly ReactiveProperty<Type> _currentScreenType = new();
         private readonly ReactiveProperty<Type> _currentPopupType = new();
 
-        private ScreenRegistry _screenRegistry;
-        private PopupRegistry _popupRegistry;
+        private WindowRegistry _windowRegistry;
 
         private IObjectResolver _objectResolver;
         private IAddressablesLoader _addressablesLoader;
@@ -51,70 +44,63 @@ namespace CustomUtils.Runtime.UI.Windows
         {
             var sourceWithDestroy = token.CreateLinkedTokenSourceWithDestroy(this);
 
-            if (_popupReferences.Count > 0 || _lazyPopupReferences.Count > 0)
-            {
-                _popupRegistry = new PopupRegistry(
-                    _currentPopupType,
-                    _popupsContainer,
-                    _objectResolver,
-                    _addressablesLoader,
-                    destroyCancellationToken);
+            _windowRegistry = new WindowRegistry(
+                _currentScreenType,
+                _currentPopupType,
+                transform,
+                _objectResolver,
+                _addressablesLoader,
+                destroyCancellationToken);
 
-                _popupRegistry.RegisterLazy(_lazyPopupReferences);
-                await _popupRegistry.LoadAsync(_popupReferences, sourceWithDestroy.Token);
-            }
-
-            if (_screenReferences.Count > 0)
-            {
-                _screenRegistry = new ScreenRegistry(
-                    _currentScreenType,
-                    _addressablesLoader,
-                    _objectResolver,
-                    _popupRegistry,
-                    _screensContainer,
-                    destroyCancellationToken);
-
-                await _screenRegistry.LoadAsync(_screenReferences, sourceWithDestroy.Token);
-            }
+            _windowRegistry.RegisterLazy(_lazyWindowReferences);
+            await _windowRegistry.LoadAsync(_windowReferences, sourceWithDestroy.Token);
         }
 
-        public async UniTask<SharedScreenBase> OpenScreen<TScreen>(CancellationToken token = default)
-            where TScreen : ScreenBase
+        public async UniTask<WindowBase> OpenScreen<TScreen>(CancellationToken token = default)
+            where TScreen : WindowBase
         {
-            _popupRegistry.HideAll();
-            return await _screenRegistry.Show<TScreen>(token);
+            var window = await _windowRegistry.GetAsync<TScreen>();
+            return await _windowRegistry.OpenRootAsync(window, token);
         }
 
-        public async UniTask<SharedScreenBase> OpenScreen<TParameterizedScreen, TParameters>(
+        public async UniTask<WindowBase> OpenScreen<TParameterizedScreen, TParameters>(
             TParameters parameters,
             CancellationToken token = default)
-            where TParameterizedScreen : ParameterizedScreenBase<TParameters>
+            where TParameterizedScreen : ParameterizedWindowBase<TParameters>
         {
-            _popupRegistry.HideAll();
-            return await _screenRegistry.Show<TParameterizedScreen, TParameters>(parameters, token);
+            var window = await _windowRegistry.GetAsync<TParameterizedScreen, TParameters>(parameters);
+            return await _windowRegistry.OpenRootAsync(window, token);
         }
 
-        public async UniTask<SharedPopupBase> OpenPopupClean<TPopup>(CancellationToken token = default)
-            where TPopup : PopupBase
+        public async UniTask<WindowBase> OpenPopupClean<TPopup>(CancellationToken token = default)
+            where TPopup : WindowBase
         {
-            _popupRegistry.HideAll();
-            return await _popupRegistry.Show<TPopup>(token);
+            var window = await _windowRegistry.GetAsync<TPopup>();
+            return await _windowRegistry.PushCleanAsync(window, token);
         }
 
-        public async UniTask<SharedPopupBase> OpenPopup<TPopup>(CancellationToken token = default)
-            where TPopup : PopupBase
-            => await _popupRegistry.Show<TPopup>(token);
+        public async UniTask<WindowBase> OpenPopup<TPopup>(CancellationToken token = default)
+            where TPopup : WindowBase
+        {
+            var window = await _windowRegistry.GetAsync<TPopup>();
+            return await _windowRegistry.PushAsync(window, token);
+        }
 
-        public async UniTask ClosePopupAsync<TPopup>(CancellationToken token = default) where TPopup : SharedPopupBase
-            => await _popupRegistry.CloseAsync<TPopup>(token);
-
-        public async UniTask<SharedPopupBase> OpenPopup<TParameterizedPopup, TParameters>(
+        public async UniTask<WindowBase> OpenPopup<TParameterizedPopup, TParameters>(
             TParameters parameters,
             CancellationToken token)
-            where TParameterizedPopup : ParameterizedPopupBase<TParameters> =>
-            await _popupRegistry.Show<TParameterizedPopup, TParameters>(parameters, token);
+            where TParameterizedPopup : ParameterizedWindowBase<TParameters>
+        {
+            var window = await _windowRegistry.GetAsync<TParameterizedPopup, TParameters>(parameters);
+            return await _windowRegistry.PushAsync(window, token);
+        }
 
-        public void BindScreenOpen<TScreen>(UIBehaviour component) where TScreen : ScreenBase
+        public async UniTask ClosePopupAsync<TPopup>(CancellationToken token = default) where TPopup : WindowBase
+        {
+            await _windowRegistry.CloseAsync<TPopup>(token);
+        }
+
+        public void BindScreenOpen<TScreen>(UIBehaviour component) where TScreen : WindowBase
         {
             component.OnPointerClickAsObservable()
                 .SubscribeAwait(
@@ -124,7 +110,7 @@ namespace CustomUtils.Runtime.UI.Windows
                 .RegisterTo(component.destroyCancellationToken);
         }
 
-        public void BindPopupOpen<TPopup>(UIBehaviour component) where TPopup : PopupBase
+        public void BindPopupOpen<TPopup>(UIBehaviour component) where TPopup : WindowBase
         {
             component.OnPointerClickAsObservable()
                 .SubscribeAwait(
@@ -137,7 +123,7 @@ namespace CustomUtils.Runtime.UI.Windows
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            foreach (var reference in _lazyPopupReferences)
+            foreach (var reference in _lazyWindowReferences)
                 reference.UpdateWindowType();
         }
 #endif
