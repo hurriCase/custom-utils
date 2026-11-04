@@ -32,14 +32,22 @@ namespace CustomUtils.Runtime.Storage.Providers
         private const string SaveFileExtension = "dat";
         private const string TempFileExtension = "tmp";
 
+        /// <inheritdoc />
         /// <summary>
         /// Creates a provider that stores each key as a file in the save folder.
         /// </summary>
         /// <param name="serializer">Serializer used to convert values to and from bytes</param>
-        public BinaryFileProvider(IBytesSerializer serializer)
+        public BinaryFileProvider(IBytesSerializer serializer) : this(serializer, Application.persistentDataPath) { }
+
+        /// <summary>
+        /// Creates a provider that stores each key as a file in the save folder inside the given directory.
+        /// </summary>
+        /// <param name="serializer">Serializer used to convert values to and from bytes</param>
+        /// <param name="rootDirectory">Directory that holds the save folder</param>
+        public BinaryFileProvider(IBytesSerializer serializer, string rootDirectory)
         {
             _serializer = serializer;
-            _saveDirectory = Path.Combine(Application.persistentDataPath, SaveFolderName);
+            _saveDirectory = Path.Combine(rootDirectory, SaveFolderName);
 
             if (!Directory.Exists(_saveDirectory))
                 Directory.CreateDirectory(_saveDirectory);
