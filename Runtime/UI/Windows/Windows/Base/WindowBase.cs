@@ -37,6 +37,9 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
         protected Button CloseButton => _visibilityHandler.CloseButton;
 #endif
 
+        public ReadOnlyReactiveProperty<bool> IsFocused => _isFocused;
+        private readonly ReactiveProperty<bool> _isFocused = new();
+
         public Observable<Unit> OnShown => _shown;
         private readonly Subject<Unit> _shown = new();
 
@@ -109,6 +112,11 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
                 _hidden.OnNext(this);
         }
 
+        internal void SetFocused(bool isFocused)
+        {
+            _isFocused.Value = isFocused;
+        }
+
         internal void Uncover()
         {
             SetVisible(true);
@@ -135,6 +143,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 
         protected virtual void OnDestroy()
         {
+            _isFocused.Dispose();
             _shown.Dispose();
             _hidden.Dispose();
             _hiding.Dispose();

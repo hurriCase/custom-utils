@@ -35,6 +35,7 @@ namespace CustomUtils.Runtime.UI.Windows
         private readonly CancellationToken _token;
 
         private WindowBase _rootWindow;
+        private WindowBase _focusedWindow;
 
         internal WindowRegistry(
             ReactiveProperty<Type> currentScreenType,
@@ -108,6 +109,7 @@ namespace CustomUtils.Runtime.UI.Windows
 
         internal async UniTask<WindowBase> OpenRootAsync(WindowBase window, CancellationToken token)
         {
+            ClearFocus();
             _currentPopupType.Value = null;
             _currentScreenType.Value = window.GetType();
 
@@ -142,6 +144,7 @@ namespace CustomUtils.Runtime.UI.Windows
 
         internal async UniTask<WindowBase> PushAsync(WindowBase window, CancellationToken token)
         {
+            ClearFocus();
             _stackedWindows.Remove(window);
 
             var coveredWindow = TopWindow;
@@ -208,6 +211,11 @@ namespace CustomUtils.Runtime.UI.Windows
                 .SubscribeSelf(this, static (hiddenWindow, self) => self.UnloadWhenUnusedAsync(hiddenWindow).Forget())
                 .RegisterTo(_token);
 
+            window.OnShown
+                .Select(window, static (_, shownWindow) => shownWindow)
+                .SubscribeSelf(this, static (shownWindow, self) => self.HandleShown(shownWindow))
+                .RegisterTo(_token);
+
             if (!window.InitialWindow)
             {
                 window.HideImmediately(isSilent: true);
@@ -220,11 +228,42 @@ namespace CustomUtils.Runtime.UI.Windows
             window.ShowAsync(_token).Forget();
         }
 
+        // The show runs on the window's own lifetime, so focus survives a caller cancelling its wait
+        private void HandleShown(WindowBase window)
+        {
+            if (window == TopWindow)
+                FocusTopWindow();
+        }
+
+        private void FocusTopWindow()
+        {
+            var topWindow = TopWindow;
+            if (topWindow == _focusedWindow)
+                return;
+
+            ClearFocus();
+            _focusedWindow = topWindow;
+
+            if (topWindow)
+                topWindow.SetFocused(true);
+        }
+
+        private void ClearFocus()
+        {
+            if (_focusedWindow)
+                _focusedWindow.SetFocused(false);
+
+            _focusedWindow = null;
+        }
+
         private void HandleHiding(WindowBase window)
         {
             var index = _stackedWindows.IndexOf(window);
             if (index < 0)
                 return;
+
+            if (window == _focusedWindow)
+                ClearFocus();
 
             var isTopWindow = index == _stackedWindows.Count - 1;
             _stackedWindows.RemoveAt(index);
@@ -247,6 +286,8 @@ namespace CustomUtils.Runtime.UI.Windows
             var transitions = new List<UniTask>();
             CollectTransitions(transitions, focusedWindow, _token);
             await UniTask.WhenAll(transitions);
+
+            FocusTopWindow();
         }
 
         private void UncoverWindows()
