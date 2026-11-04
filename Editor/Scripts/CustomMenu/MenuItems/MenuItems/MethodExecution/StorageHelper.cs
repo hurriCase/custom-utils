@@ -2,19 +2,23 @@
 using CustomUtils.Runtime.Storage;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
+using UnityEditor;
 using UnityEngine;
 
 namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.MenuItems.MethodExecution
 {
     [PublicAPI]
-    public sealed class StorageHelper
+    public static class StorageHelper
     {
+        private static bool _isPlayModeRequested;
+
         public static async UniTask<bool> TryDeleteAllAsync()
         {
+            EditorApplication.playModeStateChanged += PostponePlayMode;
+
             try
             {
-                var provider = StorageProvider.Provider;
-                var success = await provider.TryDeleteAllAsync();
+                var success = await StorageProvider.Provider.TryDeleteAllAsync();
 
                 if (success)
                     Debug.Log("[StorageHelper::TryDeleteAllAsync] Successfully cleared all data");
@@ -30,6 +34,26 @@ namespace CustomUtils.Editor.Scripts.CustomMenu.MenuItems.MenuItems.MethodExecut
                                $"Unexpected error clearing data: {ex.Message}");
                 return false;
             }
+            finally
+            {
+                EditorApplication.playModeStateChanged -= PostponePlayMode;
+
+                if (_isPlayModeRequested)
+                    EditorApplication.isPlaying = true;
+
+                _isPlayModeRequested = false;
+            }
+        }
+
+        private static void PostponePlayMode(PlayModeStateChange stateChange)
+        {
+            if (stateChange != PlayModeStateChange.ExitingEditMode)
+                return;
+
+            EditorApplication.isPlaying = false;
+            _isPlayModeRequested = true;
+            Debug.LogWarning("[StorageHelper::PostponePlayMode] Stored data is still being deleted, " +
+                             "play mode starts when it finishes");
         }
     }
 }
