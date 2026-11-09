@@ -24,7 +24,6 @@ namespace CustomUtils.Runtime.Storage.Base
                 _cache.Remove(key);
 
                 Logger.LogException(exception);
-                Logger.LogError($"[{GetType().Name}::TrySaveAsync] Error during saving data: {exception.Message}");
                 return false;
             }
         }
@@ -48,8 +47,6 @@ namespace CustomUtils.Runtime.Storage.Base
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
                 Logger.LogException(exception);
-                Logger.LogError($"[{GetType().Name}::{nameof(TryLoadAsync)}] " +
-                                $"Error loading data for key '{key}': {exception.Message}");
                 return LoadResult<TData>.Failed;
             }
         }
@@ -74,7 +71,6 @@ namespace CustomUtils.Runtime.Storage.Base
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
                 Logger.LogException(exception);
-                Logger.LogError($"[{GetType().Name}::TryDeleteKeyAsync] Error deleting key: {exception.Message}");
                 return false;
             }
         }
@@ -94,7 +90,6 @@ namespace CustomUtils.Runtime.Storage.Base
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
                 Logger.LogException(exception);
-                Logger.LogError($"[{GetType().Name}::TryDeleteAllAsync] Error deleting all data: {exception.Message}");
                 return false;
             }
         }
