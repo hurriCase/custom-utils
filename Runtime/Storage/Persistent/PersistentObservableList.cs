@@ -34,6 +34,7 @@ namespace CustomUtils.Runtime.Storage.Persistent
         /// <summary>
         /// Loads any saved values from storage and starts saving changes.
         /// Saving stays disabled if loading fails, so stored data isn't overwritten.
+        /// Can be called again (e.g. to retry a failed load): the current contents are replaced.
         /// </summary>
         /// <param name="key">Unique storage key for this list</param>
         /// <param name="token">Cancellation token</param>
@@ -46,7 +47,9 @@ namespace CustomUtils.Runtime.Storage.Persistent
             IReadOnlyList<TValue> defaultValues = null,
             IStorageProvider provider = null)
         {
+            _entry?.Dispose();
             _entry = new StorageEntry<List<TValue>>(key, provider);
+            Clear();
 
             var result = await _entry.LoadAsync(token);
             if (result.Status == LoadStatus.Failed)

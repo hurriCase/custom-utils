@@ -33,6 +33,7 @@ namespace CustomUtils.Runtime.Storage.Persistent
             TProperty defaultValue = default,
             IStorageProvider provider = null)
         {
+            _entry?.Dispose();
             _entry = new StorageEntry<TProperty>(key, provider);
 
             var result = await _entry.LoadAsync(token);
