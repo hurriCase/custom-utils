@@ -45,7 +45,9 @@ namespace CustomUtils.Runtime.UI.Theme.Materials
 
         internal void EnableShaderChannels(Graphic graphic)
         {
-            graphic.canvas.additionalShaderChannels |= ThemeShaderChannels;
+            var canvas = graphic.canvas;
+            if (canvas)
+                canvas.additionalShaderChannels |= ThemeShaderChannels;
         }
     }
 }

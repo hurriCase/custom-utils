@@ -14,6 +14,9 @@ namespace CustomUtils.Runtime.UI.Windows
     [Serializable]
     public sealed class LazyWindowReference
     {
+        /// <summary>
+        /// The window prefab to load.
+        /// </summary>
         [field: SerializeField] public AssetReferenceT<GameObject> Prefab { get; private set; }
 
         // we can't know the window type before load, so we store it

@@ -53,5 +53,8 @@ namespace CustomUtils.Runtime.UI.Theme
             UseHalftone = useHalftone;
             HalftoneProperties = halftoneProperties;
         }
+
+        internal readonly ThemeStyle WithColorData(ColorData colorData)
+            => new(colorData, GradientType, GradientRotation, DiamondDirection, UseHalftone, HalftoneProperties);
     }
 }

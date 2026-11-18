@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using CustomUtils.Editor.Scripts.UI.CustomRectTransform;
+using UnityEngine;
 
 namespace CustomUtils.Editor.Scripts.FigmaBridge.Margins
 {
@@ -10,6 +11,7 @@ namespace CustomUtils.Editor.Scripts.FigmaBridge.Margins
 
         private static readonly Vector2 _topLeftAnchor = new(MinAnchorValue, MaxAnchorValue);
         private static readonly Vector2 _centerPivot = new(0.5f, 0.5f);
+        private static readonly LayoutCalculator _layoutCalculator = new();
 
         internal static void Apply(RectTransform target, RectTransformFigmaClipboardData clipboardData)
         {
@@ -24,6 +26,9 @@ namespace CustomUtils.Editor.Scripts.FigmaBridge.Margins
             target.sizeDelta = new Vector2(clipboardData.Width, clipboardData.Height);
             target.anchoredPosition = layout.Position;
             target.localEulerAngles = new Vector3(0f, 0f, rotation);
+
+            var layoutData = _layoutCalculator.Calculate(target);
+            LayoutAnchorsApplier.Apply(target, layoutData);
         }
 
         // Figma rotates a shape around its center, so a rotated shape gets a center pivot.

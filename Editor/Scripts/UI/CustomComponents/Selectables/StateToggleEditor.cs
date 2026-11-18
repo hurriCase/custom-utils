@@ -30,6 +30,7 @@ namespace CustomUtils.Editor.Scripts.UI.CustomComponents.Selectables
             _editorStateControls.PropertyField(nameof(StateToggle.AdditionalGraphics), true);
             _editorStateControls.PropertyField(nameof(StateToggle.CheckedObjects), true);
             _editorStateControls.PropertyField(nameof(StateToggle.UncheckedObjects), true);
+            _editorStateControls.PropertyField(nameof(StateToggle.Lock), true);
 
             serializedObject.ApplyModifiedProperties();
         }

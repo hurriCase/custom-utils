@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Extensions.Observables;
+using CustomUtils.Runtime.UI.CustomComponents.Locks;
 using CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles.Mappings;
 using JetBrains.Annotations;
 using R3;
@@ -18,6 +19,7 @@ namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles
         [field: SerializeField] public List<GameObject> CheckedObjects { get; private set; } = new();
         [field: SerializeField] public List<GameObject> UncheckedObjects { get; private set; } = new();
         [field: SerializeField] public List<ToggleGraphicMapping> AdditionalGraphics { get; set; } = new();
+        [field: SerializeField] public LockView Lock { get; private set; }
 
         protected override void Awake()
         {
@@ -29,11 +31,18 @@ namespace CustomUtils.Runtime.UI.CustomComponents.Selectables.Toggles
             ApplyGraphics(currentSelectionState);
         }
 
+        public new void SetIsOnWithoutNotify(bool value)
+        {
+            base.SetIsOnWithoutNotify(value);
+            HandleStateChange(isOn);
+        }
+
         protected override void DoStateTransition(SelectionState state, bool instant)
         {
             base.DoStateTransition(state, instant);
 
             ApplyGraphics(state);
+            Lock.SetLocked(!interactable);
         }
 
         private void HandleStateChange(bool isOn)

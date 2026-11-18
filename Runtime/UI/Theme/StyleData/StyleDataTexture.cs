@@ -3,7 +3,12 @@ using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.Other;
 using CustomUtils.Runtime.UI.Theme.Databases;
 using UnityEngine;
-#if MULTI_THEME
+
+#if UNITY_EDITOR
+using System;
+#endif
+
+#if UNITY_EDITOR || MULTI_THEME
 using R3;
 #endif
 
@@ -33,16 +38,9 @@ namespace CustomUtils.Runtime.UI.Theme.StyleData
 
         private static Texture2D _texture;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Reset()
-        {
-            _rows.Clear();
-            _keys.Clear();
-            _referenceCounts.Clear();
-            _freeRows.Clear();
-            _texture.TryDestroy();
-            _texture = null;
-        }
+#if UNITY_EDITOR
+        private static IDisposable _atlasSubscription;
+#endif
 
         internal static int Acquire(StyleDataKey key)
         {
@@ -175,8 +173,9 @@ namespace CustomUtils.Runtime.UI.Theme.StyleData
             ThemeHandler.CurrentThemeType.Subscribe(static _ => RewriteAll());
 #endif
 #if UNITY_EDITOR
-            ThemeDatabaseConfig.Instance.Gradient.OnAtlasChanged -= RewriteAll;
-            ThemeDatabaseConfig.Instance.Gradient.OnAtlasChanged += RewriteAll;
+            _atlasSubscription?.Dispose();
+            _atlasSubscription = ThemeDatabaseConfig.Instance.Gradient.OnAtlasChanged
+                .Subscribe(static _ => RewriteAll());
 #endif
         }
     }

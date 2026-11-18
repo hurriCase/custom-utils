@@ -38,8 +38,13 @@ namespace CustomUtils.Runtime.UI.Theme
         [SerializeField, HideInInspector] private ColorData _previousColorData;
 #endif
 
+        private ThemeStyle AppliedStyle
+            => _overrideColorData is { } colorData ? Style.WithColorData(colorData) : Style;
+
         private readonly HalftoneMaterial _halftoneMaterial = new();
         private readonly ThemeVertexWriter _vertexWriter = new();
+
+        private ColorData? _overrideColorData;
 
         private void OnEnable()
         {
@@ -52,19 +57,49 @@ namespace CustomUtils.Runtime.UI.Theme
         /// <param name="style">The style to apply.</param>
         public void UpdateStyle(ThemeStyle style)
         {
-            var previousColorData = Style.ColorData;
+            var previousColorData = AppliedStyle.ColorData;
             Style = style;
 #if UNITY_EDITOR
             _previousColorData = style.ColorData;
 #endif
-            if (previousColorData != style.ColorData)
+            if (previousColorData != AppliedStyle.ColorData)
                 ApplyModifier(previousColorData.ColorType);
 
             Refresh();
         }
 
+        /// <summary>
+        /// Shows the given theme color instead of the style's own one, keeping the rest of the style.
+        /// The override is runtime state: it is not serialized and survives <see cref="UpdateStyle"/>
+        /// until <see cref="ClearColorOverride"/> is called.
+        /// </summary>
+        /// <param name="colorData">The color to show.</param>
+        public void SetColorOverride(ColorData colorData)
+        {
+            ApplyColorOverride(colorData);
+        }
+
+        /// <summary>
+        /// Shows the style's own color again after <see cref="SetColorOverride"/>.
+        /// </summary>
+        public void ClearColorOverride()
+        {
+            ApplyColorOverride(null);
+        }
+
+        private void ApplyColorOverride(ColorData? colorData)
+        {
+            var previousColorData = AppliedStyle.ColorData;
+            _overrideColorData = colorData;
+            if (previousColorData == AppliedStyle.ColorData)
+                return;
+
+            ApplyModifier(previousColorData.ColorType);
+            Refresh();
+        }
+
         internal GradientVertexData GetGradientVertexData()
-            => CurrentColorModifier ? CurrentColorModifier.GetGradientVertexData(Style) : default;
+            => CurrentColorModifier ? CurrentColorModifier.GetGradientVertexData(AppliedStyle) : default;
 
         Material IMaterialModifier.GetModifiedMaterial(Material baseMaterial)
         {
@@ -76,8 +111,9 @@ namespace CustomUtils.Runtime.UI.Theme
                 ? CurrentColorModifier.ModifyMaterial(baseMaterial)
                 : baseMaterial;
 
-            return Style.UseHalftone
-                ? _halftoneMaterial.Get(colorMaterial, Style.HalftoneProperties, _graphic.rectTransform.rect.size)
+            var style = AppliedStyle;
+            return style.UseHalftone
+                ? _halftoneMaterial.Get(colorMaterial, style.HalftoneProperties, _graphic.rectTransform.rect.size)
                 : colorMaterial;
         }
 
@@ -97,7 +133,7 @@ namespace CustomUtils.Runtime.UI.Theme
 
         private void ApplyModifier(ColorType previousColorType)
         {
-            var colorData = Style.ColorData;
+            var colorData = AppliedStyle.ColorData;
             if (!CurrentColorModifier || previousColorType != colorData.ColorType)
                 CreateModifier(colorData.ColorType);
 
@@ -108,6 +144,8 @@ namespace CustomUtils.Runtime.UI.Theme
         {
             var previousModifier = CurrentColorModifier;
             CurrentColorModifier = ColorModifierFactory.CreateModifier(colorType, gameObject);
+            if (CurrentColorModifier)
+                CurrentColorModifier.Init(_graphic);
 
             if (previousModifier && previousModifier != CurrentColorModifier)
             {
@@ -123,7 +161,7 @@ namespace CustomUtils.Runtime.UI.Theme
             _graphic = _graphic.AsNullable() ?? GetComponent<Graphic>();
 
             if (_graphic is ProceduralImage proceduralImage)
-                proceduralImage.SetFillStyle(Style);
+                proceduralImage.SetFillStyle(AppliedStyle);
 
             _graphic.SetAllDirty();
         }

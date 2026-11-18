@@ -99,6 +99,7 @@ namespace CustomUtils.Runtime.Pools.UI
         {
             if (_inactiveItems.TryDequeue(out var item))
             {
+                item.transform.SetAsLastSibling();
                 item.gameObject.SetActive(true);
                 return item;
             }

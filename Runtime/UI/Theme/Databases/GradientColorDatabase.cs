@@ -5,11 +5,7 @@ using CustomUtils.Runtime.UI.Theme.Databases.Base;
 using CustomUtils.Runtime.UI.Theme.ThemeColors;
 using UnityEngine;
 
-#if UNITY_EDITOR
-using System;
-#endif
-
-#if MULTI_THEME
+#if UNITY_EDITOR || MULTI_THEME
 using R3;
 #endif
 
@@ -59,14 +55,15 @@ namespace CustomUtils.Runtime.UI.Theme.Databases
 #if UNITY_EDITOR
 
         // Removing or reordering colors shifts atlas rows that graphics already wrote into their vertices.
-        internal event Action OnAtlasChanged;
+        internal Observable<Unit> OnAtlasChanged => _atlasChanged;
+        private readonly Subject<Unit> _atlasChanged = new();
 
         protected override void OnValidate()
         {
             base.OnValidate();
 
             RebuildAtlas();
-            OnAtlasChanged?.Invoke();
+            _atlasChanged.OnNext(Unit.Default);
         }
 #endif
     }

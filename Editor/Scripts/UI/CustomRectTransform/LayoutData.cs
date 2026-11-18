@@ -1,4 +1,3 @@
-#if IS_RECTTRANSFORM_EXTENDED_ENABLED
 using UnityEngine;
 #if MEMORY_PACK_INSTALLED
 using MemoryPack;
@@ -45,5 +44,3 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
             Mathf.Approximately(value, otherValue) ? LayoutField.None : field;
     }
 }
-
-#endif

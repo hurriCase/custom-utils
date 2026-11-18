@@ -1,30 +1,69 @@
-﻿#if PRIMETWEEN_INSTALLED
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
-using CustomUtils.Runtime.Animations.Base;
+using CustomUtils.Runtime.Extensions;
+using CustomUtils.Runtime.UI.AnimationSkipping;
+using CustomUtils.Runtime.UI.SequentialShow;
+using CustomUtils.Runtime.UI.Windows.Windows.Base;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
+using PrimeTween;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace CustomUtils.Runtime.UI.Windows
 {
+    /// <summary>
+    /// Plays a window's show and hide: its pose, background, content cascade and sounds. Blocks input while the window
+    /// is not fully shown.
+    /// </summary>
     [PublicAPI]
-    public class VisibilityHandler : MonoBehaviour
+    public class VisibilityHandler : MonoBehaviour, ISkippableAnimation
     {
-        [field: SerializeField] internal Button CloseButton { get; private set; }
+        [field: SerializeField] internal WindowMode Mode { get; private set; }
+        [field: SerializeField] internal List<Button> CloseButtons { get; private set; }
 
-        [SerializeReference, SerializeReferenceDropdown] private List<IAnimation<VisibilityState>> _visibilityAnimations;
+        [SerializeField] private TweenAnimation _animation;
+        [SerializeField] private TweenAnimationComponent _hideAnimation;
+        [SerializeField] private TweenAnimationComponent _backgroundAnimation;
+        [SerializeField] private AudioSource _audioSource;
+        [SerializeField] private AudioClip _showSound;
+        [SerializeField] private AudioClip _hideSound;
+        [SerializeField] private List<CanvasGroup> _interactiveGroups;
+        [SerializeField] private SequentialShowAnimation _contentAnimation;
+        [SerializeField] private float _contentAnimationDelay;
+        [SerializeField] private float _blendHideDuration;
 
-        private List<UniTask> _cachedTasks = new();
+        // Handlers on inactive objects are driven before their Awake runs, so the pose is created on first use.
+        private WindowPose Pose => _pose ??= new WindowPose(_animation, _hideAnimation, Mode, _blendHideDuration);
 
+        private WindowPose _pose;
+        private bool _isVisible;
+
+        /// <summary>
+        /// Plays the show, or jumps to the shown pose when <paramref name="isInstant"/> is true. Completes when it
+        /// has finished.
+        /// </summary>
         public virtual async UniTask ShowAsync(CancellationToken token, bool isInstant = false)
-            => await CreateVisibilitySequence(VisibilityState.Visible, token, isInstant);
+        {
+            await PlayVisibilityAsync(true, isInstant, token);
+        }
 
+        /// <summary>
+        /// Plays the hide, or jumps to the hidden pose when <paramref name="isInstant"/> is true. Completes when it
+        /// has finished.
+        /// </summary>
         public virtual async UniTask HideAsync(CancellationToken token, bool isInstant = false)
-            => await CreateVisibilitySequence(VisibilityState.Hidden, token, isInstant);
+        {
+            await PlayVisibilityAsync(false, isInstant, token);
+        }
 
-        public virtual async UniTask ToggleVisibilityAsync(bool isVisible, CancellationToken token, bool isInstant = false)
+        /// <summary>
+        /// Plays the show when <paramref name="isVisible"/> is true, otherwise the hide.
+        /// </summary>
+        public virtual async UniTask ToggleVisibilityAsync(
+            bool isVisible,
+            CancellationToken token,
+            bool isInstant = false)
         {
             if (isVisible)
             {
@@ -35,27 +74,182 @@ namespace CustomUtils.Runtime.UI.Windows
             await HideAsync(token, isInstant);
         }
 
+        /// <summary>
+        /// Jumps to the hidden pose and blocks input.
+        /// </summary>
         public void HideImmediately()
         {
-            foreach (var visibilityAnimation in _visibilityAnimations)
-                visibilityAnimation.PlayAnimation(VisibilityState.Hidden, true);
+            PlayAnimation(false, true);
+            UpdateInteractivity(false);
         }
 
-        private async UniTask CreateVisibilitySequence(VisibilityState visibilityState, CancellationToken token, bool isInstant)
+        public void SpeedUp(float timeScale)
         {
-            _cachedTasks.Clear();
+            Pose.SpeedUp(timeScale, _isVisible);
 
-            foreach (var visibilityAnimation in _visibilityAnimations)
+            if (_backgroundAnimation)
+                _backgroundAnimation.animation.SetTimeScaleKeepingDirection(timeScale);
+        }
+
+        internal void Reveal()
+        {
+            PlayAnimation(true, true);
+            UpdateInteractivity(true);
+        }
+
+        internal async UniTask ReturnAsync(CancellationToken token)
+        {
+            if (_isVisible)
+                return;
+
+            if (Pose.IsHideOneWay)
             {
-                // ToYieldInstruction() is required to avoid struct boxing allocation.
-                // It uses a pooled TweenCoroutineEnumerator instead of allocating on each call.
-                _cachedTasks.Add(visibilityAnimation.PlayAnimation(visibilityState, isInstant)
-                    .ToYieldInstruction()
-                    .ToUniTask(cancellationToken: token));
+                await PlayVisibilityAsync(true, false, token);
+                return;
             }
 
-            await UniTask.WhenAll(_cachedTasks);
+            _isVisible = true;
+
+            if (_backgroundAnimation)
+                _backgroundAnimation.animation.PlayToState(true, 1f);
+
+            if (_contentAnimation)
+                _contentAnimation.Return();
+
+            Pose.Return();
+            PlaySound(_showSound);
+
+            await WaitUntilPlayedAsync(Pose.ReturningAnimation, true, token);
+        }
+
+        internal async UniTask BlendOutAsync(CancellationToken token)
+        {
+            if (!_isVisible)
+                return;
+
+            UpdateInteractivity(false);
+            _isVisible = false;
+
+            Pose.PlayBlendOut();
+            UpdateContentAnimation(false, false);
+            PlaySound(_hideSound);
+
+            var hidingAnimation = Pose.GetPlayingAnimation(false);
+            var reverseTask = WaitUntilPlayedAsync(_animation, false, token);
+            var hideTask = WaitUntilPlayedAsync(hidingAnimation, false, token);
+            await UniTask.WhenAll(reverseTask, hideTask);
+        }
+
+        internal void ShowBackground()
+        {
+            if (_backgroundAnimation)
+                _backgroundAnimation.animation.SetStateInstantly(true);
+        }
+
+        internal void HideBackground()
+        {
+            if (_backgroundAnimation)
+                _backgroundAnimation.animation.SetStateInstantly(false);
+        }
+
+        internal void FadeOutBackground()
+        {
+            if (_backgroundAnimation)
+                _backgroundAnimation.animation.PlayToState(false, 1f);
+        }
+
+        private async UniTask PlayVisibilityAsync(bool isVisible, bool isInstant, CancellationToken token)
+        {
+            PlayAnimation(isVisible, isInstant);
+
+            var playingAnimation = Pose.GetPlayingAnimation(isVisible);
+            await WaitUntilPlayedAsync(playingAnimation, isVisible, token);
+        }
+
+        private async UniTask WaitUntilPlayedAsync(
+            TweenAnimation playingAnimation,
+            bool isVisible,
+            CancellationToken token)
+        {
+            using (SkippableAnimations.Begin(this))
+            {
+                await playingAnimation.ToYieldInstruction().ToUniTask(cancellationToken: token);
+
+                if (_backgroundAnimation)
+                    await _backgroundAnimation.animation.ToYieldInstruction().ToUniTask(cancellationToken: token);
+            }
+
+            if (!isVisible || !_isVisible)
+                return;
+
+            UpdateInteractivity(true);
+        }
+
+        private void PlayAnimation(bool isVisible, bool isInstant)
+        {
+            if (!isVisible)
+                UpdateInteractivity(false);
+
+            if (isInstant)
+            {
+                _isVisible = isVisible;
+
+                if (_backgroundAnimation)
+                    _backgroundAnimation.animation.SetStateInstantly(isVisible);
+
+                Pose.SetInstantly(isVisible);
+                UpdateContentAnimation(isVisible, true);
+                return;
+            }
+
+            if (_isVisible == isVisible)
+                return;
+
+            _isVisible = isVisible;
+
+            if (_backgroundAnimation && isVisible)
+                _backgroundAnimation.animation.PlayToState(true, 1f);
+
+            Pose.Play(isVisible);
+            UpdateContentAnimation(isVisible, false);
+
+            var sound = isVisible ? _showSound : _hideSound;
+            PlaySound(sound);
+        }
+
+        private void UpdateContentAnimation(bool isVisible, bool isInstant)
+        {
+            if (!_contentAnimation)
+                return;
+
+            if (isVisible && isInstant)
+            {
+                _contentAnimation.ShowInstantly();
+                return;
+            }
+
+            if (isVisible)
+            {
+                _contentAnimation.Play(_contentAnimationDelay);
+                return;
+            }
+
+            _contentAnimation.Hide(isInstant);
+        }
+
+        private void PlaySound(AudioClip sound)
+        {
+            if (sound)
+                _audioSource.PlayOneShot(sound);
+        }
+
+        private void UpdateInteractivity(bool isVisible)
+        {
+            foreach (var canvasGroup in _interactiveGroups)
+            {
+                canvasGroup.interactable = isVisible;
+                canvasGroup.blocksRaycasts = isVisible;
+            }
         }
     }
 }
-#endif

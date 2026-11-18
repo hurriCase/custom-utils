@@ -1,11 +1,14 @@
-﻿using CustomUtils.Runtime.Attributes;
-using CustomUtils.Runtime.Extensions;
-using CustomUtils.Runtime.UI.Theme.ColorModifiers.Base;
+﻿using CustomUtils.Runtime.UI.Theme.ColorModifiers.Base;
 using CustomUtils.Runtime.UI.Theme.Databases;
 using CustomUtils.Runtime.UI.Theme.Databases.Base;
 using CustomUtils.Runtime.UI.Theme.Materials;
 using UnityEngine;
 using UnityEngine.UI;
+
+#if UNITY_EDITOR
+using System;
+using R3;
+#endif
 
 namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
 {
@@ -15,9 +18,11 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
     [ColorModifier(ColorType.Gradient)]
     internal sealed class GradientColorModifier : GenericColorModifierBase<Gradient>
     {
-        [SerializeField, Self] private Graphic _graphic;
-
         protected override IThemeDatabase<Gradient> ThemeDatabase => ThemeDatabaseConfig.Instance.Gradient;
+
+#if UNITY_EDITOR
+        private IDisposable _atlasSubscription;
+#endif
 
         protected override void Awake()
         {
@@ -29,9 +34,12 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
         private void OnEnable()
         {
 #if UNITY_EDITOR
-            ThemeDatabaseConfig.Instance.Gradient.OnAtlasChanged += Refresh;
+            _atlasSubscription = ThemeDatabaseConfig.Instance.Gradient.OnAtlasChanged
+                .Subscribe(this, static (_, self) => self.Refresh());
 #endif
-            Refresh();
+
+            if (Graphic)
+                Refresh();
         }
 
         internal override Material ModifyMaterial(Material baseMaterial)
@@ -50,8 +58,7 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
 
         private void Refresh()
         {
-            _graphic = _graphic.AsNullable() ?? GetComponent<Graphic>();
-            _graphic.SetAllDirty();
+            Graphic.SetAllDirty();
         }
 
         public override void Dispose()
@@ -69,7 +76,7 @@ namespace CustomUtils.Runtime.UI.Theme.ColorModifiers.GradientModifier
         private void OnDisable()
         {
 #if UNITY_EDITOR
-            ThemeDatabaseConfig.Instance.Gradient.OnAtlasChanged -= Refresh;
+            _atlasSubscription.Dispose();
 #endif
             Refresh();
         }

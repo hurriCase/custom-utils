@@ -60,6 +60,11 @@
             "define": "PRIMETWEEN_INSTALLED"
         },
         {
+            "name": "com.kyrylokuzyk.primetween",
+            "expression": "[1.4.12-pro]",
+            "define": "PRIMETWEEN_PRO_INSTALLED"
+        },
+        {
             "name": "com.alexeytaranov.serializereferencedropdown",
             "expression": "",
             "define": "SERIALIZE_REFERENCE_DROPDOWN_INSTALLED"

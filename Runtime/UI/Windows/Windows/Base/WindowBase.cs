@@ -1,89 +1,158 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using CustomUtils.Runtime.Attributes;
 using CustomUtils.Runtime.Extensions;
+using CustomUtils.Runtime.Extensions.Observables;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using R3;
 using UnityEngine;
 using UnityEngine.UI;
-
-#if PRIMETWEEN_INSTALLED
-using CustomUtils.Runtime.Extensions.Observables;
-#endif
+using ZLinq;
 
 namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 {
+    /// <summary>
+    /// Base for every window a <see cref="WindowsController"/> opens: a canvas whose show and hide its
+    /// <see cref="VisibilityHandler"/> plays.
+    /// </summary>
     [PublicAPI]
     [Serializable]
     [RequireComponent(typeof(CanvasGroup), typeof(Canvas), typeof(GraphicRaycaster))]
-#if PRIMETWEEN_INSTALLED
     [RequireComponent(typeof(VisibilityHandler))]
-#endif
     [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class WindowBase : MonoBehaviour
     {
-        [field: SerializeField] internal bool InitialWindow { get; private set; }
+        /// <summary>
+        /// Opening this window closes every window of its controller and puts it at the bottom of the stack.
+        /// </summary>
+        [field: SerializeField] public bool ClearsStack { get; private set; }
 
-        [field: SerializeField] internal WindowMode Mode { get; private set; }
+        [field: SerializeField] internal bool InitialWindow { get; private set; }
 
         [SerializeField, Self] protected CanvasGroup canvasGroup;
         [SerializeField, Self] private Canvas _canvas;
 
-#if PRIMETWEEN_INSTALLED
         [SerializeField, Self] private VisibilityHandler _visibilityHandler;
 
-        protected Button CloseButton => _visibilityHandler.CloseButton;
-#endif
+        internal WindowMode Mode => _visibilityHandler.Mode;
 
+        protected IReadOnlyList<Button> CloseButtons => _visibilityHandler.CloseButtons;
+
+        protected Observable<Unit> OnCloseClicked { get; private set; }
+
+        /// <summary>
+        /// True while this window is the top window of its controller and nothing covers it.
+        /// </summary>
         public ReadOnlyReactiveProperty<bool> IsFocused => _isFocused;
         private readonly ReactiveProperty<bool> _isFocused = new();
 
+        /// <summary>
+        /// Fires when a closed window starts to show, before its show animation; not when it returns from under a
+        /// covering window.
+        /// </summary>
+        public Observable<Unit> OnOpening => _opening;
+        private readonly Subject<Unit> _opening = new();
+
+        /// <summary>
+        /// Fires when the show finishes.
+        /// </summary>
         public Observable<Unit> OnShown => _shown;
         private readonly Subject<Unit> _shown = new();
 
+        /// <summary>
+        /// Fires with this window once it has closed and left the screen.
+        /// </summary>
         public Observable<WindowBase> OnHidden => _hidden;
         private readonly Subject<WindowBase> _hidden = new();
 
         internal Observable<WindowBase> OnHiding => _hiding;
         private readonly Subject<WindowBase> _hiding = new();
 
-        internal bool IsVisible { get; private set; }
+        /// <summary>
+        /// True from the moment the window starts to show until it starts to hide.
+        /// </summary>
+        public bool IsVisible => State is WindowState.Opening or WindowState.Open or WindowState.Returning;
 
+        internal WindowState State { get; private set; }
+
+        internal bool IsCovering => Mode != WindowMode.Overlay;
+
+        internal bool IsSlideOver => Mode == WindowMode.SlideOver;
+
+        /// <summary>
+        /// Called once after the window is created, before <see cref="Initialize"/>. Subscribes the close buttons.
+        /// </summary>
         public virtual void BaseInitialize()
         {
-#if PRIMETWEEN_INSTALLED
-            CloseButton.AsNullable()?.OnClickAsObservable()
-                .SubscribeAwaitExclusive(this, static async (self, token) => await self.HideAsync(token));
-#endif
+            OnCloseClicked =
+                CloseButtons.Select(static closeButton => closeButton.OnClickAsObservable()).ToArray().Merge();
+            OnCloseClicked.SubscribeAwaitExclusive(this, static async (self, token) => await self.HandleCloseClickAsync(token));
         }
 
+        /// <summary>
+        /// Called once after the window is created and injected. Override it to set up the window.
+        /// </summary>
         public virtual void Initialize() { }
 
+        /// <summary>
+        /// Brings the window on screen. A closed window plays its show; a window that is hiding or hidden under a
+        /// covering window plays its hide backwards. Override it to refresh the content each time the window appears.
+        /// </summary>
         public virtual async UniTask ShowAsync(CancellationToken token)
         {
-            var wasVisible = IsVisible;
-            IsVisible = true;
+            if (IsVisible)
+                return;
+
+            var isReturning = State is WindowState.Covering or WindowState.Covered;
+            var showingState = isReturning ? WindowState.Returning : WindowState.Opening;
+            State = showingState;
             SetVisible(true);
 
-#if PRIMETWEEN_INSTALLED
-            if (!wasVisible)
-                await _visibilityHandler.ShowAsync(token);
-#endif
+            if (!isReturning)
+                _opening.OnNext(Unit.Default);
 
+            var showTask = isReturning ? _visibilityHandler.ReturnAsync(token) : _visibilityHandler.ShowAsync(token);
+            await showTask;
+
+            if (State != showingState)
+                return;
+
+            State = WindowState.Open;
             _shown.OnNext(Unit.Default);
         }
 
+        /// <summary>
+        /// Closes the window: its controller plays the hide and shows the windows it uncovers.
+        /// Completes once the window is closed.
+        /// </summary>
         public virtual async UniTask HideAsync(CancellationToken token)
         {
-            _hiding.OnNext(this);
+            if (State == WindowState.Closed)
+                return;
 
-            await PlayHideAnimationAsync(token);
+            if (State != WindowState.Closing)
+                _hiding.OnNext(this);
 
-            _hidden.OnNext(this);
+            await WaitUntilClosedAsync(token);
         }
 
+        /// <summary>
+        /// Completes once the window has closed, at once when it is already closed.
+        /// </summary>
+        public async UniTask WaitUntilClosedAsync(CancellationToken token)
+        {
+            if (State == WindowState.Closed)
+                return;
+
+            await OnHidden.FirstAsync(token);
+        }
+
+        /// <summary>
+        /// Shows the window when <paramref name="isVisible"/> is true, otherwise closes it.
+        /// </summary>
         public async UniTask ToggleVisibility(bool isVisible, CancellationToken token)
         {
             if (isVisible)
@@ -95,21 +164,93 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
             await HideAsync(token);
         }
 
+        /// <summary>
+        /// Closes the window at once, without animations. Unless <paramref name="isSilent"/> is true,
+        /// <see cref="OnHidden"/> fires and the controller removes the window from its stack.
+        /// </summary>
         public virtual void HideImmediately(bool isSilent = false)
         {
-            if (!isSilent)
-                _hiding.OnNext(this);
+            State = WindowState.Closed;
 
-            IsVisible = false;
-
-#if PRIMETWEEN_INSTALLED
             _visibilityHandler.HideImmediately();
-#endif
 
             SetVisible(false);
 
-            if (!isSilent)
-                _hidden.OnNext(this);
+            if (isSilent)
+                return;
+
+            _hidden.OnNext(this);
+            _hiding.OnNext(this);
+        }
+
+        /// <summary>
+        /// Plays the hide pose. Runs both when the window closes and when a window covers it.
+        /// Override it to add hide effects.
+        /// </summary>
+        public virtual async UniTask PlayHideAnimationAsync(CancellationToken token)
+        {
+            await _visibilityHandler.HideAsync(token);
+        }
+
+        /// <summary>
+        /// Plays the show backwards together with the hide pose, when the controller hides every window at once.
+        /// Override it to add effects.
+        /// </summary>
+        public virtual async UniTask PlayBlendOutAnimationAsync(CancellationToken token)
+        {
+            await _visibilityHandler.BlendOutAsync(token);
+        }
+
+        internal async UniTask StartHideAsync(bool isClosing, bool isInstant, CancellationToken token)
+        {
+            if (State == WindowState.Closed)
+                return;
+
+            var isOnScreen = IsVisible;
+            State = isClosing ? WindowState.Closing : WindowState.Covering;
+
+            if (isOnScreen && !isInstant)
+                await PlayHideAnimationAsync(token);
+        }
+
+        internal async UniTask BlendOutAsync(CancellationToken token)
+        {
+            if (!IsVisible)
+                return;
+
+            State = WindowState.Covering;
+            await PlayBlendOutAnimationAsync(token);
+        }
+
+        internal void CompleteHide()
+        {
+            if (State == WindowState.Closed)
+            {
+                HideCanvas();
+                return;
+            }
+
+            var isClosing = State == WindowState.Closing;
+            if (!isClosing && State != WindowState.Covering)
+                return;
+
+            State = isClosing ? WindowState.Closed : WindowState.Covered;
+            HideCanvas();
+
+            if (!isClosing)
+                return;
+
+            _visibilityHandler.HideImmediately();
+
+            _hidden.OnNext(this);
+        }
+
+        internal void Reveal()
+        {
+            State = WindowState.Open;
+            SetVisible(true);
+
+            _visibilityHandler.Reveal();
         }
 
         internal void SetFocused(bool isFocused)
@@ -117,22 +258,33 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
             _isFocused.Value = isFocused;
         }
 
-        internal void Uncover()
+        internal void ShowBackground()
         {
             SetVisible(true);
+            _visibilityHandler.ShowBackground();
         }
 
-        internal async UniTask PlayHideAnimationAsync(CancellationToken token)
+        internal void FadeOutBackground()
         {
-            var wasVisible = IsVisible;
-            IsVisible = false;
+            _visibilityHandler.FadeOutBackground();
+        }
 
-#if PRIMETWEEN_INSTALLED
-            if (wasVisible)
-                await _visibilityHandler.HideAsync(token);
-#endif
+        protected virtual async UniTask HandleCloseClickAsync(CancellationToken token)
+        {
+            await HideAsync(token);
+        }
 
+        protected void SetClosable(bool isClosable)
+        {
+            foreach (var closeButton in CloseButtons)
+                closeButton.interactable = isClosable;
+        }
+
+        private void HideCanvas()
+        {
             SetVisible(false);
+
+            _visibilityHandler.HideBackground();
         }
 
         protected void SetVisible(bool isVisible)
@@ -144,6 +296,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
         protected virtual void OnDestroy()
         {
             _isFocused.Dispose();
+            _opening.Dispose();
             _shown.Dispose();
             _hidden.Dispose();
             _hiding.Dispose();

@@ -1,5 +1,4 @@
-﻿#if IS_RECTTRANSFORM_EXTENDED_ENABLED
-using System;
+﻿using System;
 
 namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
 {
@@ -15,4 +14,3 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
         BottomMargin = 1 << 5
     }
 }
-#endif

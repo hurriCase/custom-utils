@@ -1,5 +1,4 @@
-﻿#if IS_RECTTRANSFORM_EXTENDED_ENABLED
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
@@ -68,4 +67,3 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
         }
     }
 }
-#endif

@@ -247,39 +247,14 @@ namespace CustomUtils.Editor.Scripts.UI.CustomRectTransform
 
                 var layoutData = modifyLayout(_layoutCalculator.Calculate(rectTransform));
 
-                if (layoutData.ParentWidth <= 0 || layoutData.ParentHeight <= 0)
-                {
-                    Debug.LogWarning("[RectTransformExtendedEditor::ApplyLayout] " +
-                                     $"Cannot apply anchors to '{rectTransform.name}': Parent size is invalid.",
-                        rectTransform);
-                    continue;
-                }
-
                 Undo.RecordObject(rectTransform, "Set RectTransform Anchors and Reset Offsets");
 
-                SetAnchors(rectTransform, layoutData);
+                LayoutAnchorsApplier.Apply(rectTransform, layoutData);
 
                 EditorUtility.SetDirty(rectTransform);
             }
 
             _editedFields = LayoutField.None;
-        }
-
-        private static void SetAnchors(RectTransform rectTransform, LayoutData layoutData)
-        {
-            var widthRatio = 1f / layoutData.ParentWidth;
-            var heightRatio = 1f / layoutData.ParentHeight;
-
-            rectTransform.anchorMin = new Vector2(
-                widthRatio * layoutData.LeftMargin,
-                heightRatio * layoutData.BottomMargin);
-
-            rectTransform.anchorMax = new Vector2(
-                1 - widthRatio * layoutData.RightMargin,
-                1 - heightRatio * layoutData.TopMargin);
-
-            rectTransform.anchoredPosition = Vector2.zero;
-            rectTransform.sizeDelta = Vector2.zero;
         }
     }
 }
