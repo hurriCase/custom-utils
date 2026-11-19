@@ -75,6 +75,9 @@ namespace CustomUtils.Editor.Scripts.CustomEditorUtilities
 
 #if PRIME_TWEEN_EXPERIMENTAL
             EnsureTweenDriver();
+
+            if (_tweenDriver)
+                _tweenDriver.UnscaledTimeScale = timeScale;
 #endif
         }
 

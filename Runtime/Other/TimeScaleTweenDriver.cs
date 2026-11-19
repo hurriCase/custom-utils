@@ -7,6 +7,8 @@ namespace CustomUtils.Runtime.Other
     [DefaultExecutionOrder(PrimeTweenManagerOrder)]
     internal sealed class TimeScaleTweenDriver : MonoBehaviour
     {
+        internal float UnscaledTimeScale { get; set; }
+
         private const int PrimeTweenManagerOrder = -2000;
 
         private void FixedUpdate()
@@ -28,7 +30,7 @@ namespace CustomUtils.Runtime.Other
 
         private void UpdateTweens(UpdateType updateType, float deltaTime, float unscaledDeltaTime)
         {
-            var scaledUnscaledDeltaTime = unscaledDeltaTime * Time.timeScale;
+            var scaledUnscaledDeltaTime = unscaledDeltaTime * UnscaledTimeScale;
             PrimeTweenConfig.ManualUpdate(updateType, deltaTime, scaledUnscaledDeltaTime);
         }
     }
