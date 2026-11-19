@@ -205,11 +205,28 @@ namespace CustomUtils.Runtime.UI.Windows
         private async UniTask<WindowBase> PushAsync(WindowBase window, CancellationToken token)
         {
             var coveredWindow = _stack.Push(window);
-            if (coveredWindow && !window.IsInFrontOf(coveredWindow))
-                window.transform.SetAsLastSibling();
+            if (coveredWindow)
+                ArrangeOver(coveredWindow, window);
 
             await _transition.PlayAsync(window, Array.Empty<WindowBase>(), token);
             return window;
+        }
+
+        private void ArrangeOver(WindowBase coveredWindow, WindowBase window)
+        {
+            var isRevealedBySlide = coveredWindow.IsSlideOver && !window.IsSlideOver;
+            if (!isRevealedBySlide)
+            {
+                if (!window.IsInFrontOf(coveredWindow))
+                    window.transform.SetAsLastSibling();
+
+                return;
+            }
+
+            if (window.IsInFrontOf(coveredWindow))
+                window.transform.SetSiblingIndex(coveredWindow.transform.GetSiblingIndex());
+
+            window.ShowBackground();
         }
 
         private void HandleHiding(WindowBase window)
