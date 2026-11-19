@@ -39,6 +39,8 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 
         internal WindowMode Mode => _visibilityHandler.Mode;
 
+        internal IReadOnlyList<SharedElement> SharedElements => _visibilityHandler.SharedElements;
+
         protected IReadOnlyList<Button> CloseButtons => _visibilityHandler.CloseButtons;
 
         protected Observable<Unit> OnCloseClicked { get; private set; }
@@ -126,7 +128,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
 
         /// <summary>
         /// Closes the window: its controller plays the hide and shows the windows it uncovers.
-        /// Completes once the window is closed.
+        /// Completes once the window is closed, or when it is opened again before its hide finishes.
         /// </summary>
         public virtual async UniTask HideAsync(CancellationToken token)
         {
@@ -136,7 +138,8 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
             if (State != WindowState.Closing)
                 _hiding.OnNext(this);
 
-            await WaitUntilClosedAsync(token);
+            var closedOrReopened = OnHidden.AsUnitObservable().Merge(_opening);
+            await closedOrReopened.FirstAsync(token);
         }
 
         /// <summary>
@@ -193,7 +196,7 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
         }
 
         /// <summary>
-        /// Plays the show backwards together with the hide pose, when the controller hides every window at once.
+        /// Plays the hide, when the controller hides every window at once.
         /// Override it to add effects.
         /// </summary>
         public virtual async UniTask PlayBlendOutAnimationAsync(CancellationToken token)
@@ -251,6 +254,11 @@ namespace CustomUtils.Runtime.UI.Windows.Windows.Base
             SetVisible(true);
 
             _visibilityHandler.Reveal();
+        }
+
+        internal void HoldSharedElements(IEnumerable<string> keys)
+        {
+            _visibilityHandler.HoldSharedElements(keys);
         }
 
         internal void SetFocused(bool isFocused)

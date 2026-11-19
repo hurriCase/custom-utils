@@ -23,6 +23,7 @@ namespace CustomUtils.Runtime.UI.Windows
         [field: SerializeField] internal List<Button> CloseButtons { get; private set; }
 
         [SerializeField] private TweenAnimation _animation;
+        [SerializeField] private List<SharedElement> _sharedElements;
         [SerializeField] private TweenAnimationComponent _hideAnimation;
         [SerializeField] private TweenAnimationComponent _backgroundAnimation;
         [SerializeField] private AudioSource _audioSource;
@@ -33,8 +34,11 @@ namespace CustomUtils.Runtime.UI.Windows
         [SerializeField] private float _contentAnimationDelay;
         [SerializeField] private float _blendHideDuration;
 
+        internal IReadOnlyList<SharedElement> SharedElements => _sharedElements;
+
         // Handlers on inactive objects are driven before their Awake runs, so the pose is created on first use.
-        private WindowPose Pose => _pose ??= new WindowPose(_animation, _hideAnimation, Mode, _blendHideDuration);
+        private WindowPose Pose =>
+            _pose ??= new WindowPose(_animation, _hideAnimation, _sharedElements, Mode, _blendHideDuration);
 
         private WindowPose _pose;
         private bool _isVisible;
@@ -91,6 +95,11 @@ namespace CustomUtils.Runtime.UI.Windows
                 _backgroundAnimation.animation.SetTimeScaleKeepingDirection(timeScale);
         }
 
+        internal void HoldSharedElements(IEnumerable<string> keys)
+        {
+            Pose.HoldSharedElements(keys);
+        }
+
         internal void Reveal()
         {
             PlayAnimation(true, true);
@@ -127,17 +136,7 @@ namespace CustomUtils.Runtime.UI.Windows
             if (!_isVisible)
                 return;
 
-            UpdateInteractivity(false);
-            _isVisible = false;
-
-            Pose.PlayBlendOut();
-            UpdateContentAnimation(false, false);
-            PlaySound(_hideSound);
-
-            var hidingAnimation = Pose.GetPlayingAnimation(false);
-            var reverseTask = WaitUntilPlayedAsync(_animation, false, token);
-            var hideTask = WaitUntilPlayedAsync(hidingAnimation, false, token);
-            await UniTask.WhenAll(reverseTask, hideTask);
+            await PlayVisibilityAsync(false, false, token);
         }
 
         internal void ShowBackground()
@@ -174,6 +173,9 @@ namespace CustomUtils.Runtime.UI.Windows
             using (SkippableAnimations.Begin(this))
             {
                 await playingAnimation.ToYieldInstruction().ToUniTask(cancellationToken: token);
+
+                foreach (var element in _sharedElements)
+                    await element.Animation.animation.ToYieldInstruction().ToUniTask(cancellationToken: token);
 
                 if (_backgroundAnimation)
                     await _backgroundAnimation.animation.ToYieldInstruction().ToUniTask(cancellationToken: token);

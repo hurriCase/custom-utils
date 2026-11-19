@@ -73,6 +73,7 @@ namespace CustomUtils.Runtime.UI.Windows
             var isBelowInstant = sourceWindow.IsSlideOver;
             var isUncoveredInFront = closingWindows.Count > 0 && sourceWindow.Mode == WindowMode.Blend;
             var frontTasks = new List<UniTask>();
+            var showingWindows = new List<WindowBase>();
             var coveredWindows = new List<WindowBase>();
 
             if (sourceWindow == _externalCoveringWindow)
@@ -110,6 +111,13 @@ namespace CustomUtils.Runtime.UI.Windows
                 if (isUncoveredInFront)
                     window.transform.SetAsLastSibling();
 
+                showingWindows.Add(window);
+            }
+
+            HoldSharedElements(showingWindows, coveredWindows, closingWindows);
+
+            foreach (var window in showingWindows)
+            {
                 var showTask = ShowOnOwnLifetimeAsync(window, token);
                 frontTasks.Add(showTask);
             }
@@ -196,6 +204,47 @@ namespace CustomUtils.Runtime.UI.Windows
                 return;
 
             window.CompleteHide();
+        }
+
+        private void HoldSharedElements(
+            List<WindowBase> showingWindows,
+            List<WindowBase> coveredWindows,
+            IReadOnlyList<WindowBase> closingWindows)
+        {
+            var hidingWindows = new List<WindowBase>(coveredWindows);
+            foreach (var window in closingWindows)
+            {
+                if (window.IsVisible)
+                    hidingWindows.Add(window);
+            }
+
+            var sharedKeys = CollectSharedElementKeys(showingWindows);
+            var hidingKeys = CollectSharedElementKeys(hidingWindows);
+            sharedKeys.IntersectWith(hidingKeys);
+
+            if (sharedKeys.Count == 0)
+                return;
+
+            foreach (var window in showingWindows)
+                window.HoldSharedElements(sharedKeys);
+
+            foreach (var window in hidingWindows)
+                window.HoldSharedElements(sharedKeys);
+        }
+
+        private HashSet<string> CollectSharedElementKeys(List<WindowBase> windows)
+        {
+            var keys = new HashSet<string>();
+            foreach (var window in windows)
+            {
+                foreach (var element in window.SharedElements)
+                {
+                    if (element.gameObject.activeInHierarchy)
+                        keys.Add(element.Key);
+                }
+            }
+
+            return keys;
         }
 
         private void ShowUncoveredBackgrounds()
