@@ -1,4 +1,6 @@
 #if PRIMETWEEN_PRO_INSTALLED
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using CustomUtils.Runtime.Extensions;
 using CustomUtils.Runtime.UI.AnimationSkipping;
@@ -13,7 +15,9 @@ namespace CustomUtils.Runtime.UI.SequentialShow
     /// <summary>
     /// Plays its content animation, then shows its <see cref="TweenSequentialShowItem"/> children and directly nested
     /// cascades row by row (or item by item), top to bottom (or bottom to top), one interval apart. Items outside the
-    /// viewport of their scroll view appear at once. On hide every item plays its own hide or reverses its show.
+    /// viewport of their scroll view appear at once. With a <see cref="SequentialShowScroll"/> the scroll view starts
+    /// at the cascade's first item and scrolls to its destination while the items appear. On hide every item plays its
+    /// own hide or reverses its show.
     /// </summary>
     [PublicAPI]
     public sealed class SequentialShowAnimation : MonoBehaviour, ISkippableAnimation
@@ -25,6 +29,7 @@ namespace CustomUtils.Runtime.UI.SequentialShow
         [SerializeField] private SequentialShowOrder _order;
         [SerializeField] private bool _isBottomToTop;
         [SerializeField] private ScrollRect _scrollRect;
+        [SerializeField] private SequentialShowScroll _scroll;
 
         private readonly SequentialShowLayout _layout = new();
 
@@ -43,7 +48,11 @@ namespace CustomUtils.Runtime.UI.SequentialShow
         {
             CancellationExtensions.DisposeToken(ref _playCancellation);
             SpeedUp(1f);
-            _layout.Collect(this, _order, _isBottomToTop);
+
+            if (_scroll)
+                _scroll.Complete();
+
+            _layout.Collect(this, _order, _isBottomToTop, _scrollRect, Vector2.zero);
 
             if (_contentAnimation)
             {
@@ -62,6 +71,9 @@ namespace CustomUtils.Runtime.UI.SequentialShow
         {
             CancellationExtensions.DisposeToken(ref _playCancellation);
             SpeedUp(1f);
+
+            if (_scroll)
+                _scroll.Stop();
 
             if (isInstant)
             {
@@ -82,6 +94,9 @@ namespace CustomUtils.Runtime.UI.SequentialShow
 
             if (_waitTween.isAlive)
                 _waitTween.timeScale = timeScale;
+
+            if (_scroll)
+                _scroll.SpeedUp(timeScale);
 
             if (_contentAnimation)
                 _contentAnimation.animation.SetTimeScaleKeepingDirection(timeScale);
@@ -111,7 +126,7 @@ namespace CustomUtils.Runtime.UI.SequentialShow
         internal void ResetItems()
         {
             _isShown = false;
-            _layout.Collect(this, _order, _isBottomToTop);
+            _layout.Collect(this, _order, _isBottomToTop, _scrollRect, Vector2.zero);
 
             if (_contentAnimation)
                 _contentAnimation.animation.ResetToStart();
@@ -122,16 +137,20 @@ namespace CustomUtils.Runtime.UI.SequentialShow
 
         private async UniTask PlayAsync(float delay, CancellationToken token)
         {
-            _layout.ResetScroll(_scrollRect);
+            if (_scroll)
+                _scroll.Stop();
+
+            AlignScrollToStart();
             ResetItems();
             SpeedUp(1f);
             using var skippableScope = SkippableAnimations.Begin(this);
 
             await WaitAsync(delay, token);
 
-            // Layout and scroll position can still settle during the delay (persisted scroll, layout rebuilds),
-            // so which items are visible is decided when the cascade starts.
-            _layout.Collect(this, _order, _isBottomToTop);
+            // Layout and scroll destination can still change during the delay, so which items are visible is decided
+            // when the cascade starts.
+            var scrollOffset = _scroll ? _scroll.GetOffset(_scrollRect) : Vector2.zero;
+            _layout.Collect(this, _order, _isBottomToTop, _scrollRect, scrollOffset);
             var items = _layout.Items;
 
             // Items outside the viewport would cross the screen on their way in, so they snap into place instead.
@@ -147,6 +166,10 @@ namespace CustomUtils.Runtime.UI.SequentialShow
 
             await WaitAsync(_itemsDelay, token);
 
+            if (_scroll)
+                _scroll.Play(_scrollRect.content, scrollOffset, _timeScale);
+
+            var itemInterval = GetItemInterval(items, scrollOffset);
             var previousStep = 0;
             var lastShownIndex = -1;
             for (var i = 0; i < items.Count; i++)
@@ -155,7 +178,7 @@ namespace CustomUtils.Runtime.UI.SequentialShow
                 if (!item.IsInViewport)
                     continue;
 
-                var stepsDuration = (item.Step - previousStep) * _itemInterval;
+                var stepsDuration = (item.Step - previousStep) * itemInterval;
                 await WaitAsync(stepsDuration, token);
 
                 previousStep = item.Step;
@@ -170,6 +193,27 @@ namespace CustomUtils.Runtime.UI.SequentialShow
             }
 
             _isShown = true;
+        }
+
+        // Items added in the same frame as the show (pooled items bound right before it) are not laid out yet, so the
+        // content is rebuilt before it is aligned to its start.
+        private void AlignScrollToStart()
+        {
+            if (!_scrollRect)
+                return;
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(_scrollRect.content);
+            _layout.ResetScroll(_scrollRect, _isBottomToTop);
+        }
+
+        // Items revealed by the scroll appear as it passes them, so the cascade is fitted into the scroll duration.
+        private float GetItemInterval(IReadOnlyList<SequentialShowItem> items, Vector2 scrollOffset)
+        {
+            if (!_scroll || scrollOffset == Vector2.zero || items.Count == 0)
+                return _itemInterval;
+
+            var lastStep = items.Max(static item => item.Step);
+            return _scroll.FitItemInterval(_itemInterval, lastStep);
         }
 
         private async UniTask WaitAsync(float duration, CancellationToken token)
